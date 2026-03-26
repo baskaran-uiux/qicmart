@@ -105,8 +105,17 @@ function DashboardContent({ children }: { children: ReactNode }) {
     }
 
     const isActive = (href: string) => {
-        if (href === "/dashboard") return pathname === "/dashboard"
+        // Exact match for dashboard root, but allow for trailing slash
+        if (href === "/dashboard") {
+            return pathname === "/dashboard" || pathname === "/dashboard/"
+        }
         return pathname.startsWith(href)
+    }
+
+    const getTargetHref = (href: string) => {
+        if (!ownerId) return href
+        const connector = href.includes("?") ? "&" : "?"
+        return `${href}${connector}ownerId=${ownerId}`
     }
 
     const toggleGroup = (key: string) => {
@@ -250,7 +259,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                                                     className="overflow-hidden space-y-0.5 ml-4 border-l border-zinc-800/50 pl-2"
                                                 >
                                                     {filteredItems.map(({ label, key, href, icon: Icon, external }: any) => {
-                                                        let targetHref = ownerId ? `${href}?ownerId=${ownerId}` : href;
+                                                        const targetHref = getTargetHref(href)
                                                         const displayLabel = key ? t(key as any) : label;
                                                         return (
                                                             <motion.div
@@ -284,7 +293,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                                             return (
                                                 <Link
                                                     key={item.href}
-                                                    href={ownerId ? `${item.href}?ownerId=${ownerId}` : item.href}
+                                                    href={getTargetHref(item.href)}
                                                     className={`p-2 rounded-lg transition-all ${isActive(item.href) ? "bg-indigo-500/20 text-indigo-400" : "text-zinc-500 hover:text-white"}`}
                                                     title={t(item.key as any)}
                                                 >
@@ -314,7 +323,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                 {/* Bottom Items */}
                 <div className={`pb-3 px-2 border-t ${dark ? "border-zinc-800" : "border-slate-200"} pt-3 space-y-0.5`}>
                     {bottomNavItems.map(({ label, key, href, icon: Icon, external }: any) => {
-                        let targetHref = ownerId ? `${href}?ownerId=${ownerId}` : href;
+                        const targetHref = getTargetHref(href)
                         const displayLabel = key ? t(key as any) : label;
                         return (
                             <Link
@@ -375,7 +384,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                             {dark ? <Sun size={16} /> : <Moon size={16} />}
                         </button>
                         <Link
-                            href={ownerId ? `/dashboard/profile?ownerId=${ownerId}` : "/dashboard/profile"}
+                            href={getTargetHref("/dashboard/profile")}
                             className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-sm font-semibold text-white shadow hover:scale-105 transition-transform cursor-pointer overflow-hidden"
                         >
                             {store.userImage ? (
