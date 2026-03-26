@@ -1160,8 +1160,8 @@ export default function ProductsPage() {
                                             <div className="flex items-center gap-2 mb-1">
                                                 <div className="w-7 h-7 bg-zinc-100 dark:bg-zinc-900 rounded-full flex items-center justify-center text-[10px] font-bold text-zinc-400">G</div>
                                                 <div className="flex flex-col">
-                                                    <span className="text-[12px] text-zinc-900 dark:text-zinc-200 font-medium">NamMart Standard Store</span>
-                                                    <span className="text-[10px] text-zinc-500 font-medium text-ellipsis overflow-hidden whitespace-nowrap max-w-[200px]">https://yourstore.com › products › {form.name.toLowerCase().replace(/\s+/g, '-')}</span>
+                                                    <span className="text-[12px] text-zinc-900 dark:text-zinc-200 font-medium">QICMART Standard Store</span>
+                                                    <span className="text-[10px] text-zinc-500 font-medium text-ellipsis overflow-hidden whitespace-nowrap max-w-[200px]">https://qicmart.com › products › {form.name.toLowerCase().replace(/\s+/g, '-')}</span>
                                                 </div>
                                             </div>
                                             <h3 className="text-[18px] text-indigo-700 dark:text-indigo-400 font-medium hover:underline cursor-pointer transition-colors leading-tight">

@@ -68,7 +68,7 @@ export default async function AdminSubscriptionsPage() {
                                             </div>
                                             <div>
                                                 <div className="font-black text-zinc-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors uppercase tracking-tight">{sub.store.name}</div>
-                                                <div className="text-[10px] text-zinc-500 font-black uppercase tracking-widest italic">{sub.store.slug}.nammart.com</div>
+                                                <div className="text-[10px] text-zinc-500 font-black uppercase tracking-widest italic">{sub.store.slug}.qicmart.com</div>
                                             </div>
                                         </div>
                                     </td>

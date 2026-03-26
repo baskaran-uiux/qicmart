@@ -30,11 +30,11 @@ export async function GET(req: Request) {
     return NextResponse.json({
         id: store.id,
         slug: store.slug,
-        subdomain: `${store.slug}.nammart.com`,
+        subdomain: `${store.slug}.qicmart.com`,
         customDomain: store.customDomain,
         isDomainVerified: store.isDomainVerified,
         instructions: {
-            cname: "cname.nammart.com",
+            cname: "cname.qicmart.com",
             aRecord: "76.76.21.21" // Simulation IP
         }
     })

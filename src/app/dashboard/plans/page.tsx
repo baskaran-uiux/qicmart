@@ -70,7 +70,7 @@ export default function PlansPage() {
                 </div>
                 <div className="relative z-10 w-full md:w-auto">
                     <a 
-                        href="https://wa.me/918072171027?text=Hi, I would like to upgrade my NamMart store plan." 
+                        href="https://wa.me/918072171027?text=Hi, I would like to upgrade my QICMART store plan." 
                         target="_blank"
                         className="block w-full px-8 py-4 bg-indigo-600 dark:bg-white text-white dark:text-black rounded-2xl font-semibold text-xs capitalize tracking-wide shadow-2xl hover:scale-105 active:scale-95 transition-all text-center shadow-indigo-500/10"
                     >
@@ -117,7 +117,7 @@ export default function PlansPage() {
                             </button>
                         ) : (
                             <a 
-                                href={`https://wa.me/918072171027?text=Hi, I would like to get the ${p.name} plan for my NamMart store.`}
+                                href={`https://wa.me/918072171027?text=Hi, I would like to get the ${p.name} plan for my QICMART store.`}
                                 target="_blank"
                                 className="block w-full py-4 rounded-2xl font-semibold text-xs capitalize tracking-wide bg-indigo-600 dark:bg-white text-white dark:text-black hover:scale-[1.02] shadow-xl shadow-indigo-500/10 text-center"
                             >

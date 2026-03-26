@@ -37,7 +37,7 @@ export async function GET(req: Request) {
                 { keyword: "buy saas products", clicks: 189, ctr: "5.1%", position: 3.8 },
                 { keyword: "best marketplace for code", clicks: 95, ctr: "3.2%", position: 4.1 },
             ],
-            sitemapUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://nammart.com'}/sitemap.xml`,
+            sitemapUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://qicmart.com'}/sitemap.xml`,
             indexingStatus: "Active"
         };
 

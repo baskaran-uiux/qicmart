@@ -638,7 +638,7 @@ function DomainTab({ domainConfig, newDomain, setNewDomain, handleSaveDomain, do
                             <div className="p-5 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-between">
                                 <div>
                                     <p className="text-[9px] font-black text-zinc-600 uppercase mb-1">{t("target")}</p>
-                                    <p className="text-xs font-bold text-white font-mono">{domainConfig?.instructions?.cname || "cname.nammart.com"}</p>
+                                    <p className="text-xs font-bold text-white font-mono">{domainConfig?.instructions?.cname || "cname.qicmart.com"}</p>
                                 </div>
                                 <div className="text-right">
                                     <p className="text-[9px] font-black text-zinc-600 uppercase mb-1">{t("type")}</p>

@@ -127,7 +127,7 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
     const isLocal = host.includes('localhost')
     const storeUrl = isLocal 
         ? `http://${store.slug}.localhost:3000` 
-        : `https://${store.slug}.nammart.com`
+        : `/s/${store.slug}`
 
     return (
         <Motion.div 

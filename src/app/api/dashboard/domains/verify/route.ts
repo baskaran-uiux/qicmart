@@ -37,7 +37,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ 
             ok: false, 
             verified: false, 
-            error: "CNAME record not found. Please ensure your domain points to cname.nammart.com" 
+            error: "CNAME record not found. Please ensure your domain points to cname.qicmart.com" 
         })
     }
 }

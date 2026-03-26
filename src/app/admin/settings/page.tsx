@@ -29,7 +29,7 @@ export default function AdminSettingsPage() {
                             <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-4">Platform Name</label>
                             <input 
                                 type="text" 
-                                defaultValue="Nammart SaaS" 
+                                defaultValue="QICMART SaaS" 
                                 className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-bold text-zinc-900 dark:text-white"
                             />
                         </div>
@@ -37,7 +37,7 @@ export default function AdminSettingsPage() {
                             <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-4">Support Email</label>
                             <input 
                                 type="email" 
-                                defaultValue="support@nammart.in" 
+                                defaultValue="support@qicmart.com" 
                                 className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-bold text-zinc-900 dark:text-white"
                             />
                         </div>
