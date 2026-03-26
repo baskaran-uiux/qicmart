@@ -79,8 +79,16 @@ export async function POST(req: Request) {
                 .replace(/-+/g, "-")
             
             if (!supabase) {
-                console.error("Supabase client not initialized. Check your credentials.")
-                throw new Error("Supabase Storage is not configured. Please add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to environment variables.")
+                const missingVars = []
+                if (!process.env.SUPABASE_URL && !process.env.NEXT_PUBLIC_SUPABASE_URL) missingVars.push("SUPABASE_URL")
+                if (!process.env.SUPABASE_SERVICE_ROLE_KEY) missingVars.push("SUPABASE_SERVICE_ROLE_KEY")
+                
+                const errorMsg = missingVars.length > 0 
+                  ? `Supabase Storage is not configured. Missing: ${missingVars.join(", ")}. Please add these to your environment variables.`
+                  : "Supabase Storage is not configured correctly. One or more environment variables may be using placeholder values (e.g., 'your-service-role-key-here'). Please check your .env file or Vercel settings."
+
+                console.error(errorMsg)
+                throw new Error(errorMsg)
             }
 
             const fileName = `${Date.now()}-${cleanFileName}`
