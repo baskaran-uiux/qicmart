@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { writeFile, mkdir } from "fs/promises"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { getStoreForDashboard } from "@/lib/dashboard"
 import { appendFileSync } from "fs"
 import { join } from "path"
+import { supabase } from "@/lib/supabase"
 
 const log = (msg: string) => {
     try {
@@ -68,13 +68,9 @@ export async function POST(req: Request) {
         let size = 0
 
         if (file) {
-            console.log(`Uploading file: ${file.name} (${file.size} bytes)`)
+            console.log(`Uploading file to Supabase: ${file.name} (${file.size} bytes)`)
             const bytes = await file.arrayBuffer()
             const buffer = Buffer.from(bytes)
-
-            // Ensure directory exists
-            const uploadDir = join(process.cwd(), "public", "uploads")
-            try { await mkdir(uploadDir, { recursive: true }) } catch (e) { }
 
             // Better filename sanitization
             const cleanFileName = file.name.toLowerCase()
@@ -82,12 +78,26 @@ export async function POST(req: Request) {
                 .replace(/-+/g, "-")
             
             const fileName = `${Date.now()}-${cleanFileName}`
-            const path = join(uploadDir, fileName)
             
-            await writeFile(path, buffer)
-            console.log("File saved to:", path)
+            // Upload to Supabase Storage
+            const { data, error: uploadError } = await supabase.storage
+                .from('media')
+                .upload(fileName, buffer, {
+                    contentType: file.type,
+                    upsert: true
+                })
 
-            url = `/uploads/${fileName}`
+            if (uploadError) {
+                console.error("Supabase upload error:", uploadError)
+                throw new Error(`Supabase Storage Error: ${uploadError.message}`)
+            }
+
+            // Get Public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('media')
+                .getPublicUrl(fileName)
+
+            url = publicUrl
             name = file.name
             type = file.type.startsWith("video/") ? "VIDEO" : "IMAGE"
             size = file.size
