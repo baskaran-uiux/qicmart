@@ -78,11 +78,22 @@ export async function POST(req: Request) {
                 .replace(/[^a-z0-9.]/g, "-")
                 .replace(/-+/g, "-")
             
-            const fileName = `${Date.now()}-${cleanFileName}`
-            
             if (!supabase) {
                 console.error("Supabase client not initialized. Check your credentials.")
                 throw new Error("Supabase Storage is not configured. Please add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to environment variables.")
+            }
+
+            const fileName = `${Date.now()}-${cleanFileName}`
+
+            // Ensure bucket exists (best effort)
+            try {
+                const { data: buckets } = await supabase.storage.listBuckets()
+                if (!buckets?.find((b: any) => b.name === 'media')) {
+                    console.log("Creating 'media' bucket...")
+                    await supabase.storage.createBucket('media', { public: true })
+                }
+            } catch (e) {
+                console.warn("Could not verify/create bucket:", e)
             }
 
             // Upload to Supabase Storage

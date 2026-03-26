@@ -54,15 +54,24 @@ export default function MediaLibraryPage() {
         const url = ownerId ? `/api/dashboard/media?ownerId=${ownerId}` : "/api/dashboard/media"
 
         setUploading(true)
-        for (const file of Array.from(files)) {
-            const formData = new FormData()
-            formData.append("file", file)
-            await fetch(url, {
-                method: "POST",
-                body: formData,
-            })
+        try {
+            for (const file of Array.from(files)) {
+                const formData = new FormData()
+                formData.append("file", file)
+                const res = await fetch(url, {
+                    method: "POST",
+                    body: formData,
+                })
+                if (!res.ok) {
+                    const data = await res.json()
+                    throw new Error(data.details || data.error || "Upload failed")
+                }
+            }
+            fetchMedia()
+        } catch (error: any) {
+            console.error("Upload error:", error)
+            alert(`Upload failed: ${error.message}`)
         }
-        fetchMedia()
         setUploading(false)
     }
 
