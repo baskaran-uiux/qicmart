@@ -704,6 +704,7 @@ export default function SettingsPage() {
     const [domainError, setDomainError] = useState<string | null>(null)
     const [domainSaving, setDomainSaving] = useState(false)
     const [showDeleteModal, setShowDeleteModal] = useState(false)
+    const [showStoreDeleteModal, setShowStoreDeleteModal] = useState(false)
     const [deleting, setDeleting] = useState(false)
 
     useEffect(() => {
@@ -928,6 +929,30 @@ export default function SettingsPage() {
         setShowDeleteModal(true)
     }
 
+    const handleDeleteStore = async () => {
+        setDeleting(true)
+        setError(null)
+        try {
+            const params = new URLSearchParams(window.location.search)
+            const ownerId = params.get("ownerId")
+            const url = ownerId ? `/api/dashboard/settings?ownerId=${ownerId}` : "/api/dashboard/settings"
+
+            const res = await fetch(url, { method: "DELETE" })
+            if (res.ok) {
+                window.location.href = "/" // Redirect to landing page after deletion
+            } else {
+                const data = await res.json()
+                setError(data.error || "Failed to delete store")
+                setShowStoreDeleteModal(false)
+            }
+        } catch (e: any) {
+            setError(e.message || "An error occurred during deletion")
+            setShowStoreDeleteModal(false)
+        } finally {
+            setDeleting(false)
+        }
+    }
+
     if (loading) return (
         <div className="flex flex-col items-center justify-center h-96 gap-4 text-zinc-500">
             <Loader2 className="animate-spin text-purple-500" size={32} /> 
@@ -1077,6 +1102,40 @@ export default function SettingsPage() {
                 </button>
             </div>
 
+            {/* Danger Zone */}
+            <div className="mt-16 pt-16 border-t border-zinc-100 dark:border-zinc-800">
+                <div className="bg-rose-50/50 dark:bg-rose-950/10 border border-rose-100 dark:border-rose-900/30 rounded-[32px] overflow-hidden">
+                    <div className="p-8 sm:p-10">
+                        <div className="flex items-start gap-4 mb-8">
+                            <div className="p-3 bg-rose-500 text-white rounded-2xl shadow-lg shadow-rose-500/20">
+                                <AlertCircle size={24} />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Delete project</h3>
+                                <p className="text-zinc-500 dark:text-zinc-400 text-sm mt-1">Permanently remove your project and its database</p>
+                            </div>
+                        </div>
+
+                        <div className="p-6 bg-rose-100/50 dark:bg-rose-900/20 border border-rose-200/50 dark:border-rose-800/30 rounded-2xl mb-8">
+                            <div className="flex items-start gap-3">
+                                <AlertCircle size={18} className="text-rose-600 mt-0.5 shrink-0" />
+                                <div>
+                                    <h4 className="text-sm font-bold text-rose-900 dark:text-rose-400">Deleting this project will also remove your database.</h4>
+                                    <p className="text-xs text-rose-700/70 dark:text-rose-400/60 mt-1 font-medium">Make sure you have made a backup if you want to keep your data.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button 
+                            onClick={() => setShowStoreDeleteModal(true)}
+                            className="px-8 py-4 bg-rose-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-700 active:scale-95 transition-all shadow-xl shadow-rose-500/20"
+                        >
+                            Delete store
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             {/* Media Library Modal */}
             <MediaLibraryModal 
                 isOpen={modalOpen}
@@ -1085,7 +1144,7 @@ export default function SettingsPage() {
                 title={t("selectMedia")}
             />
 
-            {/* Delete Confirmation Modal */}
+            {/* Remove Domain Modal */}
             <DeleteConfirmationModal
                 isOpen={showDeleteModal}
                 onClose={() => setShowDeleteModal(false)}
@@ -1093,6 +1152,17 @@ export default function SettingsPage() {
                 loading={deleting}
                 title={t("removeDomainTitle")}
                 description={t("removeDomainDesc")}
+            />
+
+            {/* Delete Store Modal */}
+            <DeleteConfirmationModal
+                isOpen={showStoreDeleteModal}
+                onClose={() => setShowStoreDeleteModal(false)}
+                onConfirm={handleDeleteStore}
+                loading={deleting}
+                confirmationValue={settings.slug}
+                title={`Confirm deletion of ${settings.slug}`}
+                description={`This will permanently delete the ${settings.slug} project and all of its data.`}
             />
         </div>
     )
