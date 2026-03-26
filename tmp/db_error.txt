@@ -1,0 +1,2 @@
+ReferenceError: output is not defined
+    at main (C:\xampp\htdocs\nammart\saas-platform\tmp\dump_db.js:10:32)

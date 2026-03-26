@@ -1,0 +1,66 @@
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
+import { getToken } from "next-auth/jwt"
+
+export const config = {
+    matcher: [
+        "/((?!api/|_next/|_static/|uploads/|favicon.ico).*)",
+    ],
+}
+
+export async function middleware(req: NextRequest) {
+    const url = req.nextUrl.clone()
+    const hostname = req.headers.get("host") || ""
+    const pathname = url.pathname
+
+    // Simplified middleware: Only handles basic auth protection for dashboard/admin
+    if (pathname.startsWith("/admin") || pathname.startsWith("/dashboard")) {
+        console.log("MIDDLEWARE_AUTH_CHECK:", pathname)
+        const secret = process.env.NEXTAUTH_SECRET
+        if (!secret) console.error("MIDDLEWARE_ERROR: NEXTAUTH_SECRET is undefined")
+        
+        const token = await getToken({ req, secret })
+        console.log("MIDDLEWARE_TOKEN_FOUND:", !!token)
+        
+        if (!token) {
+            url.pathname = "/login"
+            return NextResponse.redirect(url)
+        }
+    }
+
+    // MULTI-TENANT DOMAIN ROUTING
+    // 1. Get the current hostname (e.g. store1.qicmart.com or mystore.com)
+    const currentHost = process.env.NODE_ENV === "production" 
+        ? hostname.replace(`.qicmart.com`, "") 
+        : hostname.replace(`.localhost:3000`, "");
+
+    // 2. Ignore main domain and reserved subdomains
+    if (
+        hostname === "qicmart.com" || 
+        hostname === "localhost:3000" || 
+        hostname.startsWith("www.") ||
+        pathname.startsWith("/api") ||
+        pathname.startsWith("/_next") ||
+        pathname.startsWith("/public") ||
+        pathname.startsWith("/s/") // Already on a store path
+    ) {
+        return NextResponse.next();
+    }
+
+    // 3. Dynamic Rewrite Logic
+    // If it's a subdomain (e.g. store1.qicmart.com), rewrite to /s/store1
+    // If it's a custom domain, we would normally fetch the slug from a cache/DB.
+    // Here we simulate the rewrite for the demo.
+    
+    // Check if the hostname is a direct match for a custom domain or a subdomain
+    // For this implementation, we assume the host part IS the slug for subdomains,
+    // and for custom domains, we'd need a lookup table.
+    
+    // Example: store1.localhost:3000 -> /s/store1
+    if (currentHost && currentHost !== hostname) {
+        url.pathname = `/s/${currentHost}${pathname}`;
+        return NextResponse.rewrite(url);
+    }
+
+    return NextResponse.next()
+}
