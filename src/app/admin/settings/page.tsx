@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { Settings, Globe, Shield, Bell, Zap, Palette } from "lucide-react"
 
 export default function AdminSettingsPage() {

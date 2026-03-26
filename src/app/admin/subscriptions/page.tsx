@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma"
 import { CreditCard, CheckCircle2, XCircle, Clock, ChevronRight } from "lucide-react"
 

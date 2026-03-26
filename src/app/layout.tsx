@@ -13,7 +13,7 @@ const ubuntu = Ubuntu({ subsets: ["latin"], weight: ["300", "400", "500", "700"]
 const lato = Lato({ subsets: ["latin"], weight: ["100", "300", "400", "700", "900"], variable: "--font-lato" });
 
 export const metadata: Metadata = {
-  title: "Qicmart SaaS",
+  title: "QICMART SaaS",
   description: "Your modern e-commerce platform",
 };
 

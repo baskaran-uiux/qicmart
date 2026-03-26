@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma"
 import { Users as UsersIcon, Mail, Shield, Calendar, Plus } from "lucide-react"
 import { AddUserModal } from "@/components/admin/AddUserModal"

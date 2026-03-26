@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma"
 import { StoreTable } from "@/components/admin/StoreTable"
 import { Store as StoreIcon } from "lucide-react"

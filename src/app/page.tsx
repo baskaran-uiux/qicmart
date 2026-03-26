@@ -47,7 +47,7 @@ export default async function RootPage() {
                         <div className="w-11 h-11 bg-indigo-600 rounded-2xl overflow-hidden flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform">
                             <img src="/logo.png" alt="QICMART Logo" className="w-full h-full object-cover" />
                         </div>
-                        <span className="text-xl font-black tracking-tight italic uppercase">Qic<span className="text-indigo-500">Mart</span></span>
+                        <span className="text-xl font-black tracking-tight italic uppercase">QIC<span className="text-indigo-500">MART</span></span>
                     </div>
                     
                     <div className="hidden md:flex items-center gap-10">
@@ -80,7 +80,7 @@ export default async function RootPage() {
                             In Record Time.
                         </h1>
                         <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto mb-12 font-medium leading-relaxed">
-                            Stop struggling with complex e-commerce setups. Qicmart gives you the tools to launch, manage, and scale your online store with professional speed.
+                            Stop struggling with complex e-commerce setups. QICMART gives you the tools to launch, manage, and scale your online store with professional speed.
                         </p>
 
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
