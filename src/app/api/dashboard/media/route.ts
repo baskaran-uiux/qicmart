@@ -27,13 +27,7 @@ export async function GET(req: Request) {
     }
 
     const dashboardType = searchParams.get("dashboardType") || "1"
-    let store: any = await getStoreForDashboard(targetUserId, dashboardType)
-    
-    // Fallback for Super Admin without impersonation
-    if (!store && (session.user as any).role === 'SUPER_ADMIN') {
-        store = await prisma.store.findFirst()
-    }
-
+    const store = await getStoreForDashboard(targetUserId, dashboardType)
     if (!store) return NextResponse.json([])
 
     const media = await prisma.mediaLibrary.findMany({
@@ -56,12 +50,7 @@ export async function POST(req: Request) {
     }
 
     const dashboardType = searchParams.get("dashboardType") || "1"
-    let store: any = await getStoreForDashboard(targetUserId, dashboardType)
-
-    // Fallback for Super Admin without impersonation
-    if (!store && (session.user as any).role === 'SUPER_ADMIN') {
-        store = await prisma.store.findFirst()
-    }
+    const store = await getStoreForDashboard(targetUserId, dashboardType)
 
     if (!store) {
         console.error("Upload error: Store not found for user", targetUserId)
@@ -180,13 +169,7 @@ export async function DELETE(req: Request) {
 
     // Verify ownership
     const dashboardType = searchParams.get("dashboardType") || "1"
-    let store: any = await getStoreForDashboard(targetUserId, dashboardType)
-
-    // Fallback for Super Admin without impersonation
-    if (!store && (session.user as any).role === 'SUPER_ADMIN') {
-        store = await prisma.store.findFirst()
-    }
-
+    const store = await getStoreForDashboard(targetUserId, dashboardType)
     const media = await prisma.mediaLibrary.findFirst({
         where: { id, storeId: store?.id }
     })

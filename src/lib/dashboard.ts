@@ -32,7 +32,7 @@ export async function getStoreForDashboard(userId: string, dashboardType: string
     // Self-healing: If user is an Owner but has no stores (orphaned account), create a default one
     if (stores.length === 0) {
         const user = await prisma.user.findUnique({ where: { id: userId } })
-        if (user?.role === 'STORE_OWNER') {
+        if (user?.role === 'STORE_OWNER' || user?.role === 'SUPER_ADMIN') {
             log(`[getStoreForDashboard] Self-healing: Creating missing store for owner ${userId}`)
             const plan = await prisma.subscriptionPlan.findFirst()
             if (plan) {
