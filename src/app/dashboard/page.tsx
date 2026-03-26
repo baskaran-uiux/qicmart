@@ -15,6 +15,14 @@ import ExportButton from "@/components/dashboard/ExportButton"
 import { headers } from "next/headers"
 import * as Motion from "framer-motion/client"
 import { redirect } from "next/navigation"
+import { unstable_cache } from "next/cache"
+import { getCachedDashboardStats } from "@/lib/cache"
+import { Suspense } from "react"
+import { TableSkeleton, ReviewSkeleton } from "@/components/dashboard/DashboardSkeletons"
+import { RecentOrdersSection, TopProductsSection, ReviewsSection } from "@/components/dashboard/sections"
+
+
+
 
 export default async function StoreDashboard({ searchParams }: { searchParams: Promise<any> }) {
     const session = await getServerSession(authOptions)
@@ -54,60 +62,47 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    const [totalProducts, totalOrders, ordersToday, newCustomers, totalSales, recentReviews] = await Promise.all([
-        prisma.product.count({ where: { storeId: store.id } }),
-        prisma.order.count({ where: { storeId: store.id } }),
-        prisma.order.count({ 
-            where: { 
-                storeId: store.id,
-                createdAt: { gte: today }
-            } 
-        }),
-        prisma.customer.count({ 
-            where: { 
-                storeId: store.id,
-                createdAt: { gte: new Date(new Date().setDate(new Date().getDate() - 30)) } // Last 30 days
-            } 
-        }),
-        prisma.order.aggregate({
-            where: { storeId: store.id, status: { not: "CANCELLED" } },
-            _sum: { total: true }
-        }),
-        prisma.review.findMany({
+    const { totalProducts, totalOrders, ordersToday, newCustomers, totalSales } = await getCachedDashboardStats(store.id)
+
+    // Optimized fetch for ExportButton only (minimal fields)
+    const [exportOrders, exportProductsData] = await Promise.all([
+        prisma.order.findMany({
             where: { storeId: store.id },
             take: 5,
             orderBy: { createdAt: "desc" },
-            include: { product: true, user: true }
+            select: {
+                id: true,
+                total: true,
+                status: true,
+                customer: { select: { firstName: true, lastName: true, email: true } }
+            }
+        }),
+        prisma.orderItem.groupBy({
+            by: ['productId'],
+            where: { order: { storeId: store.id } },
+            _sum: { quantity: true },
+            orderBy: { _sum: { quantity: 'desc' } },
+            take: 5
         })
     ])
 
-    const recentOrders = await prisma.order.findMany({
-        where: { storeId: store.id },
-        take: 5,
-        orderBy: { createdAt: "desc" },
-        include: { customer: true }
+    const exportProductIds = exportProductsData.map(item => item.productId)
+    const exportProductsInfo = await prisma.product.findMany({
+        where: { id: { in: exportProductIds } },
+        select: { id: true, name: true, price: true }
     })
 
-    // Identify top products based on order count
-    const topProductsData = await prisma.orderItem.groupBy({
-        by: ['productId'],
-        where: { order: { storeId: store.id } },
-        _sum: { quantity: true },
-        orderBy: { _sum: { quantity: 'desc' } },
-        take: 5
-    })
-
-    const topProducts = await Promise.all(topProductsData.map(async (item) => {
-        const product = await prisma.product.findUnique({
-            where: { id: item.productId },
-            select: { name: true, price: true }
-        })
+    const exportTopProducts = exportProductsData.map(item => {
+        const product = exportProductsInfo.find(p => p.id === item.productId)
         return {
             name: product?.name || 'Unknown Product',
             units: item._sum.quantity || 0,
             rev: (item._sum.quantity || 0) * (product?.price || 0)
         }
-    }))
+    })
+
+
+
 
     const getStatusStyles = (status: string) => {
         switch (status) {
@@ -157,21 +152,23 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
                         <Globe size={14} className="text-emerald-500" /> View Store
                     </Link>
                     <div className="flex items-center gap-2">
-                        <ExportButton data={{
-                            currencySymbol,
-                            totalSales: totalSales._sum.total || 0,
-                            totalOrders,
-                            totalProducts,
-                            newCustomers,
-                            topProducts,
-                            recentOrders: recentOrders.map(o => ({
-                                id: o.id,
-                                customerName: o.customer?.firstName ? `${o.customer.firstName} ${o.customer.lastName || ''}`.trim() : 'Guest',
-                                customerEmail: o.customer?.email || 'N/A',
-                                total: o.total,
-                                status: o.status
-                            }))
-                        }} />
+                         <ExportButton data={{
+                             currencySymbol,
+                             totalSales: totalSales._sum.total || 0,
+                             totalOrders,
+                             totalProducts,
+                             newCustomers,
+                             topProducts: exportTopProducts,
+                             recentOrders: exportOrders.map(o => ({
+                                 id: o.id,
+                                 customerName: o.customer?.firstName ? `${o.customer.firstName} ${o.customer.lastName || ''}`.trim() : 'Guest',
+                                 customerEmail: o.customer?.email || 'N/A',
+                                 total: o.total,
+                                 status: o.status
+                             }))
+                         }} />
+
+
                         <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-[12px] font-bold capitalize tracking-wide hover:bg-indigo-700 transition-all active:scale-95 shadow-lg shadow-indigo-600/20">
                             <Filter size={14} /> Filter
                         </button>
@@ -238,155 +235,22 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
 
             {/* Dashboard 3-Column Section Upgraded */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-min">
-                {/* Recent Orders Section */}
-                <div className="bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-sm flex flex-col hover:shadow-xl transition-all duration-500 group">
-                    <div className="p-7 border-b border-zinc-50 dark:border-zinc-800 flex items-center justify-between">
-                        <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight capitalize italic text-black dark:text-white">Recent Orders</h3>
-                        <Link 
-                            href={`/dashboard/orders${impersonateId ? `?ownerId=${impersonateId}` : ''}`}
-                            className="p-1.5 bg-zinc-50 dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
-                        >
-                            <ArrowRight size={14} className="text-zinc-400 group-hover:text-indigo-500 transition-colors" />
-                        </Link>
-                    </div>
-                    <div className="flex-1 overflow-x-auto custom-scrollbar">
-                        {recentOrders.length === 0 ? (
-                            <div className="h-full flex flex-col items-center justify-center p-8 text-center">
-                                <ShoppingCart className="w-10 h-10 text-zinc-100 dark:text-zinc-800 mb-3" />
-                                <p className="text-zinc-400 font-semibold italic text-xs capitalize tracking-wide">No orders yet</p>
-                            </div>
-                        ) : (
-                            <table className="w-full text-left min-w-[380px]">
-                                <thead className="text-[12px] sm:text-[14px] text-zinc-400 dark:text-zinc-500 capitalize bg-zinc-50/50 dark:bg-zinc-950/50 font-semibold tracking-wide border-b border-zinc-50 dark:border-zinc-800">
-                                    <tr>
-                                        <th className="px-5 py-3">Customer</th>
-                                        <th className="px-5 py-3 text-right">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800/50">
-                                    {recentOrders.map((order) => (
-                                        <tr key={order.id} className="group/row hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-all">
-                                            <td className="px-5 py-4">
-                                                <div className="flex flex-col">
-                                                    <span className="font-semibold text-zinc-900 dark:text-white text-xs group-hover/row:text-indigo-600 transition-colors">
-                                                        {order.customer?.firstName} {order.customer?.lastName?.[0]}.
-                                                    </span>
-                                                    <span className="text-[11px] text-zinc-400 font-semibold capitalize tracking-normal">#{order.id.slice(-6)}</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-5 py-4 text-right">
-                                                <p className="font-semibold text-zinc-900 dark:text-white text-xs mb-0.5">{currencySymbol}{order.total.toLocaleString()}</p>
-                                                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold capitalize tracking-wide ${
-                                                    order.status === 'PAID' ? 'bg-emerald-500/10 text-emerald-500' : 
-                                                    order.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500' :
-                                                    'bg-zinc-500/10 text-zinc-500'
-                                                }`}>
-                                                    {order.status}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        )}
-                    </div>
-                </div>
+                <Suspense fallback={<TableSkeleton />}>
+                    <RecentOrdersSection storeId={store.id} impersonateId={impersonateId} currencySymbol={currencySymbol} />
+                </Suspense>
 
-                {/* Top Products Section */}
-                <div className="bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-sm flex flex-col hover:shadow-xl transition-all duration-500 group">
-                    <div className="p-7 border-b border-zinc-50 dark:border-zinc-800 flex items-center justify-between">
-                        <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight capitalize italic text-black dark:text-white">Top Products</h3>
-                        <Link 
-                            href={`/dashboard/analytics${impersonateId ? `?ownerId=${impersonateId}` : ''}`}
-                            className="p-1.5 bg-zinc-50 dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
-                        >
-                            <ArrowRight size={14} className="text-zinc-400 group-hover:text-indigo-500 transition-colors" />
-                        </Link>
-                    </div>
-                    <div className="flex-1 overflow-x-auto custom-scrollbar">
-                        {topProducts.length === 0 ? (
-                            <div className="h-full flex flex-col items-center justify-center p-8 text-center">
-                                <Package className="w-10 h-10 text-zinc-100 dark:text-zinc-800 mb-3" />
-                                <p className="text-zinc-400 font-semibold italic text-xs capitalize tracking-wide">No data available</p>
-                            </div>
-                        ) : (
-                            <table className="w-full text-left min-w-[380px]">
-                                <thead className="text-[12px] sm:text-[14px] text-zinc-400 dark:text-zinc-500 capitalize bg-zinc-50/50 dark:bg-zinc-950/50 font-semibold tracking-wide border-b border-zinc-50 dark:border-zinc-800">
-                                    <tr>
-                                        <th className="px-5 py-3">Product</th>
-                                        <th className="px-5 py-3 text-right">Revenue</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800/50">
-                                    {topProducts.map((p, i) => (
-                                        <tr key={i} className="group/row hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-all">
-                                            <td className="px-5 py-4">
-                                                <div className="flex flex-col">
-                                                    <span className="font-semibold text-zinc-900 dark:text-white text-xs truncate max-w-[150px] group-hover/row:text-indigo-600 transition-colors">{p.name}</span>
-                                                    <span className="text-[11px] text-zinc-400 font-semibold capitalize tracking-normal italic whitespace-nowrap">{p.units} Sold</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-5 py-4 text-right">
-                                                <p className="font-semibold text-zinc-900 dark:text-white text-xs mb-0.5">{currencySymbol}{p.rev.toLocaleString()}</p>
-                                                <span className="text-[8px] font-semibold capitalize tracking-wide text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded-full italic">Best Seller</span>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        )}
-                    </div>
-                </div>
+                <Suspense fallback={<TableSkeleton />}>
+                    <TopProductsSection storeId={store.id} impersonateId={impersonateId} currencySymbol={currencySymbol} />
+                </Suspense>
 
-                {/* Recent Reviews Upgraded */}
-                <div className="bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-sm flex flex-col hover:shadow-xl transition-all duration-500 group">
-                    <div className="p-7 border-b border-zinc-50 dark:border-zinc-800 flex items-center justify-between">
-                        <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight capitalize italic text-black dark:text-white">Reviews</h3>
-                        <Link 
-                            href={`/dashboard/reviews${impersonateId ? `?ownerId=${impersonateId}` : ''}`}
-                            className="p-1.5 bg-zinc-50 dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
-                        >
-                            <ArrowRight size={14} className="text-zinc-400 group-hover:text-indigo-500 transition-colors" />
-                        </Link>
-                    </div>
-                    <div className="flex-1">
-                        {recentReviews.length === 0 ? (
-                            <div className="h-full flex flex-col items-center justify-center p-8 text-center">
-                                <Star className="w-10 h-10 text-zinc-100 dark:text-zinc-800 mb-3" />
-                                <p className="text-zinc-400 font-semibold italic text-xs capitalize tracking-wide">No reviews yet</p>
-                            </div>
-                        ) : (
-                            <div className="divide-y divide-zinc-50 dark:divide-zinc-800/50">
-                                {recentReviews.map((review) => (
-                                    <div key={review.id} className="p-6 hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-all group/rev">
-                                        <div className="flex items-center gap-1 mb-2">
-                                            {[...Array(5)].map((_, i) => (
-                                                <Star 
-                                                    key={i} 
-                                                    size={10} 
-                                                    className={i < review.rating ? "fill-amber-400 text-amber-400" : "text-zinc-200 dark:text-zinc-800"} 
-                                                />
-                                            ))}
-                                            <span className="text-[11px] font-semibold text-zinc-400 capitalize tracking-wide ml-auto italic">
-                                                {new Date(review.createdAt).toLocaleDateString()}
-                                            </span>
-                                        </div>
-                                        <p className="text-xs font-medium text-zinc-900 dark:text-white line-clamp-2 leading-relaxed mb-2 italic">"{review.comment}"</p>
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-6 h-6 bg-indigo-100 dark:bg-zinc-800 rounded-full flex items-center justify-center text-[10px] font-semibold text-indigo-600 dark:text-indigo-400">
-                                                {(review.user?.name?.[0]) || 'G'}
-                                            </div>
-                                            <p className="text-[12px] font-medium text-zinc-500">
-                                                <span className="font-semibold text-zinc-900 dark:text-zinc-300 truncate max-w-[80px]">{(review.user?.name) || 'Guest'}</span> <span className="text-[10px] italic opacity-50">on {review.product?.name}</span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
+                <Suspense fallback={<div className="bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-sm flex flex-col min-h-[400px]">
+                    <div className="p-7 border-b border-zinc-50 dark:border-zinc-800"><div className="h-6 w-32 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" /></div>
+                    <ReviewSkeleton /><ReviewSkeleton /><ReviewSkeleton />
+                </div>}>
+                    <ReviewsSection storeId={store.id} impersonateId={impersonateId} />
+                </Suspense>
             </div>
+
 
             {/* Bottom Section: QR Code & Sharing */}
             <OverviewClient 

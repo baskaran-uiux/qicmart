@@ -3,6 +3,8 @@
 import { useRef, useState, useEffect } from "react"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import OptimizedImage from "@/components/common/OptimizedImage"
+
 
 interface CategoryCarouselProps {
     categories: any[]
@@ -115,9 +117,16 @@ export default function CategoryCarousel({ categories, slug }: CategoryCarouselP
                             className="group/item relative overflow-hidden rounded-[32px] aspect-square text-white flex flex-col items-center justify-end p-6 shadow-sm hover:shadow-2xl transition-all duration-500 shrink-0 w-[140px] sm:w-[200px] snap-start border border-zinc-100/50"
                         >
                             <div className="absolute inset-0">
-                                <img src={img} alt={cat.name} className="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-700" />
+                                <OptimizedImage 
+                                    src={img} 
+                                    alt={cat.name} 
+                                    fill
+                                    className="object-cover group-hover/item:scale-110 transition-transform duration-700" 
+                                    sizes="(max-width: 640px) 140px, 200px"
+                                />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover/item:opacity-100 transition-opacity" />
                             </div>
+
                             <div className="relative z-10 text-center">
                                 <span className="text-[11px] font-bold drop-shadow-2xl">{cat.name}</span>
                             </div>

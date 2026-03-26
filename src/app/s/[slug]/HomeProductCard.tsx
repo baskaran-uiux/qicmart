@@ -9,6 +9,8 @@ import { useWishlist } from "@/context/WishlistContext"
 import { formatPrice } from "./utils"
 import { useSession } from "next-auth/react"
 import QuickViewModal from "./QuickViewModal"
+import OptimizedImage from "@/components/common/OptimizedImage"
+
 
 interface Product {
     id: string
@@ -151,14 +153,17 @@ export default function HomeProductCard({
                 <div className="relative aspect-square bg-white overflow-hidden">
                     <div className="block w-full h-full relative z-0">
                         {image ? (
-                                <motion.img
-                                    whileHover={{ scale: 1.1 }}
-                                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                                    src={image}
-                                    alt={product.name}
-                                    className="w-full h-full object-cover"
-                                />
+                                <div className="w-full h-full relative">
+                                    <OptimizedImage
+                                        src={image}
+                                        alt={product.name}
+                                        fill
+                                        className="object-cover transition-transform duration-800 ease-[0.16,1,0.3,1] group-hover:scale-110"
+                                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                                    />
+                                </div>
                         ) : (
+
                             <div className="w-full h-full flex items-center justify-center text-4xl text-zinc-100 font-bold bg-zinc-50 dark:bg-zinc-800 rounded-3xl">
                                 {product.name.charAt(0)}
                             </div>

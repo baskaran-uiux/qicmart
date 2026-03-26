@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import OptimizedImage from "@/components/common/OptimizedImage"
+
 
 interface Banner {
     id: string
@@ -119,11 +121,17 @@ export default function HeroBanner({ slug, banners = [] }: Props) {
                                     </>
                                 )}
                                 
-                                <img
-                                    src={s.image}
-                                    alt={s.title}
-                                    className="absolute inset-0 w-full h-full object-cover animate-zoom-banner"
-                                />
+                                <div className="absolute inset-0 z-0">
+                                    <OptimizedImage
+                                        src={s.image}
+                                        alt={s.title}
+                                        fill
+                                        priority={current === 0}
+                                        className="object-cover animate-zoom-banner"
+                                        sizes="100vw"
+                                    />
+                                </div>
+
  
                                 <div className={`relative z-20 h-full flex flex-col justify-center px-6 sm:px-20 lg:px-32 text-white
                                     ${s.textAlign === 'left' ? 'items-start text-left' : 

@@ -7,7 +7,8 @@ import { formatPrice } from "./utils"
 import CategoryCarousel from "./CategoryCarousel"
 import StaggeredGrid from "./StaggeredGrid"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 60 // Revalidate every 60 seconds (ISR)
+
 
 export default async function StorefrontPage({
     params,
@@ -18,27 +19,53 @@ export default async function StorefrontPage({
 
     const storeData = await prisma.store.findUnique({
         where: { slug: slug.toLowerCase() },
-        include: {
+        select: {
+            id: true,
+            slug: true,
+            isActive: true,
+            isPlatformDisabled: true,
+            isStorefrontDisabled: true,
+            currency: true,
+            themeConfig: true,
+            subscription: {
+                select: {
+                    plan: { select: { name: true } }
+                }
+            },
             products: {
                 where: { isActive: true },
-                include: { 
-                    category: true,
+                select: {
+                    id: true,
+                    name: true,
+                    price: true,
+                    images: true,
+                    isBestSeller: true,
+                    stock: true,
+                    category: { select: { name: true } },
                     reviews: {
-                        where: { isApproved: true }
+                        where: { isApproved: true },
+                        select: { rating: true }
                     }
                 },
                 orderBy: { createdAt: "desc" },
+                take: 20 // Limit products on home page
             },
             categories: {
+                select: {
+                    id: true,
+                    name: true,
+                    image: true
+                },
                 orderBy: { name: "asc" },
             },
         },
     })
 
+
     if (!storeData || !storeData.isActive || storeData.isPlatformDisabled || storeData.isStorefrontDisabled) notFound()
 
-    // Serialize the store object to handle Date/Decimal types from Prisma
-    const store = JSON.parse(JSON.stringify(storeData))
+    const store = storeData as any // Use as any to skip serialization lag if possible, or mapping below
+
 
     const featuredProducts = store.products.slice(0, 8)
     const bestSellers = store.products
