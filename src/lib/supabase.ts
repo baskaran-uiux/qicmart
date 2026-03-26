@@ -7,4 +7,6 @@ if (!supabaseUrl || !supabaseServiceKey) {
   console.warn('Supabase credentials missing. Media uploads will fail.')
 }
 
-export const supabase = createClient(supabaseUrl || '', supabaseServiceKey || '')
+export const supabase = (supabaseUrl && supabaseServiceKey) 
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null as any

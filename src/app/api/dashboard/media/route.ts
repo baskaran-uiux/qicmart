@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+export const dynamic = "force-dynamic"
 import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
@@ -79,6 +80,11 @@ export async function POST(req: Request) {
             
             const fileName = `${Date.now()}-${cleanFileName}`
             
+            if (!supabase) {
+                console.error("Supabase client not initialized. Check your credentials.")
+                throw new Error("Supabase Storage is not configured. Please add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to environment variables.")
+            }
+
             // Upload to Supabase Storage
             const { data, error: uploadError } = await supabase.storage
                 .from('media')
