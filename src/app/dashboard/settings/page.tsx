@@ -4,13 +4,13 @@ import { useState, useEffect } from "react"
 import {
     Store, Upload, Image as ImageIcon, Globe, 
     Check, X, Loader2, RefreshCw, Plus, Trash2, ArrowRight, Info, Shield, MessageCircle, ChevronDown,
-    Settings as SettingsIcon, ExternalLink, Save, AlertCircle, ArrowLeft, GripVertical,
+    Settings as SettingsIcon, ExternalLink, Save, AlertCircle, ArrowLeft, GripVertical, LogOut,
     Instagram, Facebook, Twitter, Linkedin, Youtube
 } from "lucide-react"
 import DeleteConfirmationModal from "@/components/dashboard/DeleteConfirmationModal"
 import Link from "next/link"
 import { MediaLibraryModal } from "@/components/MediaLibraryModal"
-import { useSession } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import { motion, Reorder, AnimatePresence } from "framer-motion"
 import { QRCodeCanvas } from "qrcode.react"
 import { useDashboardStore } from "@/components/DashboardStoreProvider"
@@ -557,6 +557,7 @@ function PreferencesTab({ settings, update }: any) {
 }
 
 function DangerTab({ setShowStoreDeleteModal, setShowStoreDataDeleteModal }: any) {
+    const { t } = useDashboardStore()
     return (
         <motion.div 
             initial={{ opacity: 0, x: 20 }}
@@ -564,6 +565,27 @@ function DangerTab({ setShowStoreDeleteModal, setShowStoreDataDeleteModal }: any
             exit={{ opacity: 0, x: -20 }}
             className="space-y-8"
         >
+            <div className="bg-zinc-50/50 dark:bg-zinc-950/10 border border-zinc-100 dark:border-zinc-900/30 rounded-[32px] overflow-hidden">
+                <div className="p-8 sm:p-10">
+                    <div className="flex items-start gap-4 mb-8">
+                        <div className="p-3 bg-zinc-500 text-white rounded-2xl shadow-lg shadow-zinc-500/20">
+                            <LogOut size={24} />
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-zinc-900 dark:text-white">{t("signOut")}</h3>
+                            <p className="text-zinc-500 dark:text-zinc-400 text-sm mt-1">{t("signOutDesc")}</p>
+                        </div>
+                    </div>
+
+                    <button 
+                        onClick={() => signOut({ callbackUrl: "/" })}
+                        className="px-8 py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-2xl text-[10px] font-black uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-zinc-500/10"
+                    >
+                        {t("signOutButton")}
+                    </button>
+                </div>
+            </div>
+
             <div className="bg-amber-50/50 dark:bg-amber-950/5 border border-amber-100 dark:border-amber-900/20 rounded-[32px] overflow-hidden">
                 <div className="p-8 sm:p-10">
                     <div className="flex items-start gap-4 mb-8">

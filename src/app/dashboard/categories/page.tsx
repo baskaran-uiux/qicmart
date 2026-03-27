@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Plus, Pencil, Trash2, FolderOpen, X, Check, Upload, Image as ImageIcon, Loader2, Search, AlertCircle } from "lucide-react"
 import DeleteConfirmationModal from "@/components/dashboard/DeleteConfirmationModal"
 import { MediaLibraryModal } from "@/components/MediaLibraryModal"
+import { useDashboardStore } from "@/components/DashboardStoreProvider"
 
 interface Category {
     id: string
@@ -16,6 +17,7 @@ interface Category {
 }
 
 export default function CategoriesPage() {
+    const { t } = useDashboardStore()
     const [categories, setCategories] = useState<Category[]>([])
     const [loading, setLoading] = useState(true)
     const [modalOpen, setModalOpen] = useState(false)
@@ -174,7 +176,7 @@ export default function CategoriesPage() {
 
     const saveCategory = async () => {
         if (!form.name.trim()) {
-            setError("Category name is required")
+            setError(t('nameRequired'))
             return
         }
 
@@ -211,7 +213,7 @@ export default function CategoriesPage() {
                 closeForm()
                 fetchCategories()
             } else {
-                setError(data.error || "Failed to save category")
+                setError(data.error || t('categoryError'))
             }
         } catch (e: any) {
             setError("Network error. Please try again.")
@@ -248,14 +250,14 @@ export default function CategoriesPage() {
         <div className="max-w-6xl mx-auto space-y-8 animate-fade-in pb-20">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                 <div>
-                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize">Categories</h2>
-                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">Organize your products into meaningful groups.</p>
+                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize">{t('categories')}</h2>
+                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">{t('categoriesDesc')}</p>
                 </div>
                 <button
                     onClick={openAdd}
                     className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-indigo-600 dark:bg-white text-white dark:text-black rounded-2xl text-[12px] font-semibold capitalize hover:opacity-90 transition-all shadow-xl shadow-indigo-500/10 active:scale-95"
                 >
-                    <Plus size={18} /> Create Category
+                    <Plus size={18} /> {t('createCategory')}
                 </button>
             </div>
 
@@ -264,7 +266,7 @@ export default function CategoriesPage() {
                 <input 
                     value={search} 
                     onChange={e => setSearch(e.target.value)} 
-                    placeholder="Search categories..." 
+                    placeholder={t('searchCategories')} 
                     className="w-full pl-11 pr-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none text-black dark:text-white transition-all shadow-sm md:w-64" 
                 />
             </div>
@@ -274,26 +276,26 @@ export default function CategoriesPage() {
                 <div className="fixed inset-0 z-[60] bg-black/40 dark:bg-black/90 backdrop-blur-xl flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in slide-in-from-bottom-5 duration-300">
                     <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-t-[32px] sm:rounded-[40px] p-6 sm:p-8 w-full max-w-xl shadow-2xl overflow-y-auto max-h-[92vh]">
                         <div className="flex items-center justify-between mb-8">
-                            <h3 className="text-xl font-bold text-black dark:text-white tracking-tighter italic">{editingId ? "Edit Category" : "New Category"}</h3>
+                            <h3 className="text-xl font-bold text-black dark:text-white tracking-tighter italic">{editingId ? t('editCategory') : t('newCategory')}</h3>
                             <button onClick={closeForm} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"><X size={20} /></button>
                         </div>
                         <div className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-semibold text-zinc-400 capitalize">Category Name</label>
-                                <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Summer Collection" className="w-full px-4 py-3.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-semibold text-black dark:text-white focus:ring-2 focus:ring-black/5 outline-none" />
+                                <label className="text-[10px] font-semibold text-zinc-400 capitalize">{t('categoryName')}</label>
+                                <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder={t('placeholderCategoryName')} className="w-full px-4 py-3.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-semibold text-black dark:text-white focus:ring-2 focus:ring-black/5 outline-none" />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-semibold text-zinc-400 capitalize">Description</label>
-                                <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Tell us more..." rows={3} className="w-full px-4 py-3.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-semibold text-black dark:text-white focus:ring-2 focus:ring-black/5 outline-none resize-none" />
+                                <label className="text-[10px] font-semibold text-zinc-400 capitalize">{t('description')}</label>
+                                <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder={t('placeholderCategoryDesc')} rows={3} className="w-full px-4 py-3.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-semibold text-black dark:text-white focus:ring-2 focus:ring-black/5 outline-none resize-none" />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-semibold text-zinc-400 capitalize">Parent Category (Optional)</label>
+                                <label className="text-[10px] font-semibold text-zinc-400 capitalize">{t('parentCategory')}</label>
                                 <select 
                                     value={form.parentId} 
                                     onChange={e => setForm(f => ({ ...f, parentId: e.target.value }))}
                                     className="w-full px-4 py-3.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-semibold text-black dark:text-white focus:ring-2 focus:ring-black/5 outline-none appearance-none"
                                 >
-                                    <option value="">None (Top Level)</option>
+                                    <option value="">{t('noneTopLevel')}</option>
                                     {categories
                                         .filter(c => c.id !== editingId)
                                         .map(c => (
@@ -303,19 +305,19 @@ export default function CategoriesPage() {
                                 </select>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-semibold text-zinc-400 capitalize">Featured Image</label>
+                                <label className="text-[10px] font-semibold text-zinc-400 capitalize">{t('featuredImage')}</label>
                                 <div onClick={() => setMediaModalOpen(true)} className="group relative h-40 bg-zinc-50 dark:bg-zinc-950 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:border-zinc-400 transition-all overflow-hidden shrink-0">
                                     {form.image ? (
                                         <>
                                             <img src={form.image} alt="Preview" className="w-full h-full object-cover" />
                                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-sm transition-all">
-                                                <span className="bg-white text-black px-4 py-2 rounded-lg text-[10px] font-bold capitalize shadow-2xl">Change</span>
+                                                <span className="bg-white text-black px-4 py-2 rounded-lg text-[10px] font-bold capitalize shadow-2xl">{t('change')}</span>
                                             </div>
                                         </>
                                     ) : (
                                         <div className="flex flex-col items-center text-zinc-300">
                                             <Upload size={32} />
-                                            <span className="text-[10px] font-bold capitalize mt-2">Select Image</span>
+                                            <span className="text-[10px] font-bold capitalize mt-2">{t('selectImage')}</span>
                                         </div>
                                     )}
                                 </div>
@@ -326,23 +328,23 @@ export default function CategoriesPage() {
                                         {saving ? (
                                             <div className="flex items-center gap-2 text-indigo-500">
                                                 <Loader2 size={12} className="animate-spin" />
-                                                <span className="text-[10px] font-bold uppercase tracking-widest">Saving...</span>
+                                                <span className="text-[10px] font-bold uppercase tracking-widest">{t('saving')}</span>
                                             </div>
                                         ) : lastSaved ? (
                                             <div className="flex items-center gap-2 text-emerald-500">
                                                 <Check size={12} />
-                                                <span className="text-[10px] font-bold uppercase tracking-widest">Saved {lastSaved}</span>
+                                                <span className="text-[10px] font-bold uppercase tracking-widest">{t('saved')} {lastSaved}</span>
                                             </div>
                                         ) : isDirty ? (
                                             <div className="flex items-center gap-2 text-amber-500">
                                                 <AlertCircle size={12} />
-                                                <span className="text-[10px] font-bold uppercase tracking-widest">Unsaved</span>
+                                                <span className="text-[10px] font-bold uppercase tracking-widest">{t('unsavedChanges')}</span>
                                             </div>
                                         ) : null}
                                     </div>
                                     <button onClick={saveCategory} disabled={saving} className="px-8 py-3 bg-indigo-600 dark:bg-white text-white dark:text-black rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2 shadow-xl shadow-indigo-500/10 disabled:opacity-50">
                                         {saving ? <Loader2 className="animate-spin" size={14} /> : <Check size={14} />}
-                                        {editingId ? "Done" : "Create"}
+                                        {editingId ? t('done') : t('create')}
                                     </button>
                                 </div>
                                 {error && (
@@ -357,11 +359,11 @@ export default function CategoriesPage() {
             {/* Categories Table */}
             <div className="space-y-4">
                 {loading ? (
-                    <div className="py-24 text-center text-zinc-400 font-semibold italic capitalize tracking-wide">Scanning category tree...</div>
+                    <div className="py-24 text-center text-zinc-400 font-semibold italic capitalize tracking-wide">{t('scanningCategoryTree')}</div>
                 ) : categories.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-96 bg-zinc-50 dark:bg-zinc-950 rounded-[40px] border border-zinc-100 dark:border-zinc-800">
                         <FolderOpen size={64} className="text-zinc-200 dark:text-zinc-800 mb-6" />
-                        <p className="font-bold text-zinc-300 capitalize italic">No categories yet</p>
+                        <p className="font-bold text-zinc-300 capitalize italic">{t('noCategoriesYet')}</p>
                     </div>
                 ) : (
                     <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[32px] overflow-hidden shadow-sm">
@@ -369,9 +371,9 @@ export default function CategoriesPage() {
                             <table className="w-full text-[12px] sm:text-[14px] text-left">
                                 <thead className="bg-[#F8FAFC] dark:bg-zinc-950 text-[#334155] dark:text-zinc-400 font-bold capitalize border-b border-zinc-100 dark:border-zinc-800">
                                     <tr>
-                                        <th className="px-6 sm:px-10 py-6 text-left">Category</th>
-                                        <th className="px-6 py-6 text-left">Description</th>
-                                        <th className="px-6 sm:px-10 py-6 text-right">Actions</th>
+                                        <th className="px-6 sm:px-10 py-6 text-left">{t('category')}</th>
+                                        <th className="px-6 py-6 text-left">{t('description')}</th>
+                                        <th className="px-6 sm:px-10 py-6 text-right">{t('actions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800/60">
@@ -385,11 +387,11 @@ export default function CategoriesPage() {
                                                     </div>
                                                      <div className="flex flex-col">
                                                          <span className="font-medium text-black dark:text-white group-hover:text-indigo-600 transition-colors truncate max-w-[150px]">{c.name}</span>
-                                                         {c.depth > 0 && <span className="text-[8px] font-semibold text-zinc-400 capitalize mt-0.5">Sub-category</span>}
+                                                         {c.depth > 0 && <span className="text-[8px] font-semibold text-zinc-400 capitalize mt-0.5">{t('subCategory')}</span>}
                                                      </div>
                                                 </div>
                                             </td>
-                                             <td className="px-6 py-6 text-zinc-500 text-xs font-medium leading-relaxed truncate max-w-[200px]">{c.description || "No description set"}</td>
+                                             <td className="px-6 py-6 text-zinc-500 text-xs font-medium leading-relaxed truncate max-w-[200px]">{c.description || t('noDescriptionSet')}</td>
                                             <td className="px-6 sm:px-10 py-6 text-right">
                                                 <div className="flex items-center justify-end gap-3 transition-all">
                                                     <button onClick={() => openEdit(c)} className="p-2.5 text-zinc-300 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-all"><Pencil size={18} /></button>
@@ -412,7 +414,7 @@ export default function CategoriesPage() {
                     setForm(f => ({ ...f, image: url }))
                     setMediaModalOpen(false)
                 }}
-                title="Select Category Image"
+                title={t('selectCategoryImage')}
             />
 
             {/* Delete Confirmation Modal */}
@@ -426,8 +428,8 @@ export default function CategoriesPage() {
                 }}
                 onConfirm={confirmDelete}
                 loading={deleting}
-                title="Delete Category?"
-                description="This category and all its associations will be removed. This action cannot be undone."
+                title={t('deleteCategoryTitle')}
+                description={t('deleteCategoryDesc')}
             />
         </div>
     )

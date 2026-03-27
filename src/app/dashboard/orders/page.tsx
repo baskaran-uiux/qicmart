@@ -53,7 +53,7 @@ interface Order {
 }
 
 export default function OrdersPage() {
-    const { currency } = useDashboardStore()
+    const { currency, t } = useDashboardStore()
     const [orders, setOrders] = useState<Order[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState("")
@@ -213,14 +213,14 @@ export default function OrdersPage() {
         <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                 <div>
-                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize">Orders</h2>
-                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">Track and manage your customer orders.</p>
+                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize">{t("orders")}</h2>
+                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">{t("ordersDescription")}</p>
                 </div>
                 <div className="relative group w-full sm:w-auto">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
                     <input 
                         type="text" 
-                        placeholder="Search orders..." 
+                        placeholder={t("searchOrders")} 
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         className="w-full pl-11 pr-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none text-black dark:text-white transition-all shadow-sm md:w-64" 
@@ -231,16 +231,16 @@ export default function OrdersPage() {
             {loading ? (
                 <div className="py-24 text-center">
                     <Loader2 className="animate-spin mx-auto text-zinc-400 mb-4" size={32} />
-                    <p className="text-zinc-500">Loading your orders...</p>
+                    <p className="text-zinc-500">{t("loadingOrders")}</p>
                 </div>
             ) : filtered.length === 0 ? (
                 <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-20 text-center shadow-sm">
                     <div className="w-16 h-16 bg-zinc-50 dark:bg-zinc-800 rounded-xl flex items-center justify-center mx-auto mb-6 border border-zinc-100 dark:border-zinc-700 shadow-sm">
                         <Package className="w-8 h-8 text-zinc-300 dark:text-zinc-600" />
                     </div>
-                    <h3 className="text-xl font-bold text-black dark:text-white mb-2">No orders found</h3>
+                    <h3 className="text-xl font-bold text-black dark:text-white mb-2">{t("noOrdersFound")}</h3>
                     <p className="text-zinc-500 text-sm max-w-sm mx-auto">
-                        {search ? "Try adjusting your search filters." : "When customers place orders on your store, they will appear here."}
+                        {search ? t("tryAdjustingSearch") : t("noOrdersFoundDesc")}
                     </p>
                 </div>
             ) : (
@@ -249,12 +249,12 @@ export default function OrdersPage() {
                         <table className="w-full text-[12px] sm:text-[14px] text-left">
                             <thead className="bg-[#F8FAFC] dark:bg-zinc-950 text-[#334155] dark:text-zinc-400 font-bold capitalize border-b border-zinc-100 dark:border-zinc-800">
                                 <tr>
-                                    <th className="px-6 py-4 text-left">Order ID</th>
-                                    <th className="px-6 py-4 text-left">Customer</th>
-                                    <th className="px-6 py-4 text-left">Total</th>
-                                    <th className="px-6 py-4 text-left">Status</th>
-                                    <th className="px-6 py-4 text-left">Date</th>
-                                    <th className="px-6 py-4 text-right">Actions</th>
+                                    <th className="px-6 py-4 text-left">{t("orderId")}</th>
+                                    <th className="px-6 py-4 text-left">{t("customer")}</th>
+                                    <th className="px-6 py-4 text-left">{t("total")}</th>
+                                    <th className="px-6 py-4 text-left">{t("status")}</th>
+                                    <th className="px-6 py-4 text-left">{t("date")}</th>
+                                    <th className="px-6 py-4 text-right">{t("actions")}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800/50">
@@ -280,7 +280,7 @@ export default function OrdersPage() {
                                             <div className="flex items-center gap-2">
                                                 <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border ${getStatusStyles(order.status)}`}>
                                                     {getStatusIcon(order.status)}
-                                                    {order.status}
+                                                    {t(order.status.toLowerCase() as any)}
                                                 </span>
                                                 {order.payments[0]?.provider === "UPI" && (
                                                     <span className="text-[10px] font-bold px-2 py-0.5 bg-indigo-500/10 text-indigo-500 rounded-md border border-indigo-500/20 flex items-center gap-1">
@@ -288,7 +288,7 @@ export default function OrdersPage() {
                                                     </span>
                                                 )}
                                                 {order.payments[0]?.provider === "OFFLINE" && (
-                                                    <span className="text-[10px] font-bold px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-400 rounded-md">COD</span>
+                                                    <span className="text-[10px] font-bold px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-400 rounded-md">{t("cod")}</span>
                                                 )}
                                             </div>
                                         </td>
@@ -303,11 +303,11 @@ export default function OrdersPage() {
                                                     onChange={e => updateStatus(order.id, e.target.value)}
                                                     className="text-xs bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50"
                                                 >
-                                                    <option value="PENDING">Pending</option>
-                                                    <option value="PAID">Paid</option>
-                                                    <option value="SHIPPED">Shipped</option>
-                                                    <option value="DELIVERED">Delivered</option>
-                                                    <option value="CANCELLED">Cancelled</option>
+                                                    <option value="PENDING">{t("pending")}</option>
+                                                    <option value="PAID">{t("paid")}</option>
+                                                    <option value="SHIPPED">{t("shipped")}</option>
+                                                    <option value="DELIVERED">{t("delivered")}</option>
+                                                    <option value="CANCELLED">{t("cancelled")}</option>
                                                 </select>
                                                 <button 
                                                     onClick={() => {
@@ -315,7 +315,7 @@ export default function OrdersPage() {
                                                         setShowDetailsModal(true)
                                                     }}
                                                     className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-indigo-600 transition-colors"
-                                                    title="View Details"
+                                                    title={t("viewDetails")}
                                                 >
                                                     <Eye size={16} />
                                                 </button>
@@ -331,7 +331,7 @@ export default function OrdersPage() {
                                                         setShowTrackingModal(true)
                                                     }}
                                                     className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-indigo-600 transition-colors"
-                                                    title="Manage Tracking"
+                                                    title={t("manageTracking")}
                                                 >
                                                     <TruckIcon size={16} />
                                                 </button>
@@ -346,7 +346,7 @@ export default function OrdersPage() {
                         {totalPages > 1 && (
                             <div className="px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-950/30">
                                 <div className="text-xs font-bold text-zinc-500">
-                                    Showing <span className="text-black dark:text-white font-bold">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="text-black dark:text-white font-bold">{Math.min(currentPage * itemsPerPage, filtered.length)}</span> of <span className="text-black dark:text-white font-bold">{filtered.length}</span> orders
+                                    {t("showing")} <span className="text-black dark:text-white font-bold">{(currentPage - 1) * itemsPerPage + 1}</span> {t("to")} <span className="text-black dark:text-white font-bold">{Math.min(currentPage * itemsPerPage, filtered.length)}</span> {t("of")} <span className="text-black dark:text-white font-bold">{filtered.length}</span> {t("orders")}
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button 
@@ -402,7 +402,7 @@ export default function OrdersPage() {
                     <div className="bg-white dark:bg-zinc-900 w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800">
                         <div className="p-8 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-950/50">
                             <div>
-                                <h3 className="text-xl font-bold text-black dark:text-white">Order Tracking</h3>
+                                <h3 className="text-xl font-bold text-black dark:text-white">{t("orderTracking")}</h3>
                                 <p className="text-zinc-500 text-xs mt-1 uppercase font-black tracking-widest italic">#{selectedOrder.id.substring(0, 12)}</p>
                             </div>
                             <button onClick={() => setShowTrackingModal(false)} className="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-full transition-colors">
@@ -414,7 +414,7 @@ export default function OrdersPage() {
                             {/* Form */}
                             <div className="space-y-6">
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">Shipping Carrier</label>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t("shippingCarrier")}</label>
                                     <input 
                                         type="text" 
                                         placeholder="e.g. FedEx, BlueDart" 
@@ -424,7 +424,7 @@ export default function OrdersPage() {
                                     />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">Tracking Number</label>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t("trackingNumber")}</label>
                                     <input 
                                         type="text" 
                                         placeholder="Enter tracking ID" 
@@ -434,21 +434,21 @@ export default function OrdersPage() {
                                     />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">Update Status</label>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t("updateStatus")}</label>
                                     <select 
                                         value={trackingForm.status}
                                         onChange={e => setTrackingForm(f => ({ ...f, status: e.target.value }))}
                                         className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm outline-none cursor-pointer"
                                     >
-                                        <option value="PENDING">Pending</option>
-                                        <option value="PAID">Paid</option>
-                                        <option value="SHIPPED">Shipped</option>
-                                        <option value="DELIVERED">Delivered</option>
-                                        <option value="CANCELLED">Cancelled</option>
+                                        <option value="PENDING">{t("pending")}</option>
+                                        <option value="PAID">{t("paid")}</option>
+                                        <option value="SHIPPED">{t("shipped")}</option>
+                                        <option value="DELIVERED">{t("delivered")}</option>
+                                        <option value="CANCELLED">{t("cancelled")}</option>
                                     </select>
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">Add Comment</label>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t("addComment")}</label>
                                     <textarea 
                                         placeholder="Internal note or customer message..." 
                                         value={trackingForm.comment}
@@ -461,7 +461,7 @@ export default function OrdersPage() {
                                     onClick={updateTracking}
                                     className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all disabled:opacity-50"
                                 >
-                                    {updatingId === selectedOrder.id ? "Updating..." : "Save Tracking Info"}
+                                    {updatingId === selectedOrder.id ? t("updating") : t("saveTrackingInfo")}
                                 </button>
                             </div>
 
@@ -469,7 +469,7 @@ export default function OrdersPage() {
                             <div className="space-y-6">
                                 <div className="flex items-center gap-2 mb-4">
                                     <HistoryIcon size={16} className="text-zinc-400" />
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">Activity History</label>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t("activityHistory")}</label>
                                 </div>
                                 
                                 <div className="relative space-y-8 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-px before:bg-zinc-100 dark:before:bg-zinc-800">
@@ -488,7 +488,7 @@ export default function OrdersPage() {
                                         </div>
                                     ))}
                                     {(!selectedOrder.activities || selectedOrder.activities.length === 0) && (
-                                        <div className="pl-10 text-zinc-400 text-sm font-medium italic">No activity logged yet.</div>
+                                        <div className="pl-10 text-zinc-400 text-sm font-medium italic">{t("noActivityLogged")}</div>
                                     )}
                                 </div>
                             </div>
@@ -502,7 +502,7 @@ export default function OrdersPage() {
                     <div className="bg-white dark:bg-zinc-900 w-full max-w-4xl rounded-[32px] shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 flex flex-col max-h-[90vh]">
                         <div className="p-8 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-950/50">
                             <div>
-                                <h3 className="text-xl font-bold text-black dark:text-white">Order Details</h3>
+                                <h3 className="text-xl font-bold text-black dark:text-white">{t("orderDetails")}</h3>
                                 <p className="text-zinc-500 text-xs mt-1 uppercase font-black tracking-widest italic">#{selectedOrder.id}</p>
                             </div>
                             <button onClick={() => { setShowDetailsModal(false); setSelectedOrder(null); }} className="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-full transition-colors">
@@ -518,19 +518,19 @@ export default function OrdersPage() {
                                         <div className="px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-100/50 dark:bg-zinc-800/50 flex items-center justify-between">
                                             <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2">
                                                 <Package size={14} />
-                                                Order Items
+                                                {t("orderItems")}
                                             </h4>
                                             <span className="text-[10px] font-bold text-zinc-400 px-2 py-0.5 bg-white dark:bg-zinc-900 rounded-md border border-zinc-200 dark:border-zinc-700">
-                                                {selectedOrder.items.length} Items
+                                                {selectedOrder.items.length} {t("items")}
                                             </span>
                                         </div>
                                         <table className="w-full text-sm">
                                             <thead className="text-[10px] uppercase font-bold text-zinc-400 border-b border-zinc-100 dark:border-zinc-800">
                                                 <tr>
-                                                    <th className="px-6 py-3 text-left">Product</th>
-                                                    <th className="px-6 py-3 text-center">Qty</th>
-                                                    <th className="px-6 py-3 text-right">Price</th>
-                                                    <th className="px-6 py-3 text-right">Total</th>
+                                                    <th className="px-6 py-3 text-left">{t("product")}</th>
+                                                    <th className="px-6 py-3 text-center">{t("qty")}</th>
+                                                    <th className="px-6 py-3 text-right">{t("price")}</th>
+                                                    <th className="px-6 py-3 text-right">{t("total")}</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -553,7 +553,7 @@ export default function OrdersPage() {
                                             </tbody>
                                             <tfoot className="bg-zinc-100/30 dark:bg-zinc-800/30">
                                                 <tr>
-                                                    <td colSpan={3} className="px-6 py-4 text-right text-xs font-black uppercase tracking-widest text-zinc-500 italic">Total Amount</td>
+                                                    <td colSpan={3} className="px-6 py-4 text-right text-xs font-black uppercase tracking-widest text-zinc-500 italic">{t("totalAmount")}</td>
                                                     <td className="px-6 py-4 text-right text-lg font-black text-indigo-600">
                                                         {currency === "MYR" ? "RM" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "₹"}{selectedOrder.total.toFixed(2)}
                                                     </td>
@@ -566,7 +566,7 @@ export default function OrdersPage() {
                                         <div className="p-6 bg-emerald-50/30 dark:bg-emerald-500/5 rounded-2xl border border-emerald-100 dark:border-emerald-500/10">
                                             <h4 className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-4 flex items-center gap-2 italic">
                                                 <FileText size={14} />
-                                                Payment Method
+                                                {t("paymentMethod")}
                                             </h4>
                                             <div className="space-y-4">
                                                 <div className="flex items-center justify-between">
@@ -583,13 +583,13 @@ export default function OrdersPage() {
                                                     <div className="pt-4 mt-4 border-t border-emerald-100 dark:border-emerald-500/10 space-y-4">
                                                         {selectedOrder.payments[0]?.upiUTR && (
                                                             <div>
-                                                                <p className="text-[10px] font-black uppercase text-zinc-500 mb-1">Transaction ID / UTR</p>
+                                                                <p className="text-[10px] font-black uppercase text-zinc-500 mb-1">{t("transactionId")}</p>
                                                                 <p className="text-sm font-bold text-indigo-600 tracking-tight">{selectedOrder.payments[0].upiUTR}</p>
                                                             </div>
                                                         )}
                                                         {selectedOrder.payments[0]?.upiProofImage && (
                                                             <div>
-                                                                <p className="text-[10px] font-black uppercase text-zinc-500 mb-2">Payment Proof Screenshot</p>
+                                                                <p className="text-[10px] font-black uppercase text-zinc-500 mb-2">{t("paymentProof")}</p>
                                                                 <a 
                                                                     href={selectedOrder.payments[0].upiProofImage} 
                                                                     target="_blank" 
@@ -616,7 +616,7 @@ export default function OrdersPage() {
                                                         disabled={updatingId === selectedOrder.id}
                                                         className="w-full py-3 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/20 hover:bg-emerald-700 transition-all flex items-center justify-center gap-2 mt-4"
                                                     >
-                                                        <CheckCircle size={14} /> Verify & Mark as Paid
+                                                        <CheckCircle size={14} /> {t("verifyMarkAsPaid")}
                                                     </button>
                                                 )}
                                             </div>
@@ -624,12 +624,12 @@ export default function OrdersPage() {
                                         <div className="p-6 bg-blue-50/30 dark:bg-blue-500/5 rounded-2xl border border-blue-100 dark:border-blue-500/10">
                                             <h4 className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-4 flex items-center gap-2 italic">
                                                 <Truck size={14} />
-                                                Shipping Status
+                                                {t("shippingStatus")}
                                             </h4>
                                             <div className="space-y-2">
-                                                <p className="text-xl font-bold text-black dark:text-white">{selectedOrder.status}</p>
+                                                <p className="text-xl font-bold text-black dark:text-white">{t(selectedOrder.status.toLowerCase() as any)}</p>
                                                 {selectedOrder.trackingNumber && (
-                                                    <p className="text-xs text-zinc-500 font-medium">Tracking: <span className="text-blue-600">{selectedOrder.trackingNumber}</span> ({selectedOrder.carrier})</p>
+                                                    <p className="text-xs text-zinc-500 font-medium">{t("tracking")}: <span className="text-blue-600">{selectedOrder.trackingNumber}</span> ({selectedOrder.carrier})</p>
                                                 )}
                                             </div>
                                         </div>
@@ -641,15 +641,15 @@ export default function OrdersPage() {
                                     <div className="p-6 bg-white dark:bg-zinc-800/50 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-6">
                                         <div>
                                             <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-4 flex items-center gap-2 italic">
-                                                Customer Information
+                                                {t("customerInformation")}
                                             </h4>
                                             <div className="space-y-3">
                                                 <div>
-                                                    <label className="text-[10px] text-zinc-400 font-bold uppercase block">Name</label>
+                                                    <label className="text-[10px] text-zinc-400 font-bold uppercase block">{t("name")}</label>
                                                     <p className="text-sm font-bold text-black dark:text-white">{selectedOrder.customer?.firstName} {selectedOrder.customer?.lastName}</p>
                                                 </div>
                                                 <div>
-                                                    <label className="text-[10px] text-zinc-400 font-bold uppercase block">Email</label>
+                                                    <label className="text-[10px] text-zinc-400 font-bold uppercase block">{t("email")}</label>
                                                     <p className="text-sm font-medium text-indigo-600">{selectedOrder.customer?.email}</p>
                                                 </div>
                                                 <div>
@@ -661,7 +661,7 @@ export default function OrdersPage() {
 
                                         <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800">
                                             <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-4 flex items-center gap-2 italic">
-                                                Shipping Address
+                                                {t("shippingAddress")}
                                             </h4>
                                             <div className="flex gap-3 text-zinc-600 dark:text-zinc-400">
                                                 <MapPin className="shrink-0 text-zinc-300" size={18} />
@@ -679,7 +679,7 @@ export default function OrdersPage() {
                                                         </p>
                                                     )}
                                                     {!selectedOrder.shippingAddress && !selectedOrder.customer?.address && !selectedOrder.customer?.city && (
-                                                        <span className="text-zinc-400">No address provided.</span>
+                                                        <span className="text-zinc-400">{t("noAddressProvided")}</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -687,7 +687,7 @@ export default function OrdersPage() {
 
                                         <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800">
                                             <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-4 flex items-center gap-2 italic">
-                                                Order Timeline
+                                                {t("orderTimeline")}
                                             </h4>
                                             <div className="space-y-4">
                                                 {(selectedOrder.activities || []).slice(0, 3).map((activity) => (
@@ -711,7 +711,7 @@ export default function OrdersPage() {
                                         className="w-full py-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-xl hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
                                     >
                                         <TruckIcon size={16} />
-                                        Manage Shipping
+                                        {t("manageShipping")}
                                     </button>
                                 </div>
                             </div>

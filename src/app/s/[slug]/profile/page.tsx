@@ -66,6 +66,12 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
     const [email, setEmail] = useState("")
     const [mobile, setMobile] = useState("")
     
+    // Magic Link Login state
+    const [loginEmail, setLoginEmail] = useState("")
+    const [isMagicLinkSent, setIsMagicLinkSent] = useState(false)
+    const [isMagicLoading, setIsMagicLoading] = useState(false)
+    const [loginError, setLoginError] = useState("")
+
     // Address state
     const [address, setAddress] = useState("")
     const [area, setArea] = useState("")
@@ -180,6 +186,31 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
             console.error("Save failed:", err)
         } finally {
             setIsSaving(false)
+        }
+    }
+
+    const handleEmailLogin = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!loginEmail) return
+        
+        setIsMagicLoading(true)
+        setLoginError("")
+        try {
+            const result = await signIn("email", { 
+                email: loginEmail, 
+                redirect: false,
+                callbackUrl: window.location.href 
+            })
+            
+            if (result?.error) {
+                setLoginError("Failed to send magic link. Please check your email and try again.")
+            } else {
+                setIsMagicLinkSent(true)
+            }
+        } catch (err) {
+            setLoginError("An unexpected error occurred.")
+        } finally {
+            setIsMagicLoading(false)
         }
     }
 
@@ -416,25 +447,72 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                     <h1 className="text-2xl font-black text-zinc-900 uppercase italic tracking-tight mb-3">Shopper Login</h1>
                     <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest leading-loose mb-10">Sign in to track orders, save addresses, and manage your account.</p>
                     
-                    <div className="space-y-4">
-                        <button 
-                            onClick={() => signIn("google", { callbackUrl: window.location.href })}
-                            className="w-full flex items-center justify-center gap-4 py-4 bg-white border-2 border-zinc-100 rounded-2xl hover:border-zinc-200 transition-all group"
+                    {isMagicLinkSent ? (
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="bg-emerald-50 border border-emerald-100 p-8 rounded-[32px] text-center mb-6"
                         >
-                            <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5 grayscale group-hover:grayscale-0 transition-all" />
-                            <span className="text-[13px] font-black uppercase tracking-widest text-zinc-600">Continue with Google</span>
-                        </button>
-                        
-                        <div className="relative py-4">
-                            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-zinc-100"></div></div>
-                            <div className="relative flex justify-center text-[10px] uppercase tracking-[0.2em] font-black text-zinc-300"><span className="bg-white px-4">Or</span></div>
-                        </div>
+                            <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Bell className="text-emerald-600 animate-bounce" size={24} />
+                            </div>
+                            <h3 className="text-emerald-900 font-black uppercase italic mb-2">Check your email</h3>
+                            <p className="text-[11px] font-bold text-emerald-600/70 uppercase tracking-widest leading-relaxed">
+                                We've sent a secure sign-in link to<br/>
+                                <span className="text-emerald-700">{loginEmail}</span>
+                            </p>
+                            <button 
+                                onClick={() => setIsMagicLinkSent(false)}
+                                className="mt-6 text-[10px] font-black text-emerald-700 underline uppercase tracking-widest"
+                            >
+                                Try another email
+                            </button>
+                        </motion.div>
+                    ) : (
+                        <div className="space-y-6">
+                            <form onSubmit={handleEmailLogin} className="space-y-4">
+                                <div className="space-y-2 text-left">
+                                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block ml-1">Email address</label>
+                                    <input 
+                                        type="email"
+                                        required
+                                        value={loginEmail}
+                                        onChange={(e) => setLoginEmail(e.target.value)}
+                                        placeholder="you@company.com"
+                                        className="w-full px-6 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl text-[13px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]/10 focus:border-[var(--primary-color)] transition-all placeholder:text-zinc-300"
+                                    />
+                                </div>
+                                {loginError && <p className="text-[10px] font-bold text-rose-500 uppercase tracking-widest text-left ml-1">❌ {loginError}</p>}
+                                <button 
+                                    type="submit"
+                                    disabled={isMagicLoading}
+                                    className="w-full py-4 bg-[var(--primary-color)] text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-[var(--primary-color)]/20 hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
+                                >
+                                    {isMagicLoading ? "Sending..." : "Send magic link"}
+                                </button>
+                            </form>
 
+                            <div className="relative py-4">
+                                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-zinc-100"></div></div>
+                                <div className="relative flex justify-center text-[10px] uppercase tracking-[0.2em] font-black text-zinc-300"><span className="bg-white px-4">Or sign in with</span></div>
+                            </div>
+                            
+                            <button 
+                                onClick={() => signIn("google", { callbackUrl: window.location.href })}
+                                className="w-full flex items-center justify-center gap-4 py-4 bg-white border-2 border-zinc-100 rounded-2xl hover:border-zinc-200 transition-all group"
+                            >
+                                <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5 grayscale group-hover:grayscale-0 transition-all" />
+                                <span className="text-[13px] font-black uppercase tracking-widest text-zinc-600">Continue with Google</span>
+                            </button>
+                        </div>
+                    )}
+                    
+                    <div className="mt-8">
                         <Link 
                             href={`/s/${slug}`}
-                            className="w-full block py-4 bg-zinc-50 text-zinc-400 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-zinc-100 transition-all"
+                            className="text-[10px] font-black text-zinc-400 uppercase tracking-widest hover:text-zinc-600 transition-all"
                         >
-                            Return to Store
+                            ← Return to Store
                         </Link>
                     </div>
 

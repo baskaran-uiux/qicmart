@@ -21,6 +21,7 @@ import { getCachedDashboardStats } from "@/lib/cache"
 import { Suspense } from "react"
 import { TableSkeleton, ReviewSkeleton } from "@/components/dashboard/DashboardSkeletons"
 import { RecentOrdersSection, TopProductsSection, ReviewsSection } from "@/components/dashboard/sections"
+import { getT } from "@/lib/translations"
 
 
 
@@ -132,6 +133,8 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
     const hasPayment = store.isRazorpayEnabled || store.isUpiEnabled || themeConfig.isCodEnabled === true
     const isSetupComplete = hasProducts && hasPayment
 
+    const t = getT(themeConfig.language)
+
     if (!isSetupComplete) {
         return (
             <SetupGuide 
@@ -152,7 +155,7 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
             {/* Premium Header section */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize italic">Dashboard</h2>
+                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize italic">{t("dashboard")}</h2>
                     <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">Your store performance and activity at a glance.</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -160,14 +163,14 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
                         href={`/dashboard/analytics${impersonateId ? `?ownerId=${impersonateId}` : ''}`}
                         className="flex items-center gap-2 px-4 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-[12px] font-bold capitalize tracking-wide text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95 shadow-sm"
                     >
-                        <TrendingUp size={14} className="text-indigo-500" /> Analytics
+                        <TrendingUp size={14} className="text-indigo-500" /> {t("analytics")}
                     </Link>
                     <Link 
                         href={storeUrl}
                         target="_blank"
                         className="flex items-center gap-2 px-4 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-[12px] font-bold capitalize tracking-wide text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95 shadow-sm"
                     >
-                        <Globe size={14} className="text-emerald-500" /> View Store
+                        <Globe size={14} className="text-emerald-500" /> {t("openStore")}
                     </Link>
                     <div className="flex items-center gap-2">
                          <ExportButton data={{
@@ -205,7 +208,7 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
                     <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-400/20 blur-2xl -ml-16 -mb-16 rounded-full" />
                     <div className="relative z-10">
                         <div className="flex items-center justify-between mb-8">
-                            <span className="text-[12px] sm:text-[14px] font-semibold text-blue-50/70 capitalize tracking-wide">Total Revenue</span>
+                            <span className="text-[12px] sm:text-[14px] font-semibold text-blue-50/70 capitalize tracking-wide">{t("totalRevenue")}</span>
                             <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-lg shadow-black/5">
                                 <IndianRupee size={20} />
                             </div>
@@ -216,15 +219,15 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
                                 <ArrowUpRight size={10} /> 12.5%
                             </span>
                         </div>
-                        <p className="text-xs font-medium text-blue-100/50 italic">Last month: {currencySymbol}{( (totalSales._sum.total || 0) * 0.8 ).toLocaleString()}</p>
+                        <p className="text-xs font-medium text-blue-100/50 italic">{t("lastMonth")}: {currencySymbol}{( (totalSales._sum.total || 0) * 0.8 ).toLocaleString()}</p>
                     </div>
                 </Motion.div>
 
                 {/* Other KPI Cards */}
                 {[
-                    { label: "Total Orders", value: totalOrders.toLocaleString(), last: (totalOrders - 12), trend: 8.4, icon: ShoppingCart, color: "bg-zinc-950 text-white", iconColor: "text-zinc-400" },
-                    { label: "Total Products", value: totalProducts.toLocaleString(), last: (totalProducts - 5), trend: 4.2, icon: Package, color: "bg-blue-500 text-white", iconColor: "text-blue-200" },
-                    { label: "Total Customers", value: newCustomers.toLocaleString(), last: (newCustomers - 8), trend: 15.1, icon: Users, color: "bg-indigo-500 text-white", iconColor: "text-indigo-200" },
+                    { label: t("totalOrders"), value: totalOrders.toLocaleString(), last: (totalOrders - 12), trend: 8.4, icon: ShoppingCart, color: "bg-zinc-950 text-white", iconColor: "text-zinc-400" },
+                    { label: t("totalProducts"), value: totalProducts.toLocaleString(), last: (totalProducts - 5), trend: 4.2, icon: Package, color: "bg-blue-500 text-white", iconColor: "text-blue-200" },
+                    { label: t("totalCustomers"), value: newCustomers.toLocaleString(), last: (newCustomers - 8), trend: 15.1, icon: Users, color: "bg-indigo-500 text-white", iconColor: "text-indigo-200" },
                 ].map((kpi, i) => (
                     <Motion.div 
                         key={kpi.label} 
@@ -246,7 +249,7 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
                                 {kpi.trend > 0 ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />} {Math.abs(kpi.trend)}%
                             </span>
                         </div>
-                        <p className="text-xs font-medium text-zinc-400 italic">Last month: {kpi.last}</p>
+                        <p className="text-xs font-medium text-zinc-400 italic">{t("lastMonth")}: {kpi.last}</p>
                     </Motion.div>
                 ))}
             </div>
@@ -254,18 +257,18 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
             {/* Dashboard 3-Column Section Upgraded */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-min">
                 <Suspense fallback={<TableSkeleton />}>
-                    <RecentOrdersSection storeId={store.id} impersonateId={impersonateId} currencySymbol={currencySymbol} />
+                    <RecentOrdersSection storeId={store.id} impersonateId={impersonateId} currencySymbol={currencySymbol} t={t} />
                 </Suspense>
 
                 <Suspense fallback={<TableSkeleton />}>
-                    <TopProductsSection storeId={store.id} impersonateId={impersonateId} currencySymbol={currencySymbol} />
+                    <TopProductsSection storeId={store.id} impersonateId={impersonateId} currencySymbol={currencySymbol} t={t} />
                 </Suspense>
 
                 <Suspense fallback={<div className="bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-sm flex flex-col min-h-[400px]">
                     <div className="p-7 border-b border-zinc-50 dark:border-zinc-800"><div className="h-6 w-32 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" /></div>
                     <ReviewSkeleton /><ReviewSkeleton /><ReviewSkeleton />
                 </div>}>
-                    <ReviewsSection storeId={store.id} impersonateId={impersonateId} />
+                    <ReviewsSection storeId={store.id} impersonateId={impersonateId} t={t} />
                 </Suspense>
             </div>
 

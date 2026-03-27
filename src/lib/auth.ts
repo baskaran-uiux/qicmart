@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import AppleProvider from "next-auth/providers/apple"
+import EmailProvider from "next-auth/providers/email"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { prisma } from "./prisma"
 import bcrypt from "bcryptjs"
@@ -16,6 +17,18 @@ export const authOptions: NextAuthOptions = {
         AppleProvider({
             clientId: process.env.APPLE_ID!,
             clientSecret: process.env.APPLE_SECRET!,
+        }),
+        EmailProvider({
+            server: {
+                host: "smtp.gmail.com",
+                port: 465,
+                secure: true,
+                auth: {
+                    user: process.env.GMAIL_USER,
+                    pass: process.env.GMAIL_PASS,
+                },
+            },
+            from: process.env.GMAIL_USER,
         }),
         CredentialsProvider({
             name: "Credentials",

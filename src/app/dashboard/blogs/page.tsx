@@ -5,7 +5,8 @@ import {
     Plus, Search, PenTool, Calendar, User, Eye, 
     MoreVertical, Edit2, Trash2, Loader2, X, Check,
     Image as ImageIcon, Globe, Clock, Layout, ChevronRight,
-    MessageCircle, Share2
+    MessageCircle, Share2, BookOpen, CheckCircle2, FileText, ExternalLink, XCircle, Edit,
+    Store
 } from "lucide-react"
 import { useDashboardStore } from "@/components/DashboardStoreProvider"
 import { motion, AnimatePresence } from "framer-motion"
@@ -23,7 +24,7 @@ interface Blog {
 }
 
 export default function BlogsPage() {
-    const { currency } = useDashboardStore()
+    const { t } = useDashboardStore()
     const [blogs, setBlogs] = useState<Blog[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState("")
@@ -109,7 +110,7 @@ export default function BlogsPage() {
     }
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Delete this article?")) return
+        if (!confirm(t('confirmDeleteArticle'))) return
         try {
             const res = await fetch("/api/dashboard/blogs", {
                 method: "DELETE",
@@ -131,23 +132,23 @@ export default function BlogsPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                 <div>
-                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize italic">Blog Engine</h2>
-                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">Educate your customers and boost your search rankings.</p>
+                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize italic">{t('blogEngineTitle')}</h2>
+                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">{t('blogEngineDesc')}</p>
                 </div>
                 <button 
                     onClick={() => setShowModal(true)}
                     className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl text-[14px] font-bold hover:bg-indigo-700 transition-all active:scale-95 shadow-xl shadow-indigo-600/20"
                 >
-                    <Plus size={18} /> New Article
+                    <Plus size={18} /> {t('newArticle')}
                 </button>
             </div>
 
             {/* Quick Actions / Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                    { label: "Total Articles", value: blogs.length, icon: Layout, color: "text-indigo-500", bg: "bg-indigo-500/10" },
-                    { label: "Published", value: blogs.filter(b => b.published).length, icon: Globe, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-                    { label: "Drafts", value: blogs.filter(b => !b.published).length, icon: Clock, color: "text-amber-500", bg: "bg-amber-500/10" },
+                    { label: t('totalArticles'), value: blogs.length, icon: Layout, color: "text-indigo-500", bg: "bg-indigo-500/10" },
+                    { label: t('published'), value: blogs.filter(b => b.published).length, icon: Globe, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+                    { label: t('drafts'), value: blogs.filter(b => !b.published).length, icon: Clock, color: "text-amber-500", bg: "bg-amber-500/10" },
                 ].map((stat, i) => (
                     <motion.div 
                         initial={{ opacity: 0, y: 20 }}
@@ -173,7 +174,7 @@ export default function BlogsPage() {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
                     <input 
                         type="text" 
-                        placeholder="Search articles..." 
+                        placeholder={t('searchArticles')} 
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         className="w-full pl-11 pr-4 py-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl text-sm focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none text-black dark:text-white transition-all shadow-sm" 
@@ -184,13 +185,13 @@ export default function BlogsPage() {
                     {loading ? (
                         <div className="col-span-full py-24 text-center">
                             <Loader2 className="animate-spin mx-auto text-zinc-400 mb-4" size={32} />
-                            <p className="text-zinc-500">Loading articles...</p>
+                            <p className="text-zinc-500">{t('loadingArticles')}</p>
                         </div>
                     ) : filtered.length === 0 ? (
                         <div className="col-span-full py-24 text-center bg-white dark:bg-zinc-900 rounded-[40px] border border-dashed border-zinc-200 dark:border-zinc-800">
                             <PenTool className="w-16 h-16 text-zinc-100 dark:text-zinc-800 mx-auto mb-6" />
-                            <h3 className="text-xl font-bold text-black dark:text-white mb-2">No articles yet</h3>
-                            <p className="text-zinc-500 text-sm max-w-sm mx-auto">Start writing your first blog post to attract more visitors.</p>
+                            <h3 className="text-xl font-bold text-black dark:text-white mb-2">{t('noArticlesTitle')}</h3>
+                            <p className="text-zinc-500 text-sm max-w-sm mx-auto">{t('noArticlesDesc')}</p>
                         </div>
                     ) : (
                         filtered.map((blog, i) => (
@@ -215,7 +216,7 @@ export default function BlogsPage() {
                                             ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20' 
                                             : 'bg-zinc-500/20 text-zinc-300 border-zinc-500/20'
                                         }`}>
-                                            {blog.published ? 'Live' : 'Draft'}
+                                            {blog.published ? t('live') : t('draft')}
                                         </span>
                                     </div>
                                     {/* Action Overlays */}
@@ -249,7 +250,7 @@ export default function BlogsPage() {
                                         <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
                                             <User size={14} className="text-zinc-400" />
                                         </div>
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{blog.author || 'Qicmart Store'}</span>
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{blog.author || t('qicmartStore')}</span>
                                         <span className="text-zinc-300 dark:text-zinc-700">•</span>
                                         <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{new Date(blog.createdAt).toLocaleDateString()}</span>
                                     </div>
@@ -269,7 +270,7 @@ export default function BlogsPage() {
                                             onClick={() => toggleStatus(blog)}
                                             className="flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 hover:text-indigo-700 transition-colors"
                                         >
-                                            {blog.published ? 'Unpublish' : 'Publish Now'} <ChevronRight size={14} />
+                                            {blog.published ? t('unpublish') : t('publishNow')} <ChevronRight size={14} />
                                         </button>
                                     </div>
                                 </div>
@@ -291,8 +292,8 @@ export default function BlogsPage() {
                         >
                             <div className="p-8 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
                                 <div>
-                                    <h3 className="text-2xl font-black text-black dark:text-white uppercase italic tracking-tighter">{editingBlog ? "Edit Article" : "Write New Article"}</h3>
-                                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mt-1">SEO Title & Content Settings</p>
+                                    <h3 className="text-2xl font-black text-black dark:text-white uppercase italic tracking-tighter">{editingBlog ? t('editArticle') : t('writeNewArticle')}</h3>
+                                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mt-1">{t('seoSettings')}</p>
                                 </div>
                                 <button onClick={() => { setShowModal(false); setEditingBlog(null); }} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors">
                                     <X size={24} className="text-zinc-400" />
@@ -302,19 +303,19 @@ export default function BlogsPage() {
                             <form onSubmit={handleSave} className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-8 max-h-[75vh] overflow-y-auto custom-scrollbar">
                                 <div className="space-y-6 lg:col-span-1">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">Article Title</label>
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t('articleTitle')}</label>
                                         <input 
                                             required
                                             type="text" 
                                             className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-3xl text-sm font-bold text-black dark:text-white focus:ring-4 focus:ring-indigo-500/5 outline-none"
-                                            placeholder="Enter a catchy title..."
+                                            placeholder={t('placeholderTitle')}
                                             value={form.title}
                                             onChange={e => setForm({...form, title: e.target.value})}
                                         />
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">Author Name</label>
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t('authorName')}</label>
                                         <input 
                                             type="text" 
                                             className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-3xl text-sm font-bold text-black dark:text-white focus:ring-4 focus:ring-indigo-500/5 outline-none"
@@ -325,21 +326,21 @@ export default function BlogsPage() {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">Status</label>
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t('status')}</label>
                                         <div className="flex bg-zinc-50 dark:bg-zinc-800 p-2 rounded-[24px] border border-zinc-200 dark:border-zinc-700">
                                             <button 
                                                 type="button"
                                                 onClick={() => setForm({...form, published: false})}
                                                 className={`flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${!form.published ? "bg-white dark:bg-zinc-700 text-black dark:text-white shadow-sm" : "text-zinc-400 hover:text-zinc-600"}`}
                                             >
-                                                Draft
+                                                {t('draft')}
                                             </button>
                                             <button 
                                                 type="button"
                                                 onClick={() => setForm({...form, published: true})}
                                                 className={`flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${form.published ? "bg-indigo-600 text-white shadow-lg" : "text-zinc-400 hover:text-zinc-600"}`}
                                             >
-                                                Published
+                                                {t('published')}
                                             </button>
                                         </div>
                                     </div>
@@ -347,7 +348,7 @@ export default function BlogsPage() {
 
                                 <div className="space-y-6 lg:col-span-1">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">Cover Image</label>
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t('coverImage')}</label>
                                         <div className="relative aspect-video rounded-[32px] overflow-hidden bg-zinc-50 dark:bg-zinc-800 border-2 border-dashed border-zinc-200 dark:border-zinc-700 flex flex-col items-center justify-center group cursor-pointer" onClick={() => setShowMediaModal(true)}>
                                             {form.image ? (
                                                 <img src={form.image} className="w-full h-full object-cover" />
@@ -356,7 +357,7 @@ export default function BlogsPage() {
                                                     <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-700 rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
                                                         <Plus className="text-zinc-400" />
                                                     </div>
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Select Image</span>
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{t('selectImage')}</span>
                                                 </div>
                                             )}
                                         </div>
@@ -364,12 +365,12 @@ export default function BlogsPage() {
                                 </div>
 
                                 <div className="lg:col-span-2 space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">Content</label>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t('content')}</label>
                                     <textarea 
                                         required
                                         rows={8}
                                         className="w-full px-8 py-6 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-[32px] text-sm font-medium text-black dark:text-white focus:ring-4 focus:ring-indigo-500/5 outline-none resize-none italic leading-relaxed"
-                                        placeholder="Start writing your masterpiece..."
+                                        placeholder={t('placeholderContent')}
                                         value={form.content}
                                         onChange={e => setForm({...form, content: e.target.value})}
                                     />
@@ -381,7 +382,7 @@ export default function BlogsPage() {
                                         disabled={saving}
                                         className="w-full py-5 bg-indigo-600 text-white rounded-[24px] font-black uppercase text-xs tracking-[0.2em] shadow-2xl hover:bg-indigo-700 transition-all active:scale-[0.98] disabled:opacity-50"
                                     >
-                                        {saving ? "Publishing..." : editingBlog ? "Update Article" : "Create Article"}
+                                        {saving ? t('publishing') : editingBlog ? t('updateArticle') : t('publishNow')}
                                     </button>
                                 </div>
                             </form>

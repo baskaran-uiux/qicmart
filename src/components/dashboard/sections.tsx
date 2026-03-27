@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { ArrowRight, ShoppingCart, Package, Star } from "lucide-react"
 
-export async function RecentOrdersSection({ storeId, impersonateId, currencySymbol }: { storeId: string, impersonateId: string | null, currencySymbol: string }) {
+export async function RecentOrdersSection({ storeId, impersonateId, currencySymbol, t }: { storeId: string, impersonateId: string | null, currencySymbol: string, t: any }) {
     const recentOrders = await prisma.order.findMany({
         where: { storeId },
         take: 5,
@@ -23,7 +23,7 @@ export async function RecentOrdersSection({ storeId, impersonateId, currencySymb
     return (
         <div className="bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-sm flex flex-col hover:shadow-xl transition-all duration-500 group">
             <div className="p-7 border-b border-zinc-50 dark:border-zinc-800 flex items-center justify-between">
-                <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight capitalize italic text-black dark:text-white">Recent Orders</h3>
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight capitalize italic text-black dark:text-white">{t("recentOrders")}</h3>
                 <Link 
                     href={`/dashboard/orders${impersonateId ? `?ownerId=${impersonateId}` : ''}`}
                     className="p-1.5 bg-zinc-50 dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
@@ -35,14 +35,14 @@ export async function RecentOrdersSection({ storeId, impersonateId, currencySymb
                 {recentOrders.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center p-8 text-center">
                         <ShoppingCart className="w-10 h-10 text-zinc-100 dark:text-zinc-800 mb-3" />
-                        <p className="text-zinc-400 font-semibold italic text-xs capitalize tracking-wide">No orders yet</p>
+                        <p className="text-zinc-400 font-semibold italic text-xs capitalize tracking-wide">{t("noOrdersYet")}</p>
                     </div>
                 ) : (
                     <table className="w-full text-left min-w-[380px]">
                         <thead className="text-[12px] sm:text-[14px] text-zinc-400 dark:text-zinc-500 capitalize bg-zinc-50/50 dark:bg-zinc-950/50 font-semibold tracking-wide border-b border-zinc-50 dark:border-zinc-800">
                             <tr>
-                                <th className="px-5 py-3">Customer</th>
-                                <th className="px-5 py-3 text-right">Total</th>
+                                <th className="px-5 py-3">{t("customers")}</th>
+                                <th className="px-5 py-3 text-right">{t("subtotal")}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800/50">
@@ -76,7 +76,7 @@ export async function RecentOrdersSection({ storeId, impersonateId, currencySymb
     )
 }
 
-export async function TopProductsSection({ storeId, impersonateId, currencySymbol }: { storeId: string, impersonateId: string | null, currencySymbol: string }) {
+export async function TopProductsSection({ storeId, impersonateId, currencySymbol, t }: { storeId: string, impersonateId: string | null, currencySymbol: string, t: any }) {
     const topProductsData = await prisma.orderItem.groupBy({
         by: ['productId'],
         where: { order: { storeId } },
@@ -103,7 +103,7 @@ export async function TopProductsSection({ storeId, impersonateId, currencySymbo
     return (
         <div className="bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-sm flex flex-col hover:shadow-xl transition-all duration-500 group">
             <div className="p-7 border-b border-zinc-50 dark:border-zinc-800 flex items-center justify-between">
-                <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight capitalize italic text-black dark:text-white">Top Products</h3>
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight capitalize italic text-black dark:text-white">{t("topProducts")}</h3>
                 <Link 
                     href={`/dashboard/analytics${impersonateId ? `?ownerId=${impersonateId}` : ''}`}
                     className="p-1.5 bg-zinc-50 dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
@@ -115,14 +115,14 @@ export async function TopProductsSection({ storeId, impersonateId, currencySymbo
                 {topProducts.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center p-8 text-center">
                         <Package className="w-10 h-10 text-zinc-100 dark:text-zinc-800 mb-3" />
-                        <p className="text-zinc-400 font-semibold italic text-xs capitalize tracking-wide">No data available</p>
+                        <p className="text-zinc-400 font-semibold italic text-xs capitalize tracking-wide">{t("noDataAvailable")}</p>
                     </div>
                 ) : (
                     <table className="w-full text-left min-w-[380px]">
                         <thead className="text-[12px] sm:text-[14px] text-zinc-400 dark:text-zinc-500 capitalize bg-zinc-50/50 dark:bg-zinc-950/50 font-semibold tracking-wide border-b border-zinc-50 dark:border-zinc-800">
                             <tr>
-                                <th className="px-5 py-3">Product</th>
-                                <th className="px-5 py-3 text-right">Revenue</th>
+                                <th className="px-5 py-3">{t("products")}</th>
+                                <th className="px-5 py-3 text-right">{t("revenue")}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800/50">
@@ -131,12 +131,12 @@ export async function TopProductsSection({ storeId, impersonateId, currencySymbo
                                     <td className="px-5 py-4">
                                         <div className="flex flex-col">
                                             <span className="font-semibold text-zinc-900 dark:text-white text-xs truncate max-w-[150px] group-hover/row:text-indigo-600 transition-colors">{p.name}</span>
-                                            <span className="text-[11px] text-zinc-400 font-semibold capitalize tracking-normal italic whitespace-nowrap">{p.units} Sold</span>
+                                            <span className="text-[11px] text-zinc-400 font-semibold capitalize tracking-normal italic whitespace-nowrap">{p.units} {t("sold")}</span>
                                         </div>
                                     </td>
                                     <td className="px-5 py-4 text-right">
                                         <p className="font-semibold text-zinc-900 dark:text-white text-xs mb-0.5">{currencySymbol}{p.rev.toLocaleString()}</p>
-                                        <span className="text-[8px] font-semibold capitalize tracking-wide text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded-full italic">Best Seller</span>
+                                        <span className="text-[8px] font-semibold capitalize tracking-wide text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded-full italic">{t("bestSeller")}</span>
                                     </td>
                                 </tr>
                             ))}
@@ -148,7 +148,7 @@ export async function TopProductsSection({ storeId, impersonateId, currencySymbo
     )
 }
 
-export async function ReviewsSection({ storeId, impersonateId }: { storeId: string, impersonateId: string | null }) {
+export async function ReviewsSection({ storeId, impersonateId, t }: { storeId: string, impersonateId: string | null, t: any }) {
     const recentReviews = await prisma.review.findMany({
         where: { storeId },
         take: 5,
@@ -166,7 +166,7 @@ export async function ReviewsSection({ storeId, impersonateId }: { storeId: stri
     return (
         <div className="bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-sm flex flex-col hover:shadow-xl transition-all duration-500 group">
             <div className="p-7 border-b border-zinc-50 dark:border-zinc-800 flex items-center justify-between">
-                <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight capitalize italic text-black dark:text-white">Reviews</h3>
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight capitalize italic text-black dark:text-white">{t("reviews")}</h3>
                 <Link 
                     href={`/dashboard/reviews${impersonateId ? `?ownerId=${impersonateId}` : ''}`}
                     className="p-1.5 bg-zinc-50 dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"

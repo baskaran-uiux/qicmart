@@ -9,19 +9,14 @@ import {
 import { useDashboardStore } from "@/components/DashboardStoreProvider"
 import { 
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
-    ResponsiveContainer, Cell, PieChart, Pie, Sector
+    ResponsiveContainer, Cell, PieChart, Pie
 } from 'recharts';
 import { motion, AnimatePresence } from "framer-motion"
-import Link from "next/link"
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
-// Simulated monthly sales data
-const salesData = [12, 19, 8, 24, 31, 18, 42, 35, 27, 48, 38, 55]
-const ordersData = [4, 7, 3, 9, 12, 8, 16, 14, 10, 18, 15, 21]
-
 export default function AnalyticsPage() {
-    const { currency } = useDashboardStore()
+    const { currency, t } = useDashboardStore()
     const [data, setData] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState("")
@@ -61,19 +56,16 @@ export default function AnalyticsPage() {
                     <div className="absolute top-0 w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
                 </div>
                 <div className="text-center space-y-1">
-                    <p className="font-bold text-zinc-900 dark:text-white text-lg tracking-tight">Fetching real-time analytics...</p>
-                    <p className="text-sm font-medium text-zinc-400">Please wait while we sync your store data.</p>
+                    <p className="font-bold text-zinc-900 dark:text-white text-lg tracking-tight">{t("fetchingAnalytics")}</p>
+                    <p className="text-sm font-medium text-zinc-400">{t("syncingData")}</p>
                 </div>
             </div>
         )
     }
 
-
     const analytics = data?.analytics || []
-    const topProducts = data?.topProducts || []
     const metrics = data?.metrics || { current: { revenue: 0, orders: 0, customers: 0 }, last: { revenue: 0, orders: 0, customers: 0 }, returnProducts: 0 }
     const initialOrders = data?.recentOrders || []
-
 
     // Filtered and Sorted Orders
     const filteredOrders = initialOrders.filter((order: any) => 
@@ -111,7 +103,6 @@ export default function AnalyticsPage() {
         document.body.removeChild(link)
     }
 
-    // Process monthly data (ensure it matches the 12-month chart)
     const monthlySales = new Array(12).fill(0)
     const monthlyOrders = new Array(12).fill(0)
 
@@ -136,7 +127,6 @@ export default function AnalyticsPage() {
     const revenueTrend = calculateTrend(metrics.current.revenue, metrics.last.revenue)
     const customerTrend = calculateTrend(metrics.current.customers, metrics.last.customers)
 
-    // Prepare chart data
     const currentMonthIndex = new Date().getMonth()
     const chartData = MONTHS.map((name, i) => ({
         name,
@@ -145,7 +135,6 @@ export default function AnalyticsPage() {
         fill: i === currentMonthIndex ? "#4f46e5" : "#f1f5f9"
     }))
 
-    // Gauge data (using revenue growth)
     const growthPercent = Math.min(Math.max(revenueTrend, 0), 100)
     const gaugeData = [
         { name: 'Growth', value: growthPercent, fill: '#3b82f6' },
@@ -157,8 +146,8 @@ export default function AnalyticsPage() {
             {/* Sales Overview Header */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div>
-                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize italic">Sales Overview</h2>
-                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">Your current sales summary and activity.</p>
+                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize italic">{t("salesOverview")}</h2>
+                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">{t("salesSummary")}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                     <div className="relative">
@@ -166,7 +155,7 @@ export default function AnalyticsPage() {
                             onClick={() => setShowTimeRange(!showTimeRange)}
                             className="flex items-center gap-2 px-5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[12px] font-bold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95 shadow-sm"
                         >
-                            {timeRange} <ChevronDown size={14} />
+                            {t(timeRange.toLowerCase().replace(" ", "") as any)} <ChevronDown size={14} />
                         </button>
                         <AnimatePresence>
                             {showTimeRange && (
@@ -182,7 +171,7 @@ export default function AnalyticsPage() {
                                             onClick={() => { setTimeRange(range); setShowTimeRange(false) }}
                                             className="w-full text-left px-4 py-2 rounded-xl text-xs font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 transition-colors"
                                         >
-                                            {range}
+                                            {t(range.toLowerCase().replace(" ", "") as any)}
                                         </button>
                                     ))}
                                 </motion.div>
@@ -193,22 +182,20 @@ export default function AnalyticsPage() {
                         onClick={handleExport}
                         className="flex items-center gap-2 px-5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[12px] font-bold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95 shadow-sm"
                     >
-                        <Download size={14} className="text-zinc-400" /> Export
+                        <Download size={14} className="text-zinc-400" /> {t("export")}
                     </button>
                     <button className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-2xl text-[12px] font-bold hover:bg-indigo-700 transition-all active:scale-95 shadow-lg shadow-indigo-600/20">
-                        <Filter size={14} /> Filter
+                        <Filter size={14} /> {t("filter")}
                     </button>
                 </div>
             </div>
 
-            {/* KPI Cards consistent with screenshot */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* Total Sales Gradient Card */}
                 <div className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-indigo-600 p-8 rounded-[32px] shadow-xl shadow-blue-500/20 group">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl -mr-16 -mt-16 rounded-full group-hover:scale-150 transition-transform duration-1000" />
                     <div className="relative z-10">
                         <div className="flex items-center justify-between mb-8">
-                            <span className="text-[12px] sm:text-[14px] font-semibold text-blue-50/70 capitalize tracking-wide">Total Sales</span>
+                            <span className="text-[12px] sm:text-[14px] font-semibold text-blue-50/70 capitalize tracking-wide">{t("totalSales")}</span>
                             <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-lg shadow-black/5">
                                 <ShoppingCart size={20} />
                             </div>
@@ -219,50 +206,47 @@ export default function AnalyticsPage() {
                                 {salesTrend >= 0 ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />} {Math.abs(salesTrend).toFixed(1)}%
                             </span>
                         </div>
-                        <p className="text-xs font-medium text-blue-100/50 italic">Last month: {metrics.last.orders}</p>
+                        <p className="text-xs font-medium text-blue-100/50 italic">{t("lastMonth")}: {metrics.last.orders}</p>
                     </div>
                 </div>
 
-                {/* Other KPI Cards */}
                 {[
-                    { label: "New Customer", value: metrics.current.customers.toLocaleString(), last: metrics.last.customers, trend: customerTrend, icon: Users, color: "bg-zinc-950 text-white", iconColor: "text-zinc-400" },
-                    { label: "Return Products", value: metrics.returnProducts.toLocaleString(), last: 0, trend: 0, icon: Box, color: "bg-blue-500 text-white", iconColor: "text-blue-200" },
-                    { label: "Total Revenue", value: formatCurrency(metrics.current.revenue), last: formatCurrency(metrics.last.revenue), trend: revenueTrend, icon: IndianRupee, color: "bg-indigo-500 text-white", iconColor: "text-indigo-200" },
+                    { label: "newCustomer", value: metrics.current.customers.toLocaleString(), last: metrics.last.customers, trend: customerTrend, icon: Users, color: "bg-zinc-950 text-white", iconColor: "text-zinc-400" },
+                    { label: "returnProducts", value: metrics.returnProducts.toLocaleString(), last: 0, trend: 0, icon: Box, color: "bg-blue-500 text-white", iconColor: "text-blue-200" },
+                    { label: "totalRevenue", value: formatCurrency(metrics.current.revenue), last: formatCurrency(metrics.last.revenue), trend: revenueTrend, icon: IndianRupee, color: "bg-indigo-500 text-white", iconColor: "text-indigo-200" },
                 ].map((kpi) => (
                     <div key={kpi.label} className="p-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[32px] shadow-sm hover:shadow-xl transition-all duration-500 group">
                         <div className="flex items-center justify-between mb-8">
-                            <span className="text-[12px] sm:text-[14px] font-semibold text-zinc-400 dark:text-zinc-500 capitalize tracking-wide">{kpi.label}</span>
+                            <span className="text-[12px] sm:text-[14px] font-semibold text-zinc-400 dark:text-zinc-500 capitalize tracking-wide">{t(kpi.label as any)}</span>
                             <div className={`w-10 h-10 ${kpi.color} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
                                 <kpi.icon size={20} />
                             </div>
                         </div>
                         <div className="flex items-end gap-3 mb-2">
                             <p className="text-[28px] sm:text-[32px] font-bold text-zinc-900 dark:text-white tracking-tighter">{kpi.value}</p>
-                            {kpi.label !== "Return Products" && (
+                            {kpi.label !== "returnProducts" && (
                                 <span className={`mb-1.5 px-2 py-0.5 rounded-lg text-[10px] font-bold flex items-center gap-0.5 ${kpi.trend >= 0 ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400' : 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400'}`}>
                                     {kpi.trend >= 0 ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />} {Math.abs(kpi.trend).toFixed(1)}%
                                 </span>
                             )}
                         </div>
-                        <p className="text-xs font-medium text-zinc-400 italic">Last month: {kpi.last}</p>
+                        <p className="text-xs font-medium text-zinc-400 italic">{t("lastMonth")}: {kpi.last}</p>
                     </div>
                 ))}
             </div>
 
-            {/* Performance Overview & Sales Overview Gauge */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Performance Overview (Bar Chart) */}
                 <div className="lg:col-span-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[32px] p-8 shadow-sm">
                     <div className="flex items-center justify-between mb-10">
                         <div>
-                            <h3 className="text-xl font-bold text-zinc-900 dark:text-white tracking-tight">Performance Overview</h3>
+                            <h3 className="text-xl font-bold text-zinc-900 dark:text-white tracking-tight">{t("performanceOverview")}</h3>
                         </div>
                         <div className="relative">
                             <button 
                                 onClick={() => setShowYearFilter(!showYearFilter)}
                                 className="flex items-center gap-2 px-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold text-zinc-500 hover:text-zinc-700 transition-colors shadow-sm"
                             >
-                                {performanceYear} <ChevronDown size={14} />
+                                {t(performanceYear.toLowerCase().replace(" ", "") as any)} <ChevronDown size={14} />
                             </button>
                             <AnimatePresence>
                                 {showYearFilter && (
@@ -278,7 +262,7 @@ export default function AnalyticsPage() {
                                                 onClick={() => { setPerformanceYear(year); setShowYearFilter(false) }}
                                                 className="w-full text-left px-4 py-2 rounded-xl text-xs font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 transition-colors"
                                             >
-                                                {year}
+                                                {t(year.toLowerCase().replace(" ", "") as any)}
                                             </button>
                                         ))}
                                     </motion.div>
@@ -314,14 +298,14 @@ export default function AnalyticsPage() {
                                                         <div className="flex items-center justify-between gap-8">
                                                             <div className="flex items-center gap-2">
                                                                 <div className="w-2 h-2 rounded-full bg-zinc-200" />
-                                                                <span className="text-[11px] font-semibold text-zinc-500">Orders</span>
+                                                                <span className="text-[11px] font-semibold text-zinc-500">{t("orders")}</span>
                                                             </div>
                                                             <span className="text-[11px] font-semibold text-zinc-900 dark:text-white">{payload[0].payload.orders}</span>
                                                         </div>
                                                         <div className="flex items-center justify-between gap-8">
                                                             <div className="flex items-center gap-2">
                                                                 <div className="w-2 h-2 rounded-full bg-indigo-600" />
-                                                                <span className="text-[11px] font-semibold text-zinc-500">Revenue</span>
+                                                                <span className="text-[11px] font-semibold text-zinc-500">{t("revenue")}</span>
                                                             </div>
                                                             <span className="text-[11px] font-bold text-indigo-600">{formatCurrency(payload[0].payload.sales)}</span>
                                                         </div>
@@ -346,10 +330,9 @@ export default function AnalyticsPage() {
                     </div>
                 </div>
 
-                {/* Sales Overview Gauge */}
                 <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[32px] p-8 shadow-sm flex flex-col items-center justify-center relative group overflow-hidden">
                     <div className="absolute top-0 left-0 w-full p-8 border-b border-zinc-50 dark:border-zinc-800 flex items-center justify-between">
-                        <h3 className="font-bold text-zinc-900 dark:text-white">Sales Overview</h3>
+                        <h3 className="font-bold text-zinc-900 dark:text-white">{t("salesOverview")}</h3>
                         <div className="relative">
                             <button 
                                 onClick={() => setShowOptions(!showOptions)}
@@ -369,13 +352,13 @@ export default function AnalyticsPage() {
                                             onClick={() => window.location.reload()}
                                             className="w-full text-left px-4 py-2 rounded-xl text-xs font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 transition-colors flex items-center gap-2"
                                         >
-                                            <RefreshCw size={14} /> Refresh Data
+                                            <RefreshCw size={14} /> {t("refreshData")}
                                         </button>
                                         <button 
                                             onClick={() => setShowOptions(false)}
                                             className="w-full text-left px-4 py-2 rounded-xl text-xs font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 transition-colors flex items-center gap-2"
                                         >
-                                            <ExternalLink size={14} /> View Detailed Report
+                                            <ExternalLink size={14} /> {t("viewDetailedReport")}
                                         </button>
                                     </motion.div>
                                 )}
@@ -406,20 +389,20 @@ export default function AnalyticsPage() {
                         </ResponsiveContainer>
                         <div className="absolute bottom-16 left-1/2 -translate-x-1/2 text-center">
                             <p className="text-[32px] font-bold text-zinc-900 dark:text-white tracking-tighter">{revenueTrend.toFixed(1)}%</p>
-                            <p className="text-[12px] font-semibold text-zinc-400 capitalize tracking-wide mt-1">Revenue Growth</p>
+                            <p className="text-[12px] font-semibold text-zinc-400 capitalize tracking-wide mt-1">{t("revenueGrowth")}</p>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 w-full mt-4">
                         <div className="p-5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-3xl">
-                            <p className="text-[12px] font-semibold text-zinc-400 capitalize tracking-wide mb-2">Total Sales</p>
+                            <p className="text-[12px] font-semibold text-zinc-400 capitalize tracking-wide mb-2">{t("totalSales")}</p>
                             <div className="flex items-center gap-2">
                                 <span className="text-xl font-bold text-zinc-900 dark:text-white tracking-tight">{metrics.current.orders}</span>
                                 <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold capitalize ${salesTrend >= 0 ? 'bg-indigo-500/10 text-indigo-500' : 'bg-rose-500/10 text-rose-500'}`}>{salesTrend.toFixed(1)}%</span>
                             </div>
                         </div>
                         <div className="p-5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-3xl">
-                            <p className="text-[12px] font-semibold text-zinc-400 capitalize tracking-wide mb-2">Total Revenue</p>
+                            <p className="text-[12px] font-semibold text-zinc-400 capitalize tracking-wide mb-2">{t("totalRevenue")}</p>
                             <div className="flex items-center gap-2">
                                 <span className="text-xl font-bold text-zinc-900 dark:text-white tracking-tight">{formatCurrency(metrics.current.revenue)}</span>
                                 <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold capitalize ${revenueTrend >= 0 ? 'bg-indigo-500/10 text-indigo-600' : 'bg-rose-500/10 text-rose-600'}`}>{revenueTrend.toFixed(1)}%</span>
@@ -429,10 +412,9 @@ export default function AnalyticsPage() {
                 </div>
             </div>
 
-            {/* Recent Orders Table Matching Screenshot */}
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[32px] overflow-hidden shadow-sm">
                 <div className="p-8 border-b border-zinc-100 dark:border-zinc-800 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <h3 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">Recent orders</h3>
+                    <h3 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">{t("recentOrdersTitle")}</h3>
                     <div className="flex flex-wrap items-center gap-3">
                         <div className="relative group">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
@@ -440,7 +422,7 @@ export default function AnalyticsPage() {
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search products or customers..."
+                                placeholder={t("searchAnalytics")}
                                 className="pl-11 pr-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none w-full md:w-64 transition-all"
                             />
                         </div>
@@ -449,7 +431,7 @@ export default function AnalyticsPage() {
                                 onClick={() => setShowSort(!showSort)}
                                 className="flex items-center gap-2 px-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm font-bold text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95"
                             >
-                                <BarChart2 size={16} className="rotate-90" /> Sort by <ChevronDown size={14} />
+                                <BarChart2 size={16} className="rotate-90" /> {t("sortBy")} <ChevronDown size={14} />
                             </button>
                             <AnimatePresence>
                                 {showSort && (
@@ -460,16 +442,16 @@ export default function AnalyticsPage() {
                                         className="absolute top-full right-0 mt-2 w-32 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl shadow-2xl z-50 p-2"
                                     >
                                         {[
-                                            { id: "date", label: "Date" },
-                                            { id: "total", label: "Total" },
-                                            { id: "status", label: "Status" }
+                                            { id: "date", label: "date" },
+                                            { id: "total", label: "total" },
+                                            { id: "status", label: "status" }
                                         ].map((option) => (
                                             <button 
                                                 key={option.id}
                                                 onClick={() => { setSortBy(option.id); setShowSort(false) }}
                                                 className={`w-full text-left px-4 py-2 rounded-xl text-xs font-bold transition-colors ${sortBy === option.id ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400' : 'hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400'}`}
                                             >
-                                                {option.label}
+                                                {t(option.label as any)}
                                             </button>
                                         ))}
                                     </motion.div>
@@ -483,14 +465,14 @@ export default function AnalyticsPage() {
                         <thead className="bg-zinc-50/50 dark:bg-zinc-950/50 text-zinc-400 dark:text-zinc-500 text-[12px] font-semibold capitalize tracking-wide border-b border-zinc-100 dark:border-zinc-800">
                             <tr>
                                 <th className="px-8 py-5 text-center"><input type="checkbox" className="rounded border-zinc-300" /></th>
-                                <th className="px-6 py-5">Product info</th>
-                                <th className="px-6 py-5">Order Id</th>
-                                <th className="px-6 py-5">Date</th>
-                                <th className="px-6 py-5">Customer</th>
-                                <th className="px-6 py-5">Category</th>
-                                <th className="px-6 py-5">Status</th>
-                                <th className="px-6 py-5">Items</th>
-                                <th className="px-6 py-5 text-right">Total</th>
+                                <th className="px-6 py-5">{t("productInfo")}</th>
+                                <th className="px-6 py-5">{t("orderId")}</th>
+                                <th className="px-6 py-5">{t("date")}</th>
+                                <th className="px-6 py-5">{t("customer")}</th>
+                                <th className="px-6 py-5">{t("category")}</th>
+                                <th className="px-6 py-5">{t("status")}</th>
+                                <th className="px-6 py-5">{t("qty")}</th>
+                                <th className="px-6 py-5 text-right">{t("total")}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800/50">
@@ -502,7 +484,7 @@ export default function AnalyticsPage() {
                                             <div className="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center">
                                                 <Package className="text-zinc-400" size={18} />
                                             </div>
-                                            <span className="font-bold text-zinc-900 dark:text-white text-sm truncate max-w-[150px]">{order.firstItem?.name || "Multiple Items"}</span>
+                                            <span className="font-bold text-zinc-900 dark:text-white text-sm truncate max-w-[150px]">{order.firstItem?.name || t("multipleItems")}</span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-6 font-bold text-zinc-500 text-xs">#{order.id.slice(-6).toUpperCase()}</td>
@@ -525,7 +507,7 @@ export default function AnalyticsPage() {
                                 </tr>
                             )) : (
                                 <tr>
-                                    <td colSpan={9} className="px-8 py-12 text-center text-zinc-400 italic font-medium">No orders found matching your criteria.</td>
+                                    <td colSpan={9} className="px-8 py-12 text-center text-zinc-400 italic font-medium">{t("noOrdersMatching")}</td>
                                 </tr>
                             )}
                         </tbody>

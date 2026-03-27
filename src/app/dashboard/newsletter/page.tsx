@@ -7,6 +7,7 @@ import {
     ExternalLink, MailOpen, UserCheck
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { useDashboardStore } from "@/components/DashboardStoreProvider"
 
 interface Subscriber {
     id: string
@@ -15,6 +16,7 @@ interface Subscriber {
 }
 
 export default function NewsletterPage() {
+    const { t } = useDashboardStore()
     const [subscribers, setSubscribers] = useState<Subscriber[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState("")
@@ -40,7 +42,7 @@ export default function NewsletterPage() {
     }, [])
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Remove this subscriber?")) return
+        if (!confirm(t('confirmDelete'))) return
         try {
             const res = await fetch("/api/dashboard/newsletter", {
                 method: "DELETE",
@@ -91,23 +93,23 @@ export default function NewsletterPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                 <div>
-                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize italic">Newsletter Subscribers</h2>
-                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">Manage your email audience and grow your brand.</p>
+                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize italic">{t('newsletterTitle')}</h2>
+                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">{t('newsletterSummary')}</p>
                 </div>
                 <button 
                     onClick={exportToCSV}
                     disabled={subscribers.length === 0 || exporting}
                     className="flex items-center gap-2 px-6 py-3 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black rounded-2xl text-[14px] font-bold hover:bg-zinc-800 dark:hover:bg-white transition-all active:scale-95 shadow-xl disabled:opacity-50"
                 >
-                    <Download size={18} /> {exporting ? "Exporting..." : "Export to CSV"}
+                    <Download size={18} /> {exporting ? t('exporting') : t('exportToCSV')}
                 </button>
             </div>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[
-                    { label: "Total Subscribers", value: stats.total, icon: Users, color: "text-indigo-500", bg: "bg-indigo-500/10", suffix: "active leads" },
-                    { label: "New This Month", value: stats.newThisMonth, icon: TrendingUp, color: "text-emerald-500", bg: "bg-emerald-500/10", suffix: "growth" },
+                    { label: t('totalSubscribers'), value: stats.total, icon: Users, color: "text-indigo-500", bg: "bg-indigo-500/10", suffix: t('activeLeads') },
+                    { label: t('newThisMonth'), value: stats.newThisMonth, icon: TrendingUp, color: "text-emerald-500", bg: "bg-emerald-500/10", suffix: t('growth') },
                 ].map((stat, i) => (
                     <motion.div 
                         initial={{ opacity: 0, y: 20 }}
@@ -142,7 +144,7 @@ export default function NewsletterPage() {
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
                         <input 
                             type="text" 
-                            placeholder="Search by email..." 
+                            placeholder={t('searchSubscribers')} 
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             className="w-full pl-11 pr-4 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none text-black dark:text-white transition-all" 
@@ -154,24 +156,24 @@ export default function NewsletterPage() {
                     {loading ? (
                         <div className="py-24 text-center">
                             <Loader2 className="animate-spin mx-auto text-zinc-400 mb-4" size={32} />
-                            <p className="text-zinc-500 font-medium">Loading subscribers...</p>
+                            <p className="text-zinc-500 font-medium">{t('loadingSubscribers')}</p>
                         </div>
                     ) : filtered.length === 0 ? (
                         <div className="py-24 text-center">
                             <div className="w-20 h-20 bg-zinc-50 dark:bg-zinc-800/50 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <Mail size={32} className="text-zinc-300" />
                             </div>
-                            <h3 className="text-xl font-bold text-black dark:text-white mb-2">No subscribers yet</h3>
-                            <p className="text-zinc-500 text-sm max-w-xs mx-auto">Emails will appear here once customers sign up on your storefront.</p>
+                            <h3 className="text-xl font-bold text-black dark:text-white mb-2">{t('noSubscribersTitle')}</h3>
+                            <p className="text-zinc-500 text-sm max-w-xs mx-auto">{t('noSubscribersDesc')}</p>
                         </div>
                     ) : (
                         <table className="w-full text-left">
                             <thead className="text-[11px] font-black uppercase tracking-widest text-zinc-400 bg-zinc-50 dark:bg-zinc-950/50 border-b border-zinc-100 dark:border-zinc-800">
                                 <tr>
-                                    <th className="px-10 py-5">Email Address</th>
-                                    <th className="px-10 py-5">Subscription Date</th>
-                                    <th className="px-10 py-5">Source</th>
-                                    <th className="px-10 py-5 text-right">Actions</th>
+                                    <th className="px-10 py-5">{t('emailAddress') || "Email Address"}</th>
+                                    <th className="px-10 py-5">{t('subscriptionDate')}</th>
+                                    <th className="px-10 py-5">{t('source')}</th>
+                                    <th className="px-10 py-5 text-right">{t('actions')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800/50">
@@ -193,7 +195,7 @@ export default function NewsletterPage() {
                                         </td>
                                         <td className="px-10 py-6">
                                             <span className="px-3 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-500">
-                                                Storefront Footer
+                                                {t('storefrontFooter')}
                                             </span>
                                         </td>
                                         <td className="px-10 py-6 text-right">
@@ -219,12 +221,12 @@ export default function NewsletterPage() {
                         <MailOpen size={24} />
                     </div>
                     <div>
-                        <h4 className="font-bold text-indigo-600 dark:text-indigo-400">Campaign Ready</h4>
-                        <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-0.5">Export your subscribers to tools like Mailchimp or Brevo to start sending emails.</p>
+                        <h4 className="font-bold text-indigo-600 dark:text-indigo-400">{t('campaignReady')}</h4>
+                        <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-0.5">{t('campaignReadyDesc')}</p>
                     </div>
                 </div>
                 <button className="px-6 py-3 bg-indigo-600 text-white rounded-2xl text-[12px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all flex items-center gap-2">
-                    Connect Marketing Tools <ExternalLink size={14} />
+                    {t('connectMarketingTools')} <ExternalLink size={14} />
                 </button>
             </div>
         </div>

@@ -34,7 +34,7 @@ interface Category { id: string; name: string }
 
 export default function ProductsPage() {
     const router = useRouter()
-    const { currency, subscription } = useDashboardStore()
+    const { currency, subscription, t } = useDashboardStore()
     const [products, setProducts] = useState<Product[]>([])
     const [categories, setCategories] = useState<Category[]>([])
     const [loading, setLoading] = useState(true)
@@ -213,8 +213,8 @@ export default function ProductsPage() {
         <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                 <div>
-                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize">Products</h2>
-                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">{products.length} Items In Your Store. Manage your stock.</p>
+                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize">{t("products")}</h2>
+                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">{products.length} {t("itemsInStore")}</p>
                 </div>
                 <div className="flex items-center gap-3 w-full sm:w-auto">
                     <button 
@@ -231,7 +231,7 @@ export default function ProductsPage() {
                         }}
                         className={`flex-1 sm:flex-none px-6 py-3.5 ${isBulkMode ? "bg-amber-500 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300"} rounded-2xl text-[10px] font-bold capitalize flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95`}
                     >
-                        <RefreshCw size={18} className={isBulkMode ? "animate-spin" : ""} /> {isBulkMode ? "Cancel Bulk Edit" : "Bulk Stock Edit"}
+                        <RefreshCw size={18} className={isBulkMode ? "animate-spin" : ""} /> {isBulkMode ? t("cancelBulkEdit") : t("bulkStockEdit")}
                     </button>
                     {isBulkMode && (
                         <button 
@@ -256,14 +256,14 @@ export default function ProductsPage() {
                             }}
                             className="flex-1 sm:flex-none px-6 py-3.5 bg-emerald-600 text-white rounded-2xl text-[10px] font-bold capitalize flex items-center justify-center gap-2 transition-all hover:bg-emerald-700 active:scale-95 shadow-xl shadow-emerald-600/20"
                         >
-                            <Check size={18} /> Apply Changes
+                            <Check size={18} /> {t("applyChanges")}
                         </button>
                     )}
                     <button 
                         onClick={handleExport}
                         className="flex-1 sm:flex-none px-6 py-3.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-2xl text-[10px] font-bold capitalize flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all"
                     >
-                        <Download size={18} /> Export
+                        <Download size={18} /> {t("export")}
                     </button>
                     <button 
                         onClick={() => {
@@ -275,7 +275,7 @@ export default function ProductsPage() {
                         }}
                         className={`flex-1 sm:flex-none px-8 py-3.5 ${isAtLimit ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-500 cursor-not-allowed" : "bg-indigo-600 dark:bg-white text-white dark:text-black hover:opacity-90 active:scale-95"} rounded-2xl text-[10px] font-bold capitalize flex items-center justify-center gap-2 shadow-xl transition-all shadow-indigo-500/10`}
                     >
-                        <Package size={18} /> + Add Product {isAtLimit && "🔒"}
+                        <Package size={18} /> + {t("addProduct")} {isAtLimit && "🔒"}
                     </button>
                 </div>
             </div>
@@ -289,17 +289,17 @@ export default function ProductsPage() {
             >
                 <motion.div variants={itemVariants} className="p-6 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[32px] shadow-sm hover:shadow-md transition-shadow group">
                     <div className="flex items-center justify-between mb-4">
-                        <p className="text-[10px] font-bold text-zinc-400 capitalize">Total Products</p>
+                        <p className="text-[10px] font-bold text-zinc-400 capitalize">{t("totalProducts")}</p>
                         <div className="p-2 bg-blue-50 dark:bg-blue-500/10 rounded-xl group-hover:scale-110 transition-transform">
                             <Package size={16} className="text-blue-500" />
                         </div>
                     </div>
                     <p className="text-3xl font-black text-black dark:text-white">{totalProducts}</p>
-                    <p className="text-[10px] font-bold text-zinc-400 mt-1 capitalize">All products</p>
+                    <p className="text-[10px] font-bold text-zinc-400 mt-1 capitalize">{t("allProducts")}</p>
                 </motion.div>
                 <motion.div variants={itemVariants} className="p-6 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[32px] shadow-sm hover:shadow-md transition-shadow group">
                     <div className="flex items-center justify-between mb-4">
-                        <p className="text-[10px] font-bold text-zinc-400 capitalize">Active Products</p>
+                        <p className="text-[10px] font-bold text-zinc-400 capitalize">{t("activeProducts")}</p>
                         <div className="p-2 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl group-hover:scale-110 transition-transform">
                             <Check size={16} className="text-emerald-500" />
                         </div>
@@ -309,17 +309,17 @@ export default function ProductsPage() {
                 </motion.div>
                 <motion.div variants={itemVariants} className="p-6 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[32px] shadow-sm hover:shadow-md transition-shadow group">
                     <div className="flex items-center justify-between mb-4">
-                        <p className="text-[10px] font-bold text-zinc-400 capitalize">Low Stock</p>
+                        <p className="text-[10px] font-bold text-zinc-400 capitalize">{t("lowStock")}</p>
                         <div className="p-2 bg-amber-50 dark:bg-amber-500/10 rounded-xl group-hover:scale-110 transition-transform">
                             <AlertCircle size={16} className="text-amber-500" />
                         </div>
                     </div>
                     <p className="text-3xl font-black text-black dark:text-white">{lowStockProducts}</p>
-                    <p className="text-[10px] font-bold text-zinc-400 mt-1 capitalize">Need restocking</p>
+                    <p className="text-[10px] font-bold text-zinc-400 mt-1 capitalize">{t("needRestocking")}</p>
                 </motion.div>
                 <motion.div variants={itemVariants} className="p-6 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[32px] shadow-sm hover:shadow-md transition-shadow group">
                     <div className="flex items-center justify-between mb-4">
-                        <p className="text-[10px] font-bold text-zinc-400 capitalize">Total Value</p>
+                        <p className="text-[10px] font-bold text-zinc-400 capitalize">{t("totalValue")}</p>
                         <div className="p-2 bg-purple-50 dark:bg-purple-500/10 rounded-xl group-hover:scale-110 transition-transform">
                             <Zap size={16} className="text-purple-500" />
                         </div>
@@ -327,7 +327,7 @@ export default function ProductsPage() {
                     <p className="text-3xl font-black text-black dark:text-white">
                         {currency === "MYR" ? "RM" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "₹"}{totalInventoryValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
-                    <p className="text-[10px] font-bold text-zinc-400 mt-1 capitalize">Inventory value</p>
+                    <p className="text-[10px] font-bold text-zinc-400 mt-1 capitalize">{t("inventoryValue")}</p>
                 </motion.div>
             </motion.div>
             <div className="relative group w-full sm:w-auto">
@@ -335,7 +335,7 @@ export default function ProductsPage() {
                 <input 
                     value={search} 
                     onChange={e => setSearch(e.target.value)} 
-                    placeholder="Search products..." 
+                    placeholder={t("searchProducts")} 
                     className="w-full pl-11 pr-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none text-black dark:text-white transition-all shadow-sm md:w-64" 
                 />
             </div>
@@ -343,26 +343,26 @@ export default function ProductsPage() {
             {/* Products Table */}
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-sm pb-10">
                 {loading ? (
-                    <div className="py-24 text-center text-zinc-400 font-medium">Gathering your products...</div>
+                    <div className="py-24 text-center text-zinc-400 font-medium">{t("fetchingProducts")}</div>
                 ) : filtered.length === 0 ? (
                     <div className="py-32 text-center">
                         <div className="w-24 h-24 bg-zinc-50 dark:bg-zinc-800 rounded-[32px] flex items-center justify-center mx-auto mb-8 border border-zinc-100 dark:border-zinc-700 shadow-xl">
                             <Package className="w-12 h-12 text-zinc-300 dark:text-zinc-600" />
                         </div>
-                        <p className="text-slate-900 dark:text-zinc-400 font-bold text-xl">No products found</p>
-                        <p className="text-zinc-500 text-sm mt-3">Start adding items to populate your store</p>
+                        <p className="text-slate-900 dark:text-zinc-400 font-bold text-xl">{t("noProductsFound")}</p>
+                        <p className="text-zinc-500 text-sm mt-3">{t("startAddingProducts")}</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto pb-4 custom-scrollbar">
                         <table className="w-full text-[12px] sm:text-[14px] text-left min-w-[800px]">
                             <thead className="bg-[#F8FAFC] dark:bg-zinc-950 text-[#334155] dark:text-zinc-400 font-bold capitalize border-b border-zinc-100 dark:border-zinc-800">
                                 <tr>
-                                    <th className="px-6 sm:px-8 py-6 text-left">Product</th>
-                                    <th className="px-6 py-6 text-left">Category</th>
-                                    <th className="px-6 py-6 text-left">Price</th>
-                                    <th className="px-6 py-6 text-left">Stock</th>
-                                    <th className="px-6 py-6 text-left">Status</th>
-                                    <th className="px-6 sm:px-8 py-6 text-right">Actions</th>
+                                    <th className="px-6 sm:px-8 py-6 text-left">{t("product")}</th>
+                                    <th className="px-6 py-6 text-left">{t("category")}</th>
+                                    <th className="px-6 py-6 text-left">{t("price")}</th>
+                                    <th className="px-6 py-6 text-left">{t("stock")}</th>
+                                    <th className="px-6 py-6 text-left">{t("status")}</th>
+                                    <th className="px-6 sm:px-8 py-6 text-right">{t("actions")}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800/50">
@@ -391,11 +391,11 @@ export default function ProductsPage() {
                                                        className="w-24 px-3 py-1.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs font-bold outline-none ring-2 ring-indigo-500/20"
                                                     />
                                                 ) : (
-                                                    <span className={`text-[10px] font-bold capitalize px-3 py-1 rounded-full border whitespace-nowrap ${p.stock > 10 ? "text-emerald-600 bg-emerald-50 border-emerald-100 dark:text-emerald-400 dark:bg-emerald-500/10 dark:border-emerald-500/20" : p.stock > 0 ? "text-amber-600 bg-amber-50 border-amber-100 dark:text-amber-400 dark:bg-amber-500/10 dark:border-amber-500/20" : "text-rose-600 bg-rose-50 border-rose-100 dark:text-rose-400 dark:bg-rose-500/10 dark:border-rose-500/20"}`}>{p.stock} units</span>
+                                                    <span className={`text-[10px] font-bold capitalize px-3 py-1 rounded-full border whitespace-nowrap ${p.stock > 10 ? "text-emerald-600 bg-emerald-50 border-emerald-100 dark:text-emerald-400 dark:bg-emerald-500/10 dark:border-emerald-500/20" : p.stock > 0 ? "text-amber-600 bg-amber-50 border-amber-100 dark:text-amber-400 dark:bg-amber-500/10 dark:border-amber-500/20" : "text-rose-600 bg-rose-50 border-rose-100 dark:text-rose-400 dark:bg-rose-500/10 dark:border-rose-500/20"}`}>{p.stock} {t("units")}</span>
                                                 )}
                                             </td>
                                             <td className="px-6 py-5">
-                                                <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold capitalize shadow-sm ${p.isActive ? "bg-emerald-500 text-white shadow-xl shadow-emerald-500/10" : "bg-zinc-50 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 border border-zinc-100 dark:border-zinc-700"}`}>{p.isActive ? "Active" : "Draft"}</span>
+                                                <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold capitalize shadow-sm ${p.isActive ? "bg-emerald-500 text-white shadow-xl shadow-emerald-500/10" : "bg-zinc-50 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 border border-zinc-100 dark:border-zinc-700"}`}>{p.isActive ? t("active") : t("draft")}</span>
                                             </td>
                                             <td className="px-6 sm:px-8 py-5">
                                                 <div className="flex items-center justify-end gap-3 transition-all">
@@ -421,7 +421,7 @@ export default function ProductsPage() {
                         {totalPages > 1 && (
                             <div className="px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-950/30">
                                 <div className="text-xs font-bold text-zinc-500">
-                                    Showing <span className="text-black dark:text-white font-black">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="text-black dark:text-white font-black">{Math.min(currentPage * itemsPerPage, filtered.length)}</span> of <span className="text-black dark:text-white font-black">{filtered.length}</span> products
+                                    {t("showing")} <span className="text-black dark:text-white font-black">{(currentPage - 1) * itemsPerPage + 1}</span> {t("to")} <span className="text-black dark:text-white font-black">{Math.min(currentPage * itemsPerPage, filtered.length)}</span> {t("of")} <span className="text-black dark:text-white font-black">{filtered.length}</span> {t("products")}
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button 
@@ -482,8 +482,8 @@ export default function ProductsPage() {
                 }}
                 onConfirm={confirmDelete}
                 loading={deleting}
-                title="Delete Product?"
-                description="This product will be permanently removed from your inventory. This action cannot be undone."
+                title={t("deleteProductTitle")}
+                description={t("deleteProductDesc")}
             />
         </div>
     )

@@ -22,7 +22,7 @@ interface Coupon {
 }
 
 export default function CouponsPage() {
-    const { currency } = useDashboardStore()
+    const { currency, t } = useDashboardStore()
     const [coupons, setCoupons] = useState<Coupon[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState("")
@@ -111,7 +111,7 @@ export default function CouponsPage() {
     }
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this coupon?")) return
+        if (!confirm(t('confirmDelete'))) return
         try {
             const res = await fetch("/api/dashboard/coupons", {
                 method: "DELETE",
@@ -139,23 +139,23 @@ export default function CouponsPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                 <div>
-                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize italic">Coupons & Discounts</h2>
-                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">Generate codes to drive sales and customer loyalty.</p>
+                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize italic">{t('couponsTitle')}</h2>
+                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">{t('couponsSummary')}</p>
                 </div>
                 <button 
                     onClick={() => setShowModal(true)}
                     className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl text-[14px] font-bold hover:bg-indigo-700 transition-all active:scale-95 shadow-xl shadow-indigo-600/20"
                 >
-                    <Plus size={18} /> Create Coupon
+                    <Plus size={18} /> {t('addCoupon')}
                 </button>
             </div>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                    { label: "Active Coupons", value: stats.active, icon: Ticket, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-                    { label: "Total Usage", value: stats.totalUsage, icon: Users, color: "text-indigo-500", bg: "bg-indigo-500/10" },
-                    { label: "Expired", value: stats.expired, icon: Clock, color: "text-rose-500", bg: "bg-rose-500/10" },
+                    { label: t('active'), value: stats.active, icon: Ticket, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+                    { label: t('totalUsage'), value: stats.totalUsage, icon: Users, color: "text-indigo-500", bg: "bg-indigo-500/10" },
+                    { label: t('expired') || "Expired", value: stats.expired, icon: Clock, color: "text-rose-500", bg: "bg-rose-500/10" },
                 ].map((stat, i) => (
                     <motion.div 
                         initial={{ opacity: 0, y: 20 }}
@@ -182,7 +182,7 @@ export default function CouponsPage() {
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
                         <input 
                             type="text" 
-                            placeholder="Search by code..." 
+                            placeholder={t('searchCoupons')} 
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             className="w-full pl-11 pr-4 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none text-black dark:text-white transition-all" 
@@ -194,24 +194,24 @@ export default function CouponsPage() {
                     {loading ? (
                         <div className="py-24 text-center">
                             <Loader2 className="animate-spin mx-auto text-zinc-400 mb-4" size={32} />
-                            <p className="text-zinc-500">Loading coupons...</p>
+                            <p className="text-zinc-500">{t('initializing')}</p>
                         </div>
                     ) : filtered.length === 0 ? (
                         <div className="py-24 text-center">
                             <Ticket className="w-16 h-16 text-zinc-100 dark:text-zinc-800 mx-auto mb-6" />
-                            <h3 className="text-xl font-bold text-black dark:text-white mb-2">No coupons found</h3>
-                            <p className="text-zinc-500 text-sm max-w-sm mx-auto">Create your first discount code to start your marketing campaign.</p>
+                            <h3 className="text-xl font-bold text-black dark:text-white mb-2">{t('noMatches')}</h3>
+                            <p className="text-zinc-500 text-sm max-w-sm mx-auto">{t('noDataAvailable')}</p>
                         </div>
                     ) : (
                         <table className="w-full text-left">
                             <thead className="text-[11px] font-black uppercase tracking-widest text-zinc-400 bg-zinc-50 dark:bg-zinc-950/50 border-b border-zinc-100 dark:border-zinc-800">
                                 <tr>
-                                    <th className="px-8 py-5">Code</th>
-                                    <th className="px-8 py-5">Discount</th>
-                                    <th className="px-8 py-5">Usage</th>
-                                    <th className="px-8 py-5">Status</th>
-                                    <th className="px-8 py-5">Expiry</th>
-                                    <th className="px-8 py-5 text-right">Actions</th>
+                                    <th className="px-8 py-5">{t('couponCode') || "Code"}</th>
+                                    <th className="px-8 py-5">{t('discount') || "Discount"}</th>
+                                    <th className="px-8 py-5">{t('usageLimit') || "Usage"}</th>
+                                    <th className="px-8 py-5">{t('status')}</th>
+                                    <th className="px-8 py-5">{t('expiryDate') || "Expiry"}</th>
+                                    <th className="px-8 py-5 text-right">{t('actions')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800/50">
@@ -256,7 +256,7 @@ export default function CouponsPage() {
                                                     : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
                                                 }`}
                                             >
-                                                {coupon.isActive ? 'Active' : 'Disabled'}
+                                                {coupon.isActive ? t('active') : t('hidden')}
                                             </button>
                                         </td>
                                         <td className="px-8 py-6">
@@ -311,8 +311,8 @@ export default function CouponsPage() {
                         >
                             <div className="p-8 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-950/50">
                                 <div>
-                                    <h3 className="text-xl font-bold text-black dark:text-white uppercase italic tracking-tight">{editingCoupon ? "Edit Coupon" : "New Coupon"}</h3>
-                                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mt-1">Configure your discount parameters</p>
+                                    <h3 className="text-xl font-bold text-black dark:text-white uppercase italic tracking-tight">{editingCoupon ? t('edit') : t('addNew')}</h3>
+                                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mt-1">{t('couponDetails')}</p>
                                 </div>
                                 <button onClick={() => { setShowModal(false); setEditingCoupon(null); }} className="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-full transition-colors">
                                     <X size={24} className="text-zinc-400" />
@@ -322,7 +322,7 @@ export default function CouponsPage() {
                             <form onSubmit={handleSave} className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
                                 <div className="space-y-2 md:col-span-2">
                                     <div className="flex items-center justify-between">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">Coupon Code</label>
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t('couponCode')}</label>
                                         <button 
                                             type="button"
                                             onClick={() => {
@@ -348,7 +348,7 @@ export default function CouponsPage() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">Discount Type</label>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t('discountType')}</label>
                                     <div className="flex bg-zinc-50 dark:bg-zinc-800 p-1.5 rounded-2xl border border-zinc-200 dark:border-zinc-700">
                                         <button 
                                             type="button"
@@ -368,7 +368,7 @@ export default function CouponsPage() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">Value</label>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t('discountValue')}</label>
                                     <input 
                                         required
                                         type="number" 
@@ -380,7 +380,7 @@ export default function CouponsPage() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">Usage Limit (Optional)</label>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t('usageLimit')}</label>
                                     <input 
                                         type="number" 
                                         className="w-full px-5 py-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/5 outline-none"
@@ -391,7 +391,7 @@ export default function CouponsPage() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">Min Order Value</label>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t('minPurchase')}</label>
                                     <input 
                                         type="number" 
                                         className="w-full px-5 py-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/5 outline-none"
@@ -402,7 +402,7 @@ export default function CouponsPage() {
                                 </div>
 
                                 <div className="space-y-2 md:col-span-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">Expiry Date</label>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t('expiryDate')}</label>
                                     <input 
                                         type="date" 
                                         className="w-full px-5 py-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/5 outline-none"
@@ -417,7 +417,7 @@ export default function CouponsPage() {
                                         disabled={saving}
                                         className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all active:scale-[0.98] disabled:opacity-50"
                                     >
-                                        {saving ? "Processing..." : editingCoupon ? "Save Changes" : "Create Coupon"}
+                                        {saving ? t('savingChanges') : editingCoupon ? t('saveChanges') : t('addCoupon')}
                                     </button>
                                 </div>
                             </form>

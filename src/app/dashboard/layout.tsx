@@ -5,73 +5,108 @@ import Link from "next/link"
 import { usePathname as usePN, useSearchParams } from "next/navigation"
 import { signOut, useSession } from "next-auth/react"
 import { LayoutDashboard, Package, ShoppingCart, Users, Settings, LogOut,
-    Tag, FolderOpen, Sun, Moon, ChevronLeft, Menu, BarChart2, ExternalLink, Image as ImageIcon, Search, Zap, ShieldAlert, Layout, Globe, Star, CreditCard, ChevronDown, Ticket, Mail, PenTool
+    Tag, FolderOpen, Sun, Moon, ChevronLeft, Menu, BarChart2, ExternalLink, Image as ImageIcon, Search, Zap, ShieldAlert, Layout, Globe, Star, CreditCard, ChevronDown, Ticket, Mail, PenTool, Truck, Palette, RotateCcw, MapPin
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { DashboardStoreProvider, useDashboardStore } from "@/components/DashboardStoreProvider"
 import { Notifications } from "@/components/dashboard/Notifications"
+import { HourglassLoader } from "@/components/ui/HourglassLoader"
 
 const navGroups = [
     {
-        label: "Dashboard & Reports",
-        key: "dashboardAndReports",
+        label: "Dashboard",
+        key: "dashboard",
         icon: LayoutDashboard,
+        href: "/dashboard"
+    },
+    {
+        label: "Orders",
+        key: "orders",
+        icon: ShoppingCart,
         items: [
-            { label: "Overview", key: "overview", href: "/dashboard", icon: LayoutDashboard },
-            { label: "Analytics", key: "analytics", href: "/dashboard/analytics", icon: BarChart2 },
+            { label: "All Orders", key: "allOrders", href: "/dashboard/orders", icon: ShoppingCart },
+            { label: "Returns/Refunds", key: "returnsRefunds", href: "/dashboard/orders/returns", icon: RotateCcw },
         ]
     },
     {
-        label: "Shop Management",
-        key: "shopManagement",
+        label: "Delivery",
+        key: "delivery",
+        icon: Truck,
+        items: [
+            { label: "Shipping Partners", key: "shippingPartners", href: "/dashboard/delivery/partners", icon: Truck },
+            { label: "Order Tracking", key: "orderTracking", href: "/dashboard/delivery/tracking", icon: MapPin },
+        ]
+    },
+    {
+        label: "Products",
+        key: "products",
         icon: Package,
         items: [
-            { label: "Products", key: "products", href: "/dashboard/products", icon: Package },
+            { label: "All Products", key: "allProducts", href: "/dashboard/products", icon: Package },
             { label: "Categories", key: "categories", href: "/dashboard/categories", icon: FolderOpen },
-            { label: "Orders", key: "orders", href: "/dashboard/orders", icon: ShoppingCart },
-            { label: "Customers", key: "customers", href: "/dashboard/customers", icon: Users },
-        ]
-    },
-    {
-        label: "Marketing & Growth",
-        key: "marketingAndGrowth",
-        icon: Ticket,
-        items: [
-            { label: "Coupons", key: "coupons", href: "/dashboard/coupons", icon: Ticket },
-            { label: "Newsletter", key: "newsletter", href: "/dashboard/newsletter", icon: Mail },
-        ]
-    },
-    {
-        label: "SEO & Content",
-        key: "seoAndContent",
-        icon: PenTool,
-        items: [
-            { label: "Blogs/Articles", key: "blogs", href: "/dashboard/blogs", icon: PenTool },
-            { label: "Menu Manager", key: "menuManager", href: "/dashboard/menu", icon: Layout },
             { label: "Media Library", key: "mediaLibrary", href: "/dashboard/media", icon: ImageIcon },
-            { label: "Reviews", key: "reviews", href: "/dashboard/reviews", icon: Star },
-            { label: "SEO Manager", key: "seoManager", href: "/dashboard/seo", icon: Search },
-            { label: "Custom Pages", key: "customPages", href: "/dashboard/pages", icon: Layout },
         ]
     },
     {
-        label: "Finance & Plan",
-        key: "financeAndPlan",
+        label: "Analytics",
+        key: "analytics",
+        icon: BarChart2,
+        href: "/dashboard/analytics"
+    },
+    {
+        label: "Payouts",
+        key: "payouts",
         icon: CreditCard,
         items: [
             { label: "Payments", key: "payments", href: "/dashboard/payment", icon: CreditCard },
             { label: "My Plan", key: "myPlan", href: "/dashboard/plans", icon: Zap },
         ]
+    },
+    {
+        label: "Coupons",
+        key: "coupons",
+        icon: Ticket,
+        href: "/dashboard/coupons"
+    },
+    {
+        label: "Audience",
+        key: "audience",
+        icon: Users,
+        items: [
+            { label: "Customers", key: "customers", href: "/dashboard/customers", icon: Users },
+            { label: "Newsletter", key: "newsletter", href: "/dashboard/newsletter", icon: Mail },
+            { label: "Reviews", key: "reviews", href: "/dashboard/reviews", icon: Star },
+        ]
+    },
+    {
+        label: "Appearance",
+        key: "appearance",
+        icon: Palette,
+        items: [
+            { label: "Menu Manager", key: "menuManager", href: "/dashboard/menu", icon: Layout },
+            { label: "Custom Pages", key: "customPages", href: "/dashboard/pages", icon: Layout },
+            { label: "Blogs/Articles", key: "blogs", href: "/dashboard/blogs", icon: PenTool },
+        ]
+    },
+    {
+        label: "Settings",
+        key: "settings",
+        icon: Settings,
+        href: "/dashboard/settings"
     }
 ]
 
-const bottomNavItems = [
-    { label: "Store Settings", key: "storeSettings", href: "/dashboard/settings", icon: Settings },
-]
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
     return (
-<Suspense fallback={<div className="h-screen w-screen bg-zinc-950 flex items-center justify-center text-zinc-500 font-semibold tracking-wide animate-pulse">Initializing Dashboard...</div>}>
+        <Suspense fallback={
+            <div className="h-screen w-screen bg-zinc-950 flex flex-col items-center justify-center">
+                <HourglassLoader size="60" color="#3b82f6" speed="1.5" />
+                <p className="mt-6 text-sm font-medium text-zinc-500 animate-pulse tracking-widest uppercase">
+                    Initializing Dashboard...
+                </p>
+            </div>
+        }>
             <DashboardStoreProvider dashboardType="1">
                 <DashboardContent>{children}</DashboardContent>
             </DashboardStoreProvider>
@@ -85,7 +120,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
     const ownerId = searchParams.get("ownerId")?.trim()
     const { data: session } = useSession()
     const store = useDashboardStore()
-    const { logo, name, subscription, slug, t } = store
+    const { logo, name, subscription, slug, fontFamily, t, language } = store
     const [dark, setDark] = useState(true)
     const [isAuto, setIsAuto] = useState(true)
     const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -172,10 +207,10 @@ function DashboardContent({ children }: { children: ReactNode }) {
     useEffect(() => {
         const groupsToExpand: string[] = []
         navGroups.forEach(group => {
-            const hasActiveItem = group.items.some(item => isActive(item.href))
+            const hasActiveItem = group.href ? isActive(group.href) : (group.items?.some(item => isActive(item.href)) || false)
             const hasMatch = searchTerm && (
                 t(group.key as any).toLowerCase().includes(searchTerm.toLowerCase()) ||
-                group.items.some(item => t(item.key as any).toLowerCase().includes(searchTerm.toLowerCase()))
+                (group.items?.some(item => t(item.key as any).toLowerCase().includes(searchTerm.toLowerCase())) || false)
             )
             if (hasActiveItem || hasMatch) {
                 groupsToExpand.push(group.key)
@@ -196,7 +231,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
     const text = dark ? "text-white" : "text-zinc-900"
     const subtext = dark ? "text-zinc-500" : "text-zinc-500"
     const navHover = dark ? "hover:bg-white/5 hover:text-white" : "hover:bg-zinc-100/50 hover:text-black"
-    const activeClass = dark ? "bg-indigo-500/10 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.1)] border border-indigo-500/20" : "bg-indigo-100/80 text-indigo-700 border border-indigo-200 shadow-sm"
+    const activeClass = dark ? "bg-white/10 text-white shadow-[0_0_15px_rgba(255,255,255,0.05)] border border-white/20" : "bg-zinc-100 text-zinc-900 border border-zinc-200 shadow-sm font-semibold"
     const inactiveClass = dark ? `${subtext} ${navHover} border border-transparent` : `${subtext} ${navHover} border border-transparent`
     const headerBg = dark ? "bg-zinc-950/60 border-white/5" : "bg-white/60 border-zinc-200"
 
@@ -223,6 +258,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
             <motion.aside 
                 initial={false}
                 animate={{ width: sidebarOpen ? 240 : 64 }}
+                style={{ fontFamily: getFontFamily(fontFamily) }}
                 className={`
                     fixed inset-y-0 left-0 z-50 lg:static lg:z-20
                     ${mobileMenuOpen ? "translate-x-0 w-[240px]" : "-translate-x-full lg:translate-x-0"}
@@ -245,7 +281,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                             <Link 
                                 href={storeUrl} 
                                 target="_blank"
-                                className={`shrink-0 p-2 rounded-xl border transition-all shadow-sm ${dark ? "bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-indigo-400 hover:border-indigo-500/30" : "bg-zinc-50 border-zinc-200 text-zinc-400 hover:text-indigo-500 hover:border-indigo-500/30"}`}
+                                className={`shrink-0 p-2 rounded-xl border transition-all shadow-sm ${dark ? "bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-white hover:border-white/30" : "bg-zinc-50 border-zinc-200 text-zinc-400 hover:text-black hover:border-zinc-300"}`}
                                 title="View Store"
                             >
                                 <ExternalLink size={14} />
@@ -261,15 +297,15 @@ function DashboardContent({ children }: { children: ReactNode }) {
                 {sidebarOpen && (
                     <div className="px-4 py-4">
                         <div className="relative group">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-indigo-500 transition-colors" size={14} />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-white transition-colors" size={14} />
                             <input
                                 type="text"
                                 placeholder={t("quickSearch")}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className={`w-full pl-9 pr-4 py-2 text-[12px] rounded-xl border transition-all outline-none ${dark
-                                    ? "bg-zinc-950 border-zinc-800 text-zinc-300 focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5"
-                                    : "bg-zinc-50 border-zinc-200 text-black focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5"
+                                    ? "bg-zinc-950 border-zinc-800 text-zinc-300 focus:border-white/30 focus:ring-4 focus:ring-white/5"
+                                    : "bg-zinc-50 border-zinc-200 text-black focus:border-zinc-400 focus:ring-4 focus:ring-zinc-900/5"
                                     }`}
                             />
                         </div>
@@ -279,89 +315,110 @@ function DashboardContent({ children }: { children: ReactNode }) {
                 {/* Nav Items */}
                 <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-1 custom-scrollbar">
                     {navGroups.map((group) => {
-                        const filteredItems = group.items.filter(item =>
+                        const filteredItems = (group.items || []).filter(item =>
                             item.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             (item.key && t(item.key as any).toLowerCase().includes(searchTerm.toLowerCase()))
                         )
                         
                         const groupLabel = t(group.key as any);
                         const isExpanded = expandedGroups.includes(group.key);
-                        const hasMatchingItems = filteredItems.length > 0;
-                        const isGroupActive = group.items.some(item => isActive(item.href));
+                        const isGroupActive = group.href ? isActive(group.href) : group.items?.some(item => isActive(item.href));
 
-                        if (searchTerm && !hasMatchingItems && !groupLabel.toLowerCase().includes(searchTerm.toLowerCase())) return null;
+                        if (searchTerm && !groupLabel.toLowerCase().includes(searchTerm.toLowerCase()) && !group.items?.some(item => t(item.key as any).toLowerCase().includes(searchTerm.toLowerCase()))) return null;
 
                         return (
                             <div key={group.key} className="space-y-1">
                                 {sidebarOpen ? (
-                                    <>
-                                        <button
-                                            onClick={() => toggleGroup(group.key)}
-                                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all text-[12px] font-bold tracking-wider ${isGroupActive ? "text-indigo-500" : "text-zinc-500 hover:text-zinc-400"} ${dark ? "hover:bg-white/5" : "hover:bg-zinc-100/50"}`}
+                                    group.href ? (
+                                        <Link
+                                            href={getTargetHref(group.href)}
+                                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all text-[14px] font-semibold ${isActive(group.href) ? activeClass : inactiveClass}`}
                                         >
-                                            <div className="flex items-center gap-3">
-                                                <group.icon size={16} className={isGroupActive ? "text-indigo-500" : "text-zinc-400"} />
-                                                <span>{groupLabel}</span>
-                                            </div>
                                             <motion.div
-                                                animate={{ rotate: isExpanded ? 180 : 0 }}
-                                                transition={{ duration: 0.2 }}
+                                                whileHover={{ scale: 1.1, rotate: 5 }}
+                                                whileTap={{ scale: 0.9 }}
                                             >
-                                                <ChevronDown size={14} />
+                                                <group.icon size={16} className={isActive(group.href) ? dark ? "text-white" : "text-zinc-900" : "text-zinc-500"} />
                                             </motion.div>
-                                        </button>
-                                        
-                                        <AnimatePresence initial={false}>
-                                            {isExpanded && (
+                                            <span>{groupLabel}</span>
+                                        </Link>
+                                    ) : (
+                                        <>
+                                            <button
+                                                onClick={() => toggleGroup(group.key)}
+                                                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all text-[14px] ${language === "Tamil" ? "font-medium" : "font-semibold"} ${isGroupActive ? dark ? "text-white" : "text-zinc-900" : "text-zinc-500 hover:text-zinc-400"} ${dark ? "hover:bg-white/5" : "hover:bg-zinc-100/50"}`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <motion.div
+                                                        whileHover={{ scale: 1.1, rotate: 5 }}
+                                                        whileTap={{ scale: 0.9 }}
+                                                    >
+                                                        <group.icon size={16} className={isGroupActive ? dark ? "text-white" : "text-zinc-900" : "text-zinc-400"} />
+                                                    </motion.div>
+                                                    <span>{groupLabel}</span>
+                                                </div>
                                                 <motion.div
-                                                    initial={{ height: 0, opacity: 0 }}
-                                                    animate={{ height: "auto", opacity: 1 }}
-                                                    exit={{ height: 0, opacity: 0 }}
-                                                    className="overflow-hidden space-y-0.5 ml-4 border-l border-zinc-800/50 pl-2"
+                                                    animate={{ rotate: isExpanded ? 180 : 0 }}
+                                                    transition={{ duration: 0.2 }}
                                                 >
-                                                    {filteredItems.map(({ label, key, href, icon: Icon, external }: any) => {
-                                                        const targetHref = getTargetHref(href)
-                                                        const displayLabel = key ? t(key as any) : label;
-                                                        return (
-                                                            <motion.div
-                                                                key={href}
-                                                                whileHover={{ x: 4 }}
-                                                                whileTap={{ scale: 0.98 }}
-                                                            >
-                                                                <Link
-                                                                    href={targetHref}
-                                                                    target={external ? "_blank" : undefined}
-                                                                    onClick={() => setMobileMenuOpen(false)}
-                                                                    className={`flex items-center px-3 py-2 rounded-xl transition-all text-[13px] font-medium gap-3 ${isActive(href) ? activeClass : inactiveClass}`}
-                                                                >
-                                                                    <Icon className="w-4 h-4 shrink-0" />
-                                                                    <span>{displayLabel}</span>
-                                                                </Link>
-                                                            </motion.div>
-                                                        )
-                                                    })}
+                                                    <ChevronDown size={14} />
                                                 </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                    </>
+                                            </button>
+                                            
+                                            <AnimatePresence initial={false}>
+                                                {isExpanded && (
+                                                    <motion.div
+                                                        initial={{ height: 0, opacity: 0 }}
+                                                        animate={{ height: "auto", opacity: 1 }}
+                                                        exit={{ height: 0, opacity: 0 }}
+                                                        className="overflow-hidden space-y-0.5 ml-3 border-l border-zinc-800/50 pl-3"
+                                                    >
+                                                        {group.items?.map(({ label, key, href, icon: Icon, external }: any) => {
+                                                            const targetHref = getTargetHref(href)
+                                                            const displayLabel = key ? t(key as any) : label;
+                                                            return (
+                                                                <motion.div
+                                                                    key={href}
+                                                                    whileHover={{ x: 4 }}
+                                                                    whileTap={{ scale: 0.98 }}
+                                                                >
+                                                                    <Link
+                                                                        href={targetHref}
+                                                                        target={external ? "_blank" : undefined}
+                                                                        onClick={() => setMobileMenuOpen(false)}
+                                                                        className={`flex items-center ml-4 px-3 py-2 rounded-xl transition-all text-[13px] font-medium ${isActive(href) ? activeClass : inactiveClass}`}
+                                                                    >
+                                                                        <span>{displayLabel}</span>
+                                                                    </Link>
+                                                                </motion.div>
+                                                            )
+                                                        })}
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </>
+                                    )
                                 ) : (
                                     <div className="flex flex-col items-center gap-1">
-                                        <div className={`p-2 rounded-xl ${isGroupActive ? "text-indigo-500 bg-indigo-500/10" : "text-zinc-500"}`} title={groupLabel}>
-                                            <group.icon size={20} />
-                                        </div>
-                                        {group.items.map(item => {
-                                            if (searchTerm && !item.label.toLowerCase().includes(searchTerm.toLowerCase()) && !t(item.key as any).toLowerCase().includes(searchTerm.toLowerCase())) return null;
-                                            return (
-                                                <Link
-                                                    key={item.href}
-                                                    href={getTargetHref(item.href)}
-                                                    className={`p-2 rounded-lg transition-all ${isActive(item.href) ? "bg-indigo-500/20 text-indigo-400" : "text-zinc-500 hover:text-white"}`}
-                                                    title={t(item.key as any)}
+                                        {group.href ? (
+                                            <Link
+                                                href={getTargetHref(group.href)}
+                                                className={`p-2 rounded-xl transition-all ${isActive(group.href) ? "bg-white/10 text-white" : "text-zinc-500 hover:text-white"}`}
+                                                title={groupLabel}
+                                            >
+                                                <group.icon size={20} />
+                                            </Link>
+                                        ) : (
+                                            <div className="flex items-center justify-center p-2 rounded-xl">
+                                                <button
+                                                    onClick={() => toggleGroup(group.key)}
+                                                    className={`p-1.5 rounded-lg transition-all ${isGroupActive ? activeClass : inactiveClass}`}
+                                                    title={groupLabel}
                                                 >
-                                                    <item.icon size={16} />
-                                                </Link>
-                                            )
-                                        })}
+                                                    <group.icon size={18} />
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -369,7 +426,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                     })}
                     {navGroups.every(group => {
                         const groupLabel = t(group.key as any);
-                        const hasMatchingItems = group.items.some(item =>
+                        const hasMatchingItems = group.href ? groupLabel.toLowerCase().includes(searchTerm.toLowerCase()) : group.items?.some(item =>
                             item.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             (item.key && t(item.key as any).toLowerCase().includes(searchTerm.toLowerCase()))
                         );
@@ -381,34 +438,45 @@ function DashboardContent({ children }: { children: ReactNode }) {
                     )}
                 </nav>
 
-                {/* Bottom Items */}
-                <div className={`pb-3 px-2 border-t ${dark ? "border-zinc-800" : "border-slate-200"} pt-3 space-y-0.5`}>
-                    {bottomNavItems.map(({ label, key, href, icon: Icon, external }: any) => {
-                        const targetHref = getTargetHref(href)
-                        const displayLabel = key ? t(key as any) : label;
-                        return (
-                            <Link
-                                key={label}
-                                href={targetHref}
-                                target={external ? "_blank" : undefined}
-                                onClick={() => setMobileMenuOpen(false)}
-                                className={`flex items-center ${sidebarOpen ? "px-3" : "justify-center px-2"} py-2.5 rounded-xl transition-all text-[14px] font-medium gap-3 ${isActive(href) ? activeClass : inactiveClass}`}
-                                title={!sidebarOpen ? displayLabel : undefined}
+                {/* Sidebar Footer / Upgrade Card */}
+                <div className={`mt-auto ${sidebarOpen ? "px-4 py-6" : "px-2 pb-6"} border-t ${dark ? "border-white/5" : "border-zinc-200"}`}>
+                    {sidebarOpen ? (
+                        <>
+                            <div className={`p-4 rounded-2xl ${dark ? "bg-indigo-500/10 border border-indigo-500/20" : "bg-indigo-50 border border-indigo-100"} relative overflow-hidden group`}>
+                                <div className="absolute -right-4 -top-4 w-20 h-20 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-400/20 transition-all duration-500" />
+                                
+                                <div className="relative z-10 flex flex-col gap-3">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-1.5 rounded-lg bg-indigo-500 text-white shadow-lg shadow-indigo-500/20">
+                                            <Zap size={14} fill="currentColor" />
+                                        </div>
+                                        <span className="text-[12px] font-bold uppercase tracking-wider text-indigo-500">{subscription?.plan || "Free"} Plan</span>
+                                    </div>
+                                    
+                                    <p className={`text-[11px] leading-relaxed ${dark ? "text-zinc-400" : "text-zinc-500"} font-medium`}>
+                                        Manage your subscription and unlock premium features.
+                                    </p>
+                                    
+                                    <Link 
+                                        href={getTargetHref("/dashboard/plans")}
+                                        className="w-full py-2 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white text-[12px] font-bold shadow-lg shadow-indigo-500/20 transition-all text-center"
+                                    >
+                                        Upgrade
+                                    </Link>
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="flex flex-col items-center gap-4">
+                            <Link 
+                                href={getTargetHref("/dashboard/plans")}
+                                className={`p-2 rounded-xl transition-all ${dark ? "bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30" : "bg-indigo-50 text-indigo-600 hover:bg-indigo-100"}`}
+                                title="Upgrade Plan"
                             >
-                                <Icon size={18} className="shrink-0" />
-                                {sidebarOpen && <span>{displayLabel}</span>}
+                                <Zap size={18} fill="currentColor" />
                             </Link>
-                        )
-                    })}
-
-                    <button
-                        onClick={() => signOut({ callbackUrl: "/" })}
-                        className={`w-full flex items-center ${sidebarOpen ? "px-3" : "justify-center px-2"} py-2.5 rounded-xl transition-all text-[14px] font-medium gap-3 text-red-400 hover:bg-red-500/10`}
-                        title={!sidebarOpen ? t("logout") : undefined}
-                    >
-                        <LogOut size={18} className="shrink-0" />
-                        {sidebarOpen && <span>{t("logout")}</span>}
-                    </button>
+                        </div>
+                    )}
                 </div>
             </motion.aside>
 
@@ -422,11 +490,11 @@ function DashboardContent({ children }: { children: ReactNode }) {
                         >
                             <Menu size={20} />
                         </button>
-                        <h1 className="text-[16px] font-semibold tracking-tight capitalize italic sm:not-italic sm:normal-case">
+                        <h1 className="text-[16px] font-semibold tracking-tight italic sm:not-italic sm:normal-case">
                             {(() => {
-                                const allItems = navGroups.flatMap(g => g.items);
-                                const activeItem = allItems.find(n => isActive(n.href)) || bottomNavItems.find(n => isActive(n.href));
-                                return activeItem?.key ? t(activeItem.key as any) : activeItem?.label || t("dashboard");
+                                const allItems = navGroups.flatMap(g => g.items || (g.href ? [g] : []))
+                                const activeItem = allItems.find(n => n && isActive(n.href))
+                                return activeItem?.key ? t(activeItem.key as any) : activeItem?.label || t("dashboard")
                             })()}
                         </h1>
                         {/* DEBUG DATA */}
@@ -436,8 +504,8 @@ function DashboardContent({ children }: { children: ReactNode }) {
                         <span className={`px-2.5 py-1 text-nowrap rounded-full text-[12px] font-semibold ${subscription?.plan === 'Pro' ? dark ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400' : 'bg-amber-50 border border-amber-200 text-amber-700' : dark ? 'bg-zinc-500/10 border border-zinc-500/20 text-zinc-400' : 'bg-zinc-100 border border-zinc-200 text-zinc-600'}`}>
                             {subscription?.plan || "Normal"} Plan
                         </span>
-                        <Notifications ownerId={ownerId} />
                         <div className="flex items-center gap-1.5">
+                            <Notifications ownerId={ownerId} />
                             <button
                                 onClick={toggleDark}
                                 className={`p-2 rounded-xl relative ${dark ? "bg-zinc-800 hover:bg-zinc-700 text-zinc-300" : "bg-slate-100 hover:bg-slate-200 text-slate-600"} transition-all`}

@@ -4,6 +4,7 @@ import { ReactNode } from "react"
 import { CheckCircle2, Circle, ArrowRight, Package, CreditCard, Layout, Star, ArrowUpRight } from "lucide-react"
 import Link from "next/link"
 import * as Motion from "framer-motion/client"
+import { useDashboardStore } from "@/components/DashboardStoreProvider"
 
 interface StepProps {
     title: string
@@ -58,30 +59,31 @@ export default function SetupGuide({
     hasProducts: boolean, 
     hasPayment: boolean 
 }) {
+    const { t } = useDashboardStore()
     const steps = [
         {
-            title: "Store Identity",
-            description: "Give your store a unique name and personality.",
+            title: t("storeIdentity"),
+            description: t("storeIdentityDesc"),
             icon: Layout,
             isCompleted: !!storeName && storeName.length >= 3,
             href: "/dashboard/settings",
-            actionLabel: "Set Name"
+            actionLabel: t("setName")
         },
         {
-            title: "Add your first product",
-            description: "Enthusiastically add items to your inventory to start selling.",
+            title: t("addFirstProduct"),
+            description: t("addFirstProductDesc"),
             icon: Package,
             isCompleted: hasProducts,
             href: "/dashboard/products",
-            actionLabel: "Add Product"
+            actionLabel: t("addProduct")
         },
         {
-            title: "Configure Payments",
-            description: "Connect UPI, Razorpay or enable Cash on Delivery to receive payments.",
+            title: t("configurePayments"),
+            description: t("configurePaymentsDesc"),
             icon: CreditCard,
             isCompleted: hasPayment,
             href: "/dashboard/payment",
-            actionLabel: "Setup Payments"
+            actionLabel: t("setupPayments")
         }
     ]
 
@@ -96,13 +98,13 @@ export default function SetupGuide({
         >
             <div className="text-center mb-12">
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/10 text-indigo-500 rounded-full text-xs font-bold uppercase tracking-widest mb-6 border border-indigo-500/20">
-                    <Star size={12} className="fill-indigo-500" /> Getting Started
+                    <Star size={12} className="fill-indigo-500" /> {t("gettingStarted")}
                 </div>
                 <h1 className="text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white mb-4">
-                    Welcome to <span className="text-indigo-600">Qicmart</span>, {storeName}!
+                    {t("welcomeTo")} <span className="text-indigo-600">Qicmart</span>, {storeName}!
                 </h1>
                 <p className="text-zinc-500 dark:text-zinc-400 text-lg max-w-xl mx-auto">
-                    Complete these simple steps to activate your store dashboard and start growing your business.
+                    {t("completeSteps")}
                 </p>
             </div>
 
@@ -112,7 +114,7 @@ export default function SetupGuide({
                 
                 <div className="relative z-10">
                     <div className="flex items-center justify-between mb-4">
-                        <span className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-wider">Setup Progress</span>
+                        <span className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-wider">{t("setupProgress")}</span>
                         <span className="text-2xl font-black text-indigo-600">{progress}%</span>
                     </div>
                     <div className="w-full h-4 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
@@ -143,7 +145,7 @@ export default function SetupGuide({
             <div className="mt-12 p-8 bg-zinc-950 rounded-[32px] border border-white/5 text-center group cursor-pointer relative overflow-hidden">
                  <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                  <p className="text-zinc-400 text-sm font-medium relative z-10">
-                    Need help setting up? <Link href="#" className="text-white hover:text-indigo-400 underline underline-offset-4 decoration-indigo-500/50">Contact our support team</Link> or watch our <Link href="#" className="text-white hover:text-indigo-400 underline underline-offset-4 decoration-indigo-500/50">video guide</Link>.
+                    {t("needHelp")} <Link href="#" className="text-white hover:text-indigo-400 underline underline-offset-4 decoration-indigo-500/50">{t("supportTeam")}</Link> or watch our <Link href="#" className="text-white hover:text-indigo-400 underline underline-offset-4 decoration-indigo-500/50">{t("videoGuide")}</Link>.
                  </p>
             </div>
         </Motion.div>

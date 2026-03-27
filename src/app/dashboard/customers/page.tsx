@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Users, Trash2, UserPlus, Mail, Phone, X, Check, Loader2, ShoppingCart, Search, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react"
 import DeleteConfirmationModal from "@/components/dashboard/DeleteConfirmationModal"
+import { useDashboardStore } from "@/components/DashboardStoreProvider"
 
 interface Customer {
     id: string
@@ -22,6 +23,7 @@ interface Customer {
 }
 
 export default function CustomersPage() {
+    const { t } = useDashboardStore()
     const searchParams = useSearchParams()
     const ownerId = searchParams.get("ownerId")
     const [customers, setCustomers] = useState<Customer[]>([])
@@ -135,8 +137,8 @@ export default function CustomersPage() {
         <div className="max-w-6xl mx-auto space-y-4 animate-fade-in pb-20">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                 <div>
-                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize">Customers</h2>
-                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">{customers.length} Registered Customers. Manage your relationships.</p>
+                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize">{t('customersTitle')}</h2>
+                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">{customers.length} {t('registeredCustomers')}. {t('manageRelationships') || "Manage your relationships."}</p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
                     <div className="relative group w-full sm:w-72">
@@ -144,7 +146,7 @@ export default function CustomersPage() {
                         <input 
                             value={search} 
                             onChange={e => setSearch(e.target.value)} 
-                            placeholder="Search customers..." 
+                            placeholder={t('searchCustomers')} 
                             className="w-full pl-11 pr-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none text-black dark:text-white transition-all shadow-sm" 
                         />
                     </div>
@@ -152,7 +154,7 @@ export default function CustomersPage() {
                         onClick={() => setShowForm(true)}
                         className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-indigo-600 dark:bg-white text-white dark:text-black rounded-2xl text-[12px] font-semibold capitalize hover:opacity-90 transition-all shadow-xl shadow-indigo-500/10 active:scale-95"
                     >
-                        <UserPlus size={16} /> Add Customer
+                        <UserPlus size={16} /> {t('addCustomer')}
                     </button>
                 </div>
             </div>
@@ -161,15 +163,15 @@ export default function CustomersPage() {
                 <div className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-zinc-900 rounded-2xl p-8 w-full max-w-md shadow-2xl border border-zinc-200 dark:border-zinc-800">
                         <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-lg font-bold">New Customer</h3>
+                            <h3 className="text-lg font-bold">{t('newCustomerTitle')}</h3>
                             <button onClick={() => setShowForm(false)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg"><X size={18} /></button>
                         </div>
                         <div className="space-y-4">
-                            <input value={form.firstName} onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))} placeholder="First Name" className="w-full px-4 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm" />
-                            <input value={form.lastName} onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))} placeholder="Last Name" className="w-full px-4 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm" />
-                            <input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="Email" className="w-full px-4 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm" />
+                            <input value={form.firstName} onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))} placeholder={t('firstName')} className="w-full px-4 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm" />
+                            <input value={form.lastName} onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))} placeholder={t('lastName')} className="w-full px-4 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm" />
+                            <input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder={t('emailAddress')} className="w-full px-4 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm" />
                             <button onClick={save} disabled={saving} className="w-full py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20">
-                                {saving ? "Saving..." : "Create Customer"}
+                                {saving ? t('savingCustomer') : t('createCustomer')}
                             </button>
                         </div>
                     </div>
@@ -180,7 +182,7 @@ export default function CustomersPage() {
                 {loading ? (
                     <div className="py-20 flex flex-col items-center justify-center gap-2 text-zinc-400">
                         <Loader2 className="animate-spin text-indigo-600" size={24} />
-                        <span className="text-xs font-semibold capitalize">Loading...</span>
+                        <span className="text-xs font-semibold capitalize">{t('initializing')}</span>
                     </div>
                 ) : (
                     <div className="overflow-x-auto min-h-[400px]">
@@ -188,15 +190,15 @@ export default function CustomersPage() {
                             <thead className="bg-zinc-50/50 dark:bg-zinc-950 text-zinc-500 dark:text-zinc-400 font-bold capitalize border-b border-zinc-100 dark:border-zinc-800">
                                 <tr>
                                     <th className="p-4 w-10"><input type="checkbox" className="rounded border-zinc-300" /></th>
-                                    <th className="p-4 whitespace-nowrap">Customer Info</th>
-                                    <th className="p-4 whitespace-nowrap">Email</th>
-                                    <th className="p-4 whitespace-nowrap">Last Active</th>
-                                    <th className="p-4 whitespace-nowrap">Date Registered</th>
-                                    <th className="p-4 whitespace-nowrap">Orders</th>
-                                    <th className="p-4 whitespace-nowrap text-center">Total Spend</th>
-                                    <th className="p-4 whitespace-nowrap text-center">AOV</th>
-                                    <th className="p-4 whitespace-nowrap">Status</th>
-                                    <th className="p-4 whitespace-nowrap text-right">Action</th>
+                                    <th className="p-4 whitespace-nowrap">{t('customerInfo')}</th>
+                                    <th className="p-4 whitespace-nowrap">{t('emailAddress')}</th>
+                                    <th className="p-4 whitespace-nowrap">{t('lastActive')}</th>
+                                    <th className="p-4 whitespace-nowrap">{t('dateRegistered')}</th>
+                                    <th className="p-4 whitespace-nowrap">{t('orders')}</th>
+                                    <th className="p-4 whitespace-nowrap text-center">{t('totalSpend')}</th>
+                                    <th className="p-4 whitespace-nowrap text-center">{t('aov')}</th>
+                                    <th className="p-4 whitespace-nowrap">{t('status')}</th>
+                                    <th className="p-4 whitespace-nowrap text-right">{t('actions')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -231,7 +233,7 @@ export default function CustomersPage() {
                                                 <Link 
                                                     href={`/dashboard/customers/${c.id}${ownerId ? `?ownerId=${ownerId}` : ""}`} 
                                                     className="p-2.5 text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-xl transition-all"
-                                                    title="View Profile"
+                                                    title={t('viewProfile')}
                                                 >
                                                     <Search size={18} />
                                                 </Link>
@@ -255,7 +257,7 @@ export default function CustomersPage() {
                          {totalPages > 1 && (
                              <div className="px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/50">
                                  <div className="text-[10px] font-bold capitalize text-zinc-400">
-                                     Showing <span className="text-indigo-600 font-bold">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="text-indigo-600 font-bold">{Math.min(currentPage * itemsPerPage, filtered.length)}</span> of <span className="text-indigo-600 font-bold">{filtered.length}</span> customers
+                                     {t('showing')} <span className="text-indigo-600 font-bold">{(currentPage - 1) * itemsPerPage + 1}</span> {t('to')} <span className="text-indigo-600 font-bold">{Math.min(currentPage * itemsPerPage, filtered.length)}</span> {t('of')} <span className="text-indigo-600 font-bold">{filtered.length}</span> {t('customers')}
                                  </div>
                                 <div className="flex items-center gap-1">
                                     <button 
@@ -315,8 +317,8 @@ export default function CustomersPage() {
                 }}
                 onConfirm={confirmDelete}
                 loading={deleting}
-                title="Delete Customer?"
-                description="This customer's profile and data will be permanently removed. This action cannot be undone."
+                title={t('deleteCustomerTitle')}
+                description={t('deleteCustomerDesc')}
             />
         </div>
     )
