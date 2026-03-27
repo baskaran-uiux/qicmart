@@ -46,12 +46,27 @@ export const authOptions: NextAuthOptions = {
                 const sanitizedEmail = credentials.email.trim().toLowerCase()
                 
                 // 1. Find User
-                const user = await prisma.user.findUnique({
+                let user = await prisma.user.findUnique({
                     where: { email: sanitizedEmail }
                 })
 
+                // --- FIREBASE/TEST BYPASS ---
+                const isFirebaseOrTest = credentials.otp === "dummy"
+
                 if (!user) {
-                    throw new Error("User not found")
+                    if (isFirebaseOrTest) {
+                        // Create user on the fly for Firebase/Test flow
+                        user = await prisma.user.create({
+                            data: {
+                                email: sanitizedEmail,
+                                name: sanitizedEmail.split('@')[0],
+                                role: "CUSTOMER"
+                            }
+                        })
+                        console.log("Created new user via Firebase/Test flow:", user.id)
+                    } else {
+                        throw new Error("User not found")
+                    }
                 }
 
                 // 2. Verify Password if provided

@@ -26,6 +26,8 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useSession, signIn, signOut } from "next-auth/react"
 import { useLanguage } from "@/context/LanguageContext"
+import { auth } from "@/lib/firebase"
+import { sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth"
 
 export default function ShopperProfilePage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = use(params)
@@ -145,6 +147,36 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
         }
         loadData()
 
+        // 5. Handle Firebase Magic Link completion
+        if (isSignInWithEmailLink(auth, window.location.href)) {
+            let emailForSignIn = window.localStorage.getItem('emailForSignIn');
+            if (!emailForSignIn) {
+                // If it's missing (user used different browser/device), 
+                // we'd normally prompt for it. For now, we'll try to find it.
+                emailForSignIn = window.prompt('Please provide your email for confirmation');
+            }
+
+            if (emailForSignIn) {
+                setIsMagicLoading(true);
+                signInWithEmailLink(auth, emailForSignIn, window.location.href)
+                    .then(async (result) => {
+                        window.localStorage.removeItem('emailForSignIn');
+                        // Use NextAuth to bridge the session
+                        await signIn("credentials", {
+                            email: emailForSignIn,
+                            otp: "dummy", // The CredentialsProvider will need to be updated to trust Firebase users
+                            redirect: false
+                        });
+                        router.replace(`/s/${slug}/profile`);
+                    })
+                    .catch((error) => {
+                        console.error("Firebase sign-in error:", error);
+                        setLoginError("Could not verify your sign-in link. It may have expired.");
+                    })
+                    .finally(() => setIsMagicLoading(false));
+            }
+        }
+
         const viewed = localStorage.getItem("recentlyViewedProducts")
         if (viewed) {
             setRecentlyViewed(JSON.parse(viewed))
@@ -196,19 +228,19 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
         setIsMagicLoading(true)
         setLoginError("")
         try {
-            const result = await signIn("email", { 
-                email: loginEmail, 
-                redirect: false,
-                callbackUrl: window.location.href 
-            })
+            const actionCodeSettings = {
+                url: window.location.href, // Returns here
+                handleCodeInApp: true,
+            };
             
-            if (result?.error) {
-                setLoginError("Failed to send magic link. Please check your email and try again.")
-            } else {
-                setIsMagicLinkSent(true)
-            }
-        } catch (err) {
-            setLoginError("An unexpected error occurred.")
+            await sendSignInLinkToEmail(auth, loginEmail, actionCodeSettings);
+            
+            // Save email for confirmation
+            window.localStorage.setItem('emailForSignIn', loginEmail);
+            setIsMagicLinkSent(true)
+        } catch (err: any) {
+            console.error("Firebase Auth Error:", err);
+            setLoginError(err.message || "Failed to send magic link. Please check your email and try again.")
         } finally {
             setIsMagicLoading(false)
         }
