@@ -20,6 +20,15 @@ export async function GET(req: Request) {
     const store = await getStoreForDashboard(targetUserId, dashboardType)
     if (!store) return NextResponse.json([])
 
+    const id = searchParams.get("id")
+    if (id) {
+        const product = await prisma.product.findUnique({
+            where: { id, storeId: store.id },
+            include: { category: { select: { name: true } } }
+        })
+        return NextResponse.json(product)
+    }
+
     const products = await prisma.product.findMany({
         where: { storeId: store.id },
         orderBy: { createdAt: "desc" },

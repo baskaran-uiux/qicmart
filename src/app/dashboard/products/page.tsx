@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, Search, Filter, MoreHorizontal, Pencil, Trash2, Package, LayoutGrid, List, ChevronLeft, ChevronRight, Loader2, X, Upload, Check, AlertCircle, Eye, Star, Image as ImageIcon, Zap, Download, RefreshCw } from "lucide-react"
+import { Search, Pencil, Trash2, Package, ChevronLeft, ChevronRight, Loader2, Check, AlertCircle, Star, Zap, Download, RefreshCw } from "lucide-react"
 import DeleteConfirmationModal from "@/components/dashboard/DeleteConfirmationModal"
+import { useRouter } from "next/navigation"
 import { useDashboardStore } from "@/components/DashboardStoreProvider"
 import { motion } from "framer-motion"
 
@@ -32,48 +33,20 @@ interface Product {
 interface Category { id: string; name: string }
 
 export default function ProductsPage() {
+    const router = useRouter()
     const { currency, subscription } = useDashboardStore()
     const [products, setProducts] = useState<Product[]>([])
     const [categories, setCategories] = useState<Category[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState("")
-    const [editItem, setEditItem] = useState<Product | null>(null)
     const [deletingId, setDeletingId] = useState<string | null>(null)
-    const [uploading, setUploading] = useState(false)
-    const [saving, setSaving] = useState(false)
-    const [isModalOpen, setIsModalOpen] = useState(false)
-    const [viewItem, setViewItem] = useState<Product | null>(null)
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [productToDelete, setProductToDelete] = useState<string | null>(null)
     const [deleting, setDeleting] = useState(false)
-    const [isDirty, setIsDirty] = useState(false)
-    const [initialForm, setInitialForm] = useState<any>(null)
-    const [lastSaved, setLastSaved] = useState<string | null>(null)
     const [currentPage, setCurrentPage] = useState(1)
     const itemsPerPage = 15
     const [isBulkMode, setIsBulkMode] = useState(false)
     const [bulkStocks, setBulkStocks] = useState<Record<string, number>>({})
-    const [form, setForm] = useState({
-        name: "", 
-        description: "",
-        type: "SIMPLE",
-        price: "", 
-        compareAtPrice: "", 
-        stock: "", 
-        sku: "",
-        categoryId: "",
-        isActive: true, 
-        isBestSeller: false,
-        imageUrl: "",
-        gallery: [] as string[],
-        attributes: [] as { name: string, values: string[] }[],
-        variations: [] as any[],
-        weight: "", length: "", width: "", height: "",
-        seoTitle: "",
-        seoDescription: "",
-        focusKeyword: "",
-        seoScore: 0,
-    })
 
     const fetch_ = async () => {
         setLoading(true)
@@ -111,288 +84,15 @@ export default function ProductsPage() {
         setCurrentPage(1)
     }, [search])
 
-    useEffect(() => {
-        const calculateScore = () => {
-            let s = 0
-            const title = form.seoTitle || form.name
-            const desc = form.seoDescription || form.description
-            const kw = form.focusKeyword.toLowerCase()
-
-            if (kw) {
-                s += 20
-                if (title.toLowerCase().includes(kw)) s += 30
-                if (desc.toLowerCase().includes(kw)) s += 20
-            }
-            if (title.length >= 40 && title.length <= 60) s += 15
-            if (desc.length >= 120 && desc.length <= 160) s += 15
-            
-            setForm(f => ({ ...f, seoScore: s }))
-        }
-        calculateScore()
-    }, [form.name, form.description, form.focusKeyword, form.seoTitle, form.seoDescription])
-
     const openEdit = (p: Product) => {
-        setEditItem(p)
-        let imgs: string[] = []
-        try { imgs = JSON.parse(p.images) } catch { }
-        
-        let attrs = []
-        try { attrs = JSON.parse(p.attributes || "[]") } catch { }
-        
-        let vars = []
-        try { vars = JSON.parse(p.variations || "[]") } catch { }
-
-        const initial = {
-            name: p.name,
-            description: p.description || "",
-            type: p.type || "SIMPLE",
-            price: String(p.price),
-            compareAtPrice: p.compareAtPrice ? String(p.compareAtPrice) : "",
-            stock: String(p.stock),
-            sku: p.sku || "",
-            categoryId: p.categoryId || "",
-            isActive: p.isActive,
-            isBestSeller: p.isBestSeller,
-            imageUrl: imgs[0] || "",
-            gallery: imgs,
-            attributes: attrs,
-            variations: vars,
-            weight: p.weight ? String(p.weight) : "",
-            length: p.length ? String(p.length) : "",
-            width: p.width ? String(p.width) : "",
-            height: p.height ? String(p.height) : "",
-            seoTitle: (p as any).seoTitle || "",
-            seoDescription: (p as any).seoDescription || "",
-            focusKeyword: (p as any).focusKeyword || "",
-            seoScore: (p as any).seoScore || 0,
-        }
-        setForm(initial)
-        setInitialForm(initial)
-        setIsDirty(false)
-        setIsModalOpen(true)
+        const params = new URLSearchParams(window.location.search)
+        const ownerId = params.get("ownerId")
+        router.push(ownerId ? `/dashboard/products/${p.id}/edit?ownerId=${ownerId}` : `/dashboard/products/${p.id}/edit`)
     }
     const openAdd = () => {
-        setEditItem(null)
-        const initial = {
-            name: "", description: "", type: "SIMPLE", price: "", compareAtPrice: "", stock: "", sku: "", 
-            categoryId: "", isActive: true, isBestSeller: false, imageUrl: "", gallery: [], 
-            attributes: [], variations: [], weight: "", length: "", width: "", height: "",
-            seoTitle: "", seoDescription: "", focusKeyword: "", seoScore: 0,
-        }
-        setForm(initial)
-        setInitialForm(initial)
-        setIsDirty(false)
-        setIsModalOpen(true)
-    }
-
-    const handleAutoSave = async () => {
-        if (!editItem || !form.name.trim()) return
-        
-        // Check if actually changed from last initial form
-        if (JSON.stringify(form) === JSON.stringify(initialForm)) return
-
-        setSaving(true)
-        const allImages = [...form.gallery]
-        if (form.imageUrl && !allImages.includes(form.imageUrl)) {
-            allImages.unshift(form.imageUrl)
-        }
-        const images = JSON.stringify(allImages)
-        
-        const formattedVariations = form.variations.map(v => ({
-            ...v,
-            price: parseFloat(String(v.price)) || 0,
-            stock: parseInt(String(v.stock)) || 0
-        }))
-
-        const payload = {
-            id: editItem.id,
-            name: form.name,
-            description: form.description,
-            type: form.type,
-            price: parseFloat(form.price) || 0,
-            compareAtPrice: form.compareAtPrice ? parseFloat(form.compareAtPrice) : null,
-            stock: parseInt(form.stock) || 0,
-            sku: form.sku,
-            images,
-            attributes: JSON.stringify(form.attributes),
-            variations: JSON.stringify(formattedVariations),
-            categoryId: form.categoryId || null,
-            weight: parseFloat(form.weight) || null,
-            length: parseFloat(form.length) || null,
-            width: parseFloat(form.width) || null,
-            height: parseFloat(form.height) || null,
-            isActive: form.isActive,
-            isBestSeller: form.isBestSeller,
-            seoTitle: form.seoTitle,
-            seoDescription: form.seoDescription,
-            focusKeyword: form.focusKeyword,
-            seoScore: form.seoScore,
-        }
-
         const params = new URLSearchParams(window.location.search)
         const ownerId = params.get("ownerId")
-        const url = ownerId ? `/api/dashboard/products?ownerId=${ownerId}` : "/api/dashboard/products"
-
-        try {
-            const res = await fetch(url, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-            })
-
-            if (res.ok) {
-                setInitialForm({ ...form })
-                setIsDirty(false)
-                setLastSaved(new Date().toLocaleTimeString())
-                // Optionally refresh list in background
-                const pRes = await fetch(ownerId ? `/api/dashboard/products?ownerId=${ownerId}` : "/api/dashboard/products")
-                const pData = await pRes.json()
-                setProducts(Array.isArray(pData) ? pData : [])
-            }
-        } catch (err) {
-            console.error("Auto-save failed:", err)
-        } finally {
-            setSaving(false)
-        }
-    }
-
-    useEffect(() => {
-        if (!isModalOpen || !editItem) return
-        
-        const hasChanged = JSON.stringify(form) !== JSON.stringify(initialForm)
-        setIsDirty(hasChanged)
-
-        if (hasChanged) {
-            const timer = setTimeout(() => {
-                handleAutoSave()
-            }, 2000)
-            return () => clearTimeout(timer)
-        }
-    }, [form, isModalOpen, editItem])
-
-    const generateVariations = () => {
-        if (form.attributes.length === 0) return
-        
-        // Generate Cartesian product
-        const generate = (index: number, current: any): any[] => {
-            if (index === form.attributes.length) {
-                // Check if this variation already exists to preserve its data
-                const existing = form.variations.find(v => 
-                    Object.entries(current).every(([name, value]) => v.options[name] === value)
-                )
-
-                return [{
-                    sku: existing?.sku || `${form.sku}-${Object.values(current).join("-")}`,
-                    price: existing?.price || form.price,
-                    stock: existing?.stock || form.stock,
-                    image: existing?.image || form.imageUrl,
-                    options: { ...current }
-                }]
-            }
-            
-            const attribute = form.attributes[index]
-            let results: any[] = []
-            for (const val of attribute.values) {
-                results = [...results, ...generate(index + 1, { ...current, [attribute.name]: val })]
-            }
-            return results
-        }
-        
-        const newVariations = generate(0, {})
-        setForm(f => ({ ...f, variations: newVariations }))
-    }
-
-    const handleVariationImage = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (!file) return
-
-        setUploading(true)
-        const formData = new FormData()
-        formData.append("file", file)
-
-        try {
-            const params = new URLSearchParams(window.location.search)
-            const ownerId = params.get("ownerId")
-            const url = ownerId ? `/api/dashboard/media?ownerId=${ownerId}` : "/api/dashboard/media"
-            const res = await fetch(url, { method: "POST", body: formData })
-            const data = await res.json()
-            if (data.url) {
-                const newVars = [...form.variations]
-                newVars[index].image = data.url
-                setForm(f => ({ ...f, variations: newVars }))
-            }
-        } catch (err) {
-            console.error(err)
-            alert("Failed to upload image")
-        }
-        setUploading(false)
-    }
-
-    const save = async () => {
-        if (!form.name.trim()) {
-            alert("Product name is required")
-            return
-        }
-        
-        if (editItem) {
-            await handleAutoSave()
-            setIsModalOpen(false)
-            return
-        }
-
-        setSaving(true)
-        const allImages = [...form.gallery]
-        if (form.imageUrl && !allImages.includes(form.imageUrl)) {
-            allImages.unshift(form.imageUrl)
-        }
-        const images = JSON.stringify(allImages)
-        
-        const formattedVariations = form.variations.map(v => ({
-            ...v,
-            price: parseFloat(String(v.price)) || 0,
-            stock: parseInt(String(v.stock)) || 0
-        }))
-
-        const payload = {
-            name: form.name,
-            description: form.description,
-            type: form.type,
-            price: parseFloat(form.price) || 0,
-            compareAtPrice: form.compareAtPrice ? parseFloat(form.compareAtPrice) : null,
-            stock: parseInt(form.stock) || 0,
-            sku: form.sku,
-            images,
-            attributes: JSON.stringify(form.attributes),
-            variations: JSON.stringify(formattedVariations),
-            categoryId: form.categoryId || null,
-            weight: parseFloat(form.weight) || null,
-            length: parseFloat(form.length) || null,
-            width: parseFloat(form.width) || null,
-            height: parseFloat(form.height) || null,
-            isActive: form.isActive,
-            isBestSeller: form.isBestSeller,
-            seoTitle: form.seoTitle,
-            seoDescription: form.seoDescription,
-            focusKeyword: form.focusKeyword,
-            seoScore: form.seoScore,
-        }
-
-        const params = new URLSearchParams(window.location.search)
-        const ownerId = params.get("ownerId")
-        const url = ownerId ? `/api/dashboard/products?ownerId=${ownerId}` : "/api/dashboard/products"
-
-        const res = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        })
-
-        if (res.ok) {
-            setEditItem(null)
-            fetch_()
-            setIsModalOpen(false)
-        }
-        setSaving(false)
+        router.push(ownerId ? `/dashboard/products/new?ownerId=${ownerId}` : `/dashboard/products/new`)
     }
 
     const confirmDelete = async () => {
@@ -438,54 +138,6 @@ export default function ProductsPage() {
         } catch (error) {
             console.error(error)
         }
-    }
-
-    const handleImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (!file) return
-
-        setUploading(true)
-        const formData = new FormData()
-        formData.append("file", file)
-
-        try {
-            const params = new URLSearchParams(window.location.search)
-            const ownerId = params.get("ownerId")
-            const url = ownerId ? `/api/dashboard/media?ownerId=${ownerId}` : "/api/dashboard/media"
-            const res = await fetch(url, { method: "POST", body: formData })
-            const data = await res.json()
-            if (data.url) setForm(f => ({ ...f, imageUrl: data.url }))
-        } catch (err) {
-            console.error(err)
-            alert("Failed to upload image")
-        }
-        setUploading(false)
-    }
-
-    const handleGalleryFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = Array.from(e.target.files || [])
-        if (files.length === 0) return
-
-        setUploading(true)
-        const uploadedUrls: string[] = []
-
-        for (const file of files) {
-            const formData = new FormData()
-            formData.append("file", file)
-            try {
-                const params = new URLSearchParams(window.location.search)
-                const ownerId = params.get("ownerId")
-                const url = ownerId ? `/api/dashboard/media?ownerId=${ownerId}` : "/api/dashboard/media"
-                const res = await fetch(url, { method: "POST", body: formData })
-                const data = await res.json()
-                if (data.url) uploadedUrls.push(data.url)
-            } catch (err) {
-                console.error(err)
-            }
-        }
-
-        setForm(f => ({ ...f, gallery: [...f.gallery, ...uploadedUrls] }))
-        setUploading(false)
     }
 
     const filtered = (Array.isArray(products) ? products : []).filter(p => 
@@ -534,7 +186,7 @@ export default function ProductsPage() {
         document.body.removeChild(link)
     }
 
-    const containerVariants = {
+    const containerVariants: import("framer-motion").Variants = {
         hidden: { opacity: 0 },
         visible: {
             opacity: 1,
@@ -544,7 +196,7 @@ export default function ProductsPage() {
         }
     }
 
-    const itemVariants = {
+    const itemVariants: import("framer-motion").Variants = {
         hidden: { y: 20, opacity: 0 },
         visible: {
             y: 0,
@@ -584,7 +236,6 @@ export default function ProductsPage() {
                     {isBulkMode && (
                         <button 
                             onClick={async () => {
-                                setSaving(true)
                                 try {
                                     const updates = Object.entries(bulkStocks).map(([id, stock]) => ({ id, stock }))
                                     const params = new URLSearchParams(window.location.search)
@@ -599,8 +250,8 @@ export default function ProductsPage() {
                                         fetch_()
                                         setIsBulkMode(false)
                                     }
-                                } finally {
-                                    setSaving(false)
+                                } catch (error) {
+                                    console.error("Bulk update failed:", error)
                                 }
                             }}
                             className="flex-1 sm:flex-none px-6 py-3.5 bg-emerald-600 text-white rounded-2xl text-[10px] font-bold capitalize flex items-center justify-center gap-2 transition-all hover:bg-emerald-700 active:scale-95 shadow-xl shadow-emerald-600/20"
@@ -616,15 +267,15 @@ export default function ProductsPage() {
                     </button>
                     <button 
                         onClick={() => {
-                            if (isAtLimit && !editItem) {
+                            if (isAtLimit) {
                                 alert(`You have reached the product limit (${maxProducts}) for your Normal plan. Please upgrade to Pro to add more.`);
                                 return;
                             }
                             openAdd();
                         }}
-                        className={`flex-1 sm:flex-none px-8 py-3.5 ${isAtLimit && !editItem ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-500 cursor-not-allowed" : "bg-indigo-600 dark:bg-white text-white dark:text-black hover:opacity-90 active:scale-95"} rounded-2xl text-[10px] font-bold capitalize flex items-center justify-center gap-2 shadow-xl transition-all shadow-indigo-500/10`}
+                        className={`flex-1 sm:flex-none px-8 py-3.5 ${isAtLimit ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-500 cursor-not-allowed" : "bg-indigo-600 dark:bg-white text-white dark:text-black hover:opacity-90 active:scale-95"} rounded-2xl text-[10px] font-bold capitalize flex items-center justify-center gap-2 shadow-xl transition-all shadow-indigo-500/10`}
                     >
-                        <Package size={18} /> + Add Product {isAtLimit && !editItem && "🔒"}
+                        <Package size={18} /> + Add Product {isAtLimit && "🔒"}
                     </button>
                 </div>
             </div>
@@ -688,545 +339,6 @@ export default function ProductsPage() {
                     className="w-full pl-11 pr-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none text-black dark:text-white transition-all shadow-sm md:w-64" 
                 />
             </div>
-
-            {/* Quick View Modal */}
-            {viewItem && (
-                <div className="fixed inset-0 z-[70] bg-black/40 dark:bg-black/90 backdrop-blur-xl overflow-y-auto py-8 transition-all duration-500 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[40px] w-full max-w-4xl shadow-2xl relative animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-hidden flex flex-col">
-                        <div className="p-8 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between shrink-0">
-                            <div>
-                                <h3 className="font-bold text-2xl text-slate-900 dark:text-white">Quick View</h3>
-                                <p className="text-zinc-400 text-sm mt-1">{viewItem.name}</p>
-                            </div>
-                            <button onClick={() => setViewItem(null)} className="p-3 text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-2xl transition-all"><X size={24} /></button>
-                        </div>
-                        
-                        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                                {/* Images */}
-                                <div className="space-y-4">
-                                    <div className="aspect-square rounded-3xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
-                                        {JSON.parse(viewItem.images)[0] ? (
-                                            <img src={JSON.parse(viewItem.images)[0]} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-zinc-300">
-                                                <ImageIcon size={48} />
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="flex flex-wrap gap-2">
-                                        {JSON.parse(viewItem.images).map((img: string, i: number) => (
-                                            <img key={i} src={img} className="w-16 h-16 rounded-xl object-cover border border-zinc-200 dark:border-zinc-800" />
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Details */}
-                                <div className="space-y-8">
-                                    <div>
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <span className="text-[10px] font-bold capitalize tracking-wide px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20">{viewItem.type}</span>
-                                            {viewItem.isActive ? (
-                                                <span className="text-[10px] font-bold capitalize tracking-wide px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-500/20">Active</span>
-                                            ) : (
-                                                <span className="text-[10px] font-bold capitalize tracking-wide px-2 py-0.5 rounded-full bg-zinc-50 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 border border-zinc-100 dark:border-zinc-700">Draft</span>
-                                            )}
-                                        </div>
-                                        <h4 className="text-3xl font-medium text-black dark:text-white">{viewItem.name}</h4>
-                                        <p className="text-zinc-500 dark:text-zinc-400 mt-2 text-sm leading-relaxed">{viewItem.description || "No description provided."}</p>
-                                    </div>
-
-                                    <div className="flex items-center gap-6">
-                                        <div className="space-y-1">
-                                            <p className="text-[10px] font-semibold text-zinc-400 capitalize">Price</p>
-                                            <p className="text-3xl font-bold text-black dark:text-white">
-                                                {currency === "MYR" ? "RM" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "₹"}{viewItem.price.toFixed(2)}
-                                            </p>
-                                        </div>
-                                        {viewItem.compareAtPrice && (
-                                            <div className="space-y-1">
-                                                <p className="text-[10px] font-semibold text-zinc-400 capitalize">MRP</p>
-                                                <p className="text-xl font-bold text-zinc-400 line-through">
-                                                    {currency === "MYR" ? "RM" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "₹"}{viewItem.compareAtPrice.toFixed(2)}
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-3xl border border-zinc-100 dark:border-zinc-700">
-                                            <p className="text-[10px] font-semibold text-zinc-400 capitalize mb-1">Stock</p>
-                                            <p className="text-lg font-bold text-black dark:text-white">{viewItem.stock} Units</p>
-                                        </div>
-                                        <div className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-3xl border border-zinc-100 dark:border-zinc-700">
-                                            <p className="text-[10px] font-semibold text-zinc-400 capitalize mb-1">SKU</p>
-                                            <p className="text-lg font-bold text-black dark:text-white truncate">{viewItem.sku || "—"}</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Logistics Read-only */}
-                                    <div className="space-y-3">
-                                        <p className="text-[10px] font-semibold text-zinc-400 capitalize">Specifications</p>
-                                        <div className="grid grid-cols-4 gap-2">
-                                            <div className="p-3 bg-zinc-50 dark:bg-zinc-800 rounded-2xl text-center">
-                                                <p className="text-[8px] font-bold text-zinc-400 capitalize">WT</p>
-                                                <p className="text-xs font-bold">{viewItem.weight || 0}kg</p>
-                                            </div>
-                                            <div className="p-3 bg-zinc-50 dark:bg-zinc-800 rounded-2xl text-center">
-                                                <p className="text-[8px] font-bold text-zinc-400 capitalize">L</p>
-                                                <p className="text-xs font-bold">{viewItem.length || 0}cm</p>
-                                            </div>
-                                            <div className="p-3 bg-zinc-50 dark:bg-zinc-800 rounded-2xl text-center">
-                                                <p className="text-[8px] font-bold text-zinc-400 capitalize">W</p>
-                                                <p className="text-xs font-bold">{viewItem.width || 0}cm</p>
-                                            </div>
-                                            <div className="p-3 bg-zinc-50 dark:bg-zinc-800 rounded-2xl text-center">
-                                                <p className="text-[8px] font-bold text-zinc-400 capitalize">H</p>
-                                                <p className="text-xs font-bold">{viewItem.height || 0}cm</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Attributes & Variations */}
-                            {viewItem.type === "VARIABLE" && (
-                                <div className="mt-10 pt-10 border-t border-zinc-100 dark:border-zinc-800 space-y-8">
-                                    <div className="space-y-4">
-                                        <h5 className="text-[10px] font-bold text-black dark:text-white capitalize italic">Defined Attributes</h5>
-                                        <div className="flex flex-wrap gap-3">
-                                            {JSON.parse(viewItem.attributes).map((attr: any, i: number) => (
-                                                <div key={i} className="p-4 bg-white dark:bg-zinc-800 rounded-2xl border border-zinc-100 dark:border-zinc-700 shadow-sm">
-                                                    <p className="text-[10px] font-semibold text-zinc-400 capitalize mb-1">{attr.name}</p>
-                                                    <div className="flex flex-wrap gap-1.5">
-                                                        {(Array.isArray(attr.values) ? attr.values.flatMap((v: any) => typeof v === 'string' ? v.split('|') : [v]) : []).map((v: string, j: number) => (
-                                                            <span key={j} className="px-2 py-0.5 bg-zinc-100 dark:bg-zinc-900 rounded-md text-[10px] font-bold">{v}</span>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <h5 className="text-[10px] font-bold text-black dark:text-white capitalize italic">Variation Matrix</h5>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                            {JSON.parse(viewItem.variations).map((v: any, i: number) => (
-                                                <div key={i} className="p-4 bg-white dark:bg-zinc-800 rounded-3xl border border-zinc-100 dark:border-zinc-700 shadow-sm flex items-center gap-4">
-                                                    <div className="w-12 h-12 rounded-xl bg-zinc-100 dark:bg-zinc-900 overflow-hidden border border-zinc-100 dark:border-zinc-800 shrink-0">
-                                                        {v.image && <img src={v.image} className="w-full h-full object-cover" />}
-                                                    </div>
-                                                    <div className="min-w-0">
-                                                        <p className="text-[10px] font-bold text-black dark:text-white capitalize truncate">{Object.values(v.options).join(" • ")}</p>
-                                                        <p className="text-[10px] font-bold text-zinc-400 truncate tracking-tighter">{currency === "MYR" ? "RM" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "₹"}{v.price} • {v.stock} in stock</p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                        
-                        <div className="p-8 border-t border-zinc-100 dark:border-zinc-800 flex gap-4 shrink-0">
-                            <button onClick={() => setViewItem(null)} className="flex-1 px-8 py-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 rounded-2xl font-bold capitalize text-[10px] hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all">Close</button>
-                            <button 
-                                onClick={() => {
-                                    const p = viewItem;
-                                    setViewItem(null);
-                                    openEdit(p);
-                                }} 
-                                className="flex-1 px-8 py-4 bg-indigo-600 dark:bg-white text-white dark:text-black rounded-2xl font-bold capitalize text-[10px] shadow-xl shadow-indigo-500/20 hover:scale-105 active:scale-95 transition-all"
-                            >
-                                Edit Product
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-
-            {/* Edit Modal */}
-            {isModalOpen && (
-                <div className="fixed inset-0 z-[60] bg-black/40 dark:bg-black/90 backdrop-blur-xl flex items-center justify-center p-0 sm:p-4 animate-in fade-in duration-300">
-                    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-t-[32px] sm:rounded-[40px] w-full max-w-5xl shadow-2xl relative overflow-hidden flex flex-col max-h-[92vh]">
-                        {/* Header */}
-                        <div className="p-8 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between shrink-0">
-                            <div>
-                                <h3 className="text-xl font-bold text-black dark:text-white tracking-tighter italic">{editItem ? "Edit Product" : "New Product"}</h3>
-                                <p className="text-zinc-500 dark:text-zinc-400 text-[10px] font-semibold capitalize mt-1">Configure your product listings accurately</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button 
-                                    onClick={() => setForm(f => ({ ...f, isBestSeller: !f.isBestSeller }))} 
-                                    className={`p-3 rounded-2xl transition-all ${form.isBestSeller ? "text-amber-500 bg-amber-50 dark:bg-amber-500/10" : "text-zinc-400 hover:text-amber-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"}`}
-                                    title="Toggle Best Seller"
-                                >
-                                    <Star size={20} fill={form.isBestSeller ? "currentColor" : "none"} />
-                                </button>
-                                <button onClick={() => setIsModalOpen(false)} className="p-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-2xl transition-all"><X size={20} /></button>
-                            </div>
-                        </div>
-
-                        {/* Scrollable Content */}
-                        <div className="flex-1 overflow-y-auto p-8 sm:p-12 space-y-12 custom-scrollbar">
-                            {/* Media Section */}
-                            <div className="space-y-4">
-                                <label className="text-[10px] font-semibold text-zinc-400 capitalize">Product Imagery</label>
-                                <div className="p-6 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-[32px] space-y-6">
-                                    <div className="flex gap-6 items-start">
-                                        <div className="w-24 h-24 rounded-[28px] bg-white dark:bg-zinc-900 border-2 border-dashed border-zinc-200 dark:border-zinc-800 overflow-hidden flex items-center justify-center shrink-0">
-                                            {form.imageUrl ? <img src={form.imageUrl} alt="" className="w-full h-full object-cover" /> : <ImageIcon size={32} className="text-zinc-300" />}
-                                        </div>
-                                        <div className="flex-1 space-y-4">
-                                            <input value={form.imageUrl} onChange={e => setForm(f => ({ ...f, imageUrl: e.target.value }))} placeholder="Paste image URL..." className="w-full px-5 py-4 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-sm font-bold placeholder-zinc-400 outline-none focus:ring-2 focus:ring-black/5" />
-                                            <div className="flex items-center gap-3">
-                                                <label className="cursor-pointer">
-                                                    <div className="px-6 py-2.5 bg-indigo-600 dark:bg-white text-white dark:text-black rounded-xl hover:opacity-90 flex items-center gap-2.5 text-[10px] font-bold capitalize transition-all shadow-indigo-500/10">
-                                                        <Upload size={14} /> Upload Main
-                                                    </div>
-                                                    <input type="file" className="hidden" accept="image/*" onChange={handleImageFile} />
-                                                </label>
-                                                <label className="cursor-pointer">
-                                                    <div className="px-6 py-2.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-xl hover:bg-zinc-200 flex items-center gap-2 text-[10px] font-bold capitalize">
-                                                        + Gallery Photos
-                                                    </div>
-                                                    <input type="file" multiple className="hidden" accept="image/*" onChange={handleGalleryFiles} />
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {form.gallery.length > 0 && (
-                                        <div className="flex flex-wrap gap-2 pt-4 border-t border-zinc-100 dark:border-zinc-800">
-                                            {form.gallery.map((img, i) => (
-                                                <div key={i} className="relative group">
-                                                    <img src={img} className="w-16 h-16 rounded-xl object-cover border border-zinc-200 dark:border-zinc-700" />
-                                                    <button onClick={() => setForm(f => ({ ...f, gallery: f.gallery.filter((_, idx) => idx !== i) }))} className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white p-1 rounded-full shadow-lg hover:scale-110 active:scale-95"><X size={10} /></button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Type Toggle */}
-                            <div className="flex p-1.5 bg-zinc-100 dark:bg-zinc-950 rounded-2xl">
-                                <button onClick={() => setForm(f => ({ ...f, type: "SIMPLE" }))} className={`flex-1 py-3 px-6 rounded-xl text-[10px] font-bold capitalize transition-all ${form.type === "SIMPLE" ? "bg-white dark:bg-zinc-800 text-black dark:text-white shadow-sm" : "text-zinc-500"}`}>Simple</button>
-                                <button onClick={() => { if (isNormalPlan) { alert("Variable products are available on Pro plan."); return; } setForm(f => ({ ...f, type: "VARIABLE" })) }} className={`flex-1 py-3 px-6 rounded-xl text-[10px] font-bold capitalize transition-all ${form.type === "VARIABLE" ? "bg-white dark:bg-zinc-800 text-black dark:text-white shadow-sm" : "text-zinc-500"} ${isNormalPlan ? "opacity-50" : ""}`}>Variable {isNormalPlan && "🔒"}</button>
-                            </div>
-
-                            {/* Info Grid */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-zinc-400 capitalize pl-2">Product Name</label>
-                                    <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Classic Collection Tee" className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-sm font-semibold outline-none focus:ring-2 focus:ring-black/5" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-zinc-400 capitalize pl-2">Category</label>
-                                    <select value={form.categoryId} onChange={e => setForm(f => ({ ...f, categoryId: e.target.value }))} className="w-full px-6 py-[18px] bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-sm font-semibold appearance-none outline-none">
-                                        <option value="">Choose Category</option>
-                                        {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-zinc-400 capitalize pl-2">Description</label>
-                                <textarea value={form.description || ""} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Product description..." className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-sm font-medium min-h-[120px] resize-none outline-none" />
-                            </div>
-
-                            {/* Variable Product Configuration */}
-                            {form.type === "VARIABLE" && (
-                                <div className="space-y-12 animate-in slide-in-from-top-4 duration-500">
-                                    {/* Attributes Management */}
-                                    <div className="space-y-6">
-                                        <div className="flex items-center justify-between">
-                                            <h4 className="text-[10px] font-bold text-black dark:text-white capitalize italic">Product Attributes</h4>
-                                            <button 
-                                                onClick={() => setForm(f => ({ ...f, attributes: [...f.attributes, { name: "", values: [] }] }))}
-                                                className="px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl text-[10px] font-bold capitalize border border-indigo-100 dark:border-indigo-500/20 hover:bg-indigo-100 transition-all"
-                                            >
-                                                + Add Attribute
-                                            </button>
-                                        </div>
-                                        <div className="space-y-4">
-                                            {form.attributes.map((attr, i) => (
-                                                <div key={i} className="flex flex-col sm:flex-row gap-4 p-6 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-3xl relative group">
-                                                    <div className="flex-1 space-y-2">
-                                                        <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest pl-1">Attribute Name</label>
-                                                        <input 
-                                                            value={attr.name} 
-                                                            onChange={e => {
-                                                                const newAttrs = [...form.attributes]
-                                                                newAttrs[i].name = e.target.value
-                                                                setForm(f => ({ ...f, attributes: newAttrs }))
-                                                            }}
-                                                            placeholder="e.g. Color" 
-                                                            className="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl text-xs font-bold outline-none"
-                                                        />
-                                                    </div>
-                                                    <div className="flex-[2] space-y-2">
-                                                        <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest pl-1">Values (Comma Separated)</label>
-                                                        <input 
-                                                            value={attr.values.join(", ")} 
-                                                            onChange={e => {
-                                                                const newAttrs = [...form.attributes]
-                                                                newAttrs[i].values = e.target.value.split(",").map(v => v.trim()).filter(Boolean)
-                                                                setForm(f => ({ ...f, attributes: newAttrs }))
-                                                            }}
-                                                            placeholder="Red, Blue, Green" 
-                                                            className="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl text-xs font-bold outline-none"
-                                                        />
-                                                    </div>
-                                                    <button 
-                                                        onClick={() => setForm(f => ({ ...f, attributes: f.attributes.filter((_, idx) => idx !== i) }))}
-                                                        className="absolute -top-2 -right-2 p-1.5 bg-rose-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                                                    >
-                                                        <X size={12} />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                        {/* Generate Variations Button */}
-                                        <button 
-                                            onClick={generateVariations}
-                                            className="w-full py-4 bg-indigo-600 dark:bg-white text-white dark:text-black rounded-2xl text-[10px] font-bold capitalize shadow-xl hover:scale-[1.01] active:scale-95 transition-all shadow-indigo-500/10"
-                                        >
-                                            Generate / Update Variation Matrix
-                                        </button>
-                                    </div>
-
-                                    {/* Variation Matrix */}
-                                    {form.variations.length > 0 && (
-                                        <div className="space-y-6">
-                                            <h4 className="text-[10px] font-bold text-black dark:text-white capitalize italic">Variation Matrix</h4>
-                                            <div className="grid grid-cols-1 gap-4">
-                                                {form.variations.map((v, i) => (
-                                                    <div key={i} className="flex flex-col lg:flex-row lg:items-center gap-6 p-6 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-3xl shadow-sm">
-                                                        {/* Variation Title & Image */}
-                                                        <div className="flex items-center gap-4 lg:w-48 shrink-0">
-                                                            <label className="relative group cursor-pointer w-12 h-12 rounded-xl bg-zinc-100 dark:bg-zinc-800 overflow-hidden border border-zinc-200 dark:border-zinc-700 shrink-0">
-                                                                {v.image ? (
-                                                                    <img src={v.image} className="w-full h-full object-cover" />
-                                                                ) : (
-                                                                    <div className="w-full h-full flex items-center justify-center text-zinc-300">
-                                                                        <Upload size={16} />
-                                                                    </div>
-                                                                )}
-                                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-                                                                    <Upload size={14} />
-                                                                </div>
-                                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleVariationImage(i, e)} />
-                                                            </label>
-                                                            <div className="min-w-0">
-                                                                <p className="text-[10px] font-bold text-black dark:text-white capitalize truncate">
-                                                                    {Object.values(v.options).join(" • ")}
-                                                                </p>
-                                                                <p className="text-[8px] font-semibold text-zinc-400 capitalize mt-0.5">Edit Variation Details</p>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Variation Inputs */}
-                                                        <div className="flex-1 grid grid-cols-2 lg:grid-cols-3 gap-4">
-                                                            <div className="space-y-2">
-                                                                <label className="text-[8px] font-bold text-zinc-400 capitalize leading-none block">Price ({currency === "MYR" ? "RM" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "₹"})</label>
-                                                                <input 
-                                                                    type="number" 
-                                                                    value={v.price}
-                                                                    onChange={e => {
-                                                                        const newVars = [...form.variations]
-                                                                        newVars[i].price = e.target.value
-                                                                        setForm(f => ({ ...f, variations: newVars }))
-                                                                    }}
-                                                                    className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-xl text-xs font-black outline-none" 
-                                                                />
-                                                            </div>
-                                                            <div className="space-y-2">
-                                                                <label className="text-[8px] font-bold text-zinc-400 capitalize leading-none block">Stock</label>
-                                                                <input 
-                                                                    type="number" 
-                                                                    value={v.stock}
-                                                                    onChange={e => {
-                                                                        const newVars = [...form.variations]
-                                                                        newVars[i].stock = e.target.value
-                                                                        setForm(f => ({ ...f, variations: newVars }))
-                                                                    }}
-                                                                    className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-xl text-xs font-black outline-none" 
-                                                                />
-                                                            </div>
-                                                            <div className="space-y-2 col-span-2 lg:col-span-1">
-                                                                <label className="text-[8px] font-bold text-zinc-400 capitalize leading-none block">SKU Override</label>
-                                                                <input 
-                                                                    value={v.sku}
-                                                                    onChange={e => {
-                                                                        const newVars = [...form.variations]
-                                                                        newVars[i].sku = e.target.value
-                                                                        setForm(f => ({ ...f, variations: newVars }))
-                                                                    }}
-                                                                    className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-xl text-xs font-black outline-none" 
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Simple Product Fields (Hidden if Variable) */}
-                            {form.type === "SIMPLE" && (
-                                <>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-6 border-t border-zinc-100 dark:border-zinc-800">
-                                        <div className="space-y-4">
-                                            <label className="text-[10px] font-bold text-zinc-400 capitalize pl-2">Pricing</label>
-                                            <div className="relative">
-                                                <span className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400 font-black">{currency === "INR" ? "₹" : currency === "USD" ? "$" : "₹"}</span>
-                                                <input type="number" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} className="w-full pl-12 pr-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-lg font-black outline-none" placeholder="0.00" />
-                                            </div>
-                                        </div>
-                                        <div className="space-y-4">
-                                            <label className="text-[10px] font-bold text-zinc-400 capitalize pl-2">Regular MRP</label>
-                                            <div className="relative">
-                                                <span className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400 font-black">{currency === "INR" ? "₹" : currency === "USD" ? "$" : "₹"}</span>
-                                                <input type="number" value={form.compareAtPrice} onChange={e => setForm(f => ({ ...f, compareAtPrice: e.target.value }))} className="w-full pl-12 pr-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-lg font-black outline-none" placeholder="0.00" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-bold text-zinc-400 capitalize pl-2">Stock Inventory</label>
-                                            <input type="number" value={form.stock} onChange={e => setForm(f => ({ ...f, stock: e.target.value }))} className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-sm font-bold outline-none" placeholder="0" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-bold text-zinc-400 capitalize pl-2">SKU ID</label>
-                                            <input value={form.sku} onChange={e => setForm(f => ({ ...f, sku: e.target.value }))} className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-sm font-bold outline-none" placeholder="e.g. TEE-BLK-LG" />
-                                        </div>
-                                    </div>
-                                </>
-                            )}
-
-                            {/* SEO Section */}
-                            <div className="space-y-8 pt-12 border-t border-zinc-100 dark:border-zinc-800">
-                                <div className="flex items-center justify-between">
-                                    <h4 className="text-[12px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest flex items-center gap-2">
-                                        <Search size={16} /> Search Engine Optimization
-                                    </h4>
-                                    <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-500/10 px-4 py-1.5 rounded-full border border-emerald-100 dark:border-emerald-500/20">
-                                        <Zap size={14} className="text-emerald-500" />
-                                        <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400">Score: {form.seoScore}/100</span>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                                    <div className="space-y-6">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-bold text-zinc-400 capitalize pl-2">Focus Keyword</label>
-                                            <input 
-                                                value={form.focusKeyword} 
-                                                onChange={e => setForm(f => ({ ...f, focusKeyword: e.target.value }))} 
-                                                placeholder="e.g. running shoes" 
-                                                className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-sm font-semibold outline-none focus:ring-2 focus:ring-black/5" 
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-bold text-zinc-400 capitalize pl-2">SEO Title</label>
-                                            <input 
-                                                value={form.seoTitle} 
-                                                onChange={e => setForm(f => ({ ...f, seoTitle: e.target.value }))} 
-                                                placeholder={form.name || "Custom SEO Title"} 
-                                                className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-sm font-semibold outline-none" 
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-bold text-zinc-400 capitalize pl-2">SEO Description</label>
-                                            <textarea 
-                                                value={form.seoDescription} 
-                                                onChange={e => setForm(f => ({ ...f, seoDescription: e.target.value }))} 
-                                                placeholder={form.description || "Custom meta description..."} 
-                                                className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-sm font-medium min-h-[100px] resize-none outline-none" 
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Google Preview */}
-                                    <div className="space-y-4">
-                                        <label className="text-[10px] font-bold text-zinc-400 capitalize pl-2 flex items-center gap-2">
-                                            Google Search Preview <Eye size={12} />
-                                        </label>
-                                        <div className="p-8 bg-white dark:bg-black rounded-[32px] border border-zinc-100 dark:border-zinc-800 shadow-inner flex flex-col gap-1.5 group cursor-default">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <div className="w-7 h-7 bg-zinc-100 dark:bg-zinc-900 rounded-full flex items-center justify-center text-[10px] font-bold text-zinc-400">G</div>
-                                                <div className="flex flex-col">
-                                                    <span className="text-[12px] text-zinc-900 dark:text-zinc-200 font-medium">QICMART Standard Store</span>
-                                                    <span className="text-[10px] text-zinc-500 font-medium text-ellipsis overflow-hidden whitespace-nowrap max-w-[200px]">https://qicmart.com › products › {form.name.toLowerCase().replace(/\s+/g, '-')}</span>
-                                                </div>
-                                            </div>
-                                            <h3 className="text-[18px] text-indigo-700 dark:text-indigo-400 font-medium hover:underline cursor-pointer transition-colors leading-tight">
-                                                {form.seoTitle || form.name || "Product Name"}
-                                            </h3>
-                                            <p className="text-[13px] text-zinc-600 dark:text-zinc-400 leading-relaxed line-clamp-2">
-                                                {form.seoDescription || form.description || "Enter a description to see how your product will appear in Google search results."}
-                                            </p>
-                                        </div>
-                                        <p className="text-[10px] text-zinc-400 italic font-medium px-2 leading-relaxed">
-                                            *This is an approximate preview of how your product might appear in Google's search results.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Logistics Section */}
-                            <div className="pt-10 border-t border-zinc-100 dark:border-zinc-800 space-y-6">
-                                <div className="flex items-center justify-between">
-                                    <h4 className="text-[10px] font-bold text-black dark:text-white capitalize italic">Shipping Dimensions</h4>
-                                    <button onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))} className={`px-5 py-1.5 rounded-xl text-[10px] font-bold capitalize transition-all ${form.isActive ? "bg-emerald-500 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400"}`}>{form.isActive ? "Public" : "Draft Mode"}</button>
-                                </div>
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                    {['Weight', 'Length', 'Width', 'Height'].map((l) => (
-                                        <div key={l} className="space-y-2">
-                                            <label className="text-[9px] font-black uppercase text-zinc-400 tracking-[0.2em] ml-1">{l}</label>
-                                            <input type="number" value={form[l.toLowerCase() as keyof typeof form] as string} onChange={e => setForm(f => ({ ...f, [l.toLowerCase()]: e.target.value }))} className="w-full px-4 py-3.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-xl text-xs font-black outline-none" placeholder="0" />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Footer */}
-                        <div className="p-8 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 flex flex-col sm:flex-row items-center justify-between gap-6 shrink-0">
-                            <div className="flex flex-col">
-                                {saving ? (
-                                    <div className="flex items-center gap-2 text-indigo-500">
-                                        <Loader2 size={14} className="animate-spin" />
-                                        <span className="text-[10px] font-bold uppercase tracking-widest">Saving changes...</span>
-                                    </div>
-                                ) : lastSaved ? (
-                                    <div className="flex items-center gap-2 text-emerald-500">
-                                        <Check size={14} />
-                                        <span className="text-[10px] font-bold uppercase tracking-widest">All changes saved at {lastSaved}</span>
-                                    </div>
-                                ) : isDirty ? (
-                                    <div className="flex items-center gap-2 text-amber-500">
-                                        <RefreshCw size={14} />
-                                        <span className="text-[10px] font-bold uppercase tracking-widest">Unsaved changes</span>
-                                    </div>
-                                ) : (
-                                    <button onClick={() => setIsModalOpen(false)} className="px-0 py-4 text-zinc-400 hover:text-rose-500 font-bold capitalize text-[10px] transition-all">Discard Changes</button>
-                                )}
-                            </div>
-                            <button onClick={save} disabled={saving || uploading} className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-indigo-600 dark:bg-white text-white dark:text-black rounded-2xl text-[12px] font-semibold capitalize hover:opacity-90 transition-all shadow-xl shadow-indigo-500/10 active:scale-95 disabled:opacity-50">
-                                {(saving || uploading) ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}
-                                {saving ? "Auto-saving..." : uploading ? "Uploading..." : editItem ? "Done & Sync" : "Publish to Store"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-
 
             {/* Products Table */}
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-sm pb-10">
@@ -1294,7 +406,7 @@ export default function ProductsPage() {
                                                     >
                                                         <Star size={18} fill={p.isBestSeller ? "currentColor" : "none"} />
                                                     </button>
-                                                    <button onClick={() => setViewItem(p)} className="p-2.5 text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all" title="Quick View"><Eye size={18} /></button>
+
                                                     <button onClick={() => openEdit(p)} className="p-2.5 text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-xl transition-all" title="Edit"><Pencil size={18} /></button>
                                                     <button onClick={() => deleteProduct(p.id)} disabled={deletingId === p.id} className="p-2.5 text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-all" title="Delete"><Trash2 size={18} /></button>
                                                 </div>

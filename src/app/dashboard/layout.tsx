@@ -5,68 +5,34 @@ import Link from "next/link"
 import { usePathname as usePN, useSearchParams } from "next/navigation"
 import { signOut, useSession } from "next-auth/react"
 import { LayoutDashboard, Package, ShoppingCart, Users, Settings, LogOut,
-    Tag, FolderOpen, Sun, Moon, ChevronLeft, Menu, BarChart2, ExternalLink, Image as ImageIcon, Search, Zap, ShieldAlert, Layout, Globe, Star, CreditCard, ChevronDown, Ticket, Mail, PenTool
+    Tag, FolderOpen, Sun, Moon, ChevronLeft, Menu, BarChart2, ExternalLink, Image as ImageIcon, Search, Zap, ShieldAlert, Layout, Globe, Star, CreditCard, ChevronDown, Ticket, Mail, PenTool,
+    Home, ClipboardList, Truck, LayoutGrid, BarChart3, Wallet, Percent, Palette, Gem, Minus
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { DashboardStoreProvider, useDashboardStore } from "@/components/DashboardStoreProvider"
 import { Notifications } from "@/components/dashboard/Notifications"
 
-const navGroups = [
-    {
-        label: "Dashboard & Reports",
-        key: "dashboardAndReports",
-        icon: LayoutDashboard,
-        items: [
-            { label: "Overview", key: "overview", href: "/dashboard", icon: LayoutDashboard },
-            { label: "Analytics", key: "analytics", href: "/dashboard/analytics", icon: BarChart2 },
+const navItems = [
+    { label: "Dashboard", key: "dashboard", href: "/dashboard", icon: Home },
+    { 
+        label: "Orders", 
+        key: "orders", 
+        href: "/dashboard/orders", 
+        icon: ClipboardList,
+        subItems: [
+            { label: "All orders", key: "allOrders", href: "/dashboard/orders" },
+            { label: "Abandoned", key: "abandoned", href: "/dashboard/orders/abandoned" },
         ]
     },
-    {
-        label: "Shop Management",
-        key: "shopManagement",
-        icon: Package,
-        items: [
-            { label: "Products", key: "products", href: "/dashboard/products", icon: Package },
-            { label: "Categories", key: "categories", href: "/dashboard/categories", icon: FolderOpen },
-            { label: "Orders", key: "orders", href: "/dashboard/orders", icon: ShoppingCart },
-            { label: "Customers", key: "customers", href: "/dashboard/customers", icon: Users },
-        ]
-    },
-    {
-        label: "Marketing & Growth",
-        key: "marketingAndGrowth",
-        icon: Ticket,
-        items: [
-            { label: "Coupons", key: "coupons", href: "/dashboard/coupons", icon: Ticket },
-            { label: "Newsletter", key: "newsletter", href: "/dashboard/newsletter", icon: Mail },
-        ]
-    },
-    {
-        label: "SEO & Content",
-        key: "seoAndContent",
-        icon: PenTool,
-        items: [
-            { label: "Blogs/Articles", key: "blogs", href: "/dashboard/blogs", icon: PenTool },
-            { label: "Menu Manager", key: "menuManager", href: "/dashboard/menu", icon: Layout },
-            { label: "Media Library", key: "mediaLibrary", href: "/dashboard/media", icon: ImageIcon },
-            { label: "Reviews", key: "reviews", href: "/dashboard/reviews", icon: Star },
-            { label: "SEO Manager", key: "seoManager", href: "/dashboard/seo", icon: Search },
-            { label: "Custom Pages", key: "customPages", href: "/dashboard/pages", icon: Layout },
-        ]
-    },
-    {
-        label: "Finance & Plan",
-        key: "financeAndPlan",
-        icon: CreditCard,
-        items: [
-            { label: "Payments", key: "payments", href: "/dashboard/payment", icon: CreditCard },
-            { label: "My Plan", key: "myPlan", href: "/dashboard/plans", icon: Zap },
-        ]
-    }
-]
-
-const bottomNavItems = [
-    { label: "Store Settings", key: "storeSettings", href: "/dashboard/settings", icon: Settings },
+    { label: "Delivery", key: "delivery", href: "/dashboard/delivery", icon: Truck },
+    { label: "Products", key: "products", href: "/dashboard/products", icon: LayoutGrid },
+    { label: "Analytics", key: "analytics", href: "/dashboard/analytics", icon: BarChart3 },
+    { label: "Payouts", key: "payouts", href: "/dashboard/payment", icon: Wallet },
+    { label: "Discounts", key: "discounts", href: "/dashboard/coupons", icon: Percent },
+    { label: "Audience", key: "audience", href: "/dashboard/customers", icon: Users },
+    { label: "Appearance", key: "appearance", href: "/dashboard/appearance", icon: Palette },
+    { label: "Plugins", key: "plugins", href: "/dashboard/plans", icon: Zap },
+    { label: "Settings", key: "settings", href: "/dashboard/settings", icon: Settings },
 ]
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -87,21 +53,53 @@ function DashboardContent({ children }: { children: ReactNode }) {
     const store = useDashboardStore()
     const { logo, name, subscription, slug, t } = store
     const [dark, setDark] = useState(true)
+    const [isAuto, setIsAuto] = useState(true)
     const [sidebarOpen, setSidebarOpen] = useState(true)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState("")
-    const [expandedGroups, setExpandedGroups] = useState<string[]>(navGroups.map(g => g.key))
+    const [expandedItems, setExpandedItems] = useState<string[]>(["orders"])
  
 
     useEffect(() => {
-        const saved = localStorage.getItem("dashboard-dark")
-        if (saved !== null) setDark(saved === "true")
+        const updateTheme = () => {
+            const hour = new Date().getHours()
+            const isNight = hour < 6 || hour >= 18
+            const saved = localStorage.getItem("dashboard-dark")
+            
+            if (saved !== null) {
+                setDark(saved === "true")
+                setIsAuto(false)
+            } else {
+                setDark(isNight)
+                setIsAuto(true)
+            }
+        }
+
+        updateTheme()
+        
+        const interval = setInterval(() => {
+            if (localStorage.getItem("dashboard-dark") === null) {
+                const hour = new Date().getHours()
+                const isNight = hour < 6 || hour >= 18
+                setDark(isNight)
+            }
+        }, 60000)
+
+        return () => clearInterval(interval)
     }, [])
 
     const toggleDark = () => {
         const next = !dark
         setDark(next)
+        setIsAuto(false)
         localStorage.setItem("dashboard-dark", String(next))
+    }
+
+    const resetToAuto = () => {
+        localStorage.removeItem("dashboard-dark")
+        const hour = new Date().getHours()
+        setDark(hour < 6 || hour >= 18)
+        setIsAuto(true)
     }
 
     const isActive = (href: string) => {
@@ -118,26 +116,26 @@ function DashboardContent({ children }: { children: ReactNode }) {
         return `${href}${connector}ownerId=${ownerId}`
     }
 
-    const toggleGroup = (key: string) => {
-        setExpandedGroups(prev =>
+    const toggleItem = (key: string) => {
+        setExpandedItems(prev =>
             prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
         )
     }
 
     // Auto-expand groups on mount if they contain active item OR when searching
     useEffect(() => {
-        const groupsToExpand: string[] = []
-        navGroups.forEach(group => {
-            const hasActiveItem = group.items.some(item => isActive(item.href))
+        const itemsToExpand: string[] = []
+        navItems.forEach(item => {
+            const hasActiveSub = item.subItems?.some(s => isActive(s.href))
             const hasMatch = searchTerm && (
-                t(group.key as any).toLowerCase().includes(searchTerm.toLowerCase()) ||
-                group.items.some(item => t(item.key as any).toLowerCase().includes(searchTerm.toLowerCase()))
+                t(item.key as any).toLowerCase().includes(searchTerm.toLowerCase()) ||
+                item.subItems?.some(s => t(s.key as any).toLowerCase().includes(searchTerm.toLowerCase()))
             )
-            if (hasActiveItem || hasMatch) {
-                groupsToExpand.push(group.key)
+            if (hasActiveSub || hasMatch) {
+                itemsToExpand.push(item.key)
             }
         })
-        setExpandedGroups(prev => Array.from(new Set([...prev, ...groupsToExpand])))
+        setExpandedItems(prev => Array.from(new Set([...prev, ...itemsToExpand])))
     }, [pathname, searchTerm])
 
     const bg = dark ? "bg-zinc-950" : "bg-white"
@@ -145,9 +143,33 @@ function DashboardContent({ children }: { children: ReactNode }) {
     const text = dark ? "text-white" : "text-zinc-900"
     const subtext = dark ? "text-zinc-500" : "text-zinc-500"
     const navHover = dark ? "hover:bg-white/5 hover:text-white" : "hover:bg-zinc-100/50 hover:text-black"
-    const activeClass = dark ? "bg-indigo-500/10 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.1)] border border-indigo-500/20" : "bg-indigo-100/80 text-indigo-700 border border-indigo-200 shadow-sm"
-    const inactiveClass = dark ? `${subtext} ${navHover} border border-transparent` : `${subtext} ${navHover} border border-transparent`
     const headerBg = dark ? "bg-zinc-950/60 border-white/5" : "bg-white/60 border-zinc-200"
+
+    function UpgradeCard({ dark, sidebarOpen }: { dark: boolean, sidebarOpen: boolean }) {
+        if (!sidebarOpen) return (
+            <div className="flex justify-center py-4">
+                <div className={`p-2 rounded-xl ${dark ? "bg-zinc-800 text-zinc-400" : "bg-zinc-100 text-zinc-500"}`}>
+                    <Gem size={20} />
+                </div>
+            </div>
+        )
+        return (
+            <div className={`mx-2 mt-4 p-4 rounded-2xl border ${dark ? "bg-zinc-900 border-zinc-800" : "bg-zinc-50 border-zinc-200"} relative overflow-hidden group`}>
+                <div className="relative z-10 flex items-start gap-3">
+                    <div className={`p-2 rounded-xl ${dark ? "bg-emerald-500/10 text-emerald-500" : "bg-emerald-50 text-emerald-600"} shadow-sm transition-transform group-hover:scale-110 duration-500`}>
+                        <Gem size={18} />
+                    </div>
+                    <div>
+                        <h4 className="text-[13px] font-bold">Upgrade plan</h4>
+                        <p className="text-[11px] text-zinc-500 font-medium">Get extra benefits</p>
+                    </div>
+                </div>
+                <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-all duration-700 group-hover:rotate-12">
+                    <Gem size={80} />
+                </div>
+            </div>
+        )
+    }
 
     const getFontFamily = (font: string) => {
         switch (font) {
@@ -217,66 +239,72 @@ function DashboardContent({ children }: { children: ReactNode }) {
 
                 {/* Nav Items */}
                 <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-1 custom-scrollbar">
-                    {navGroups.map((group) => {
-                        const filteredItems = group.items.filter(item =>
-                            item.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            (item.key && t(item.key as any).toLowerCase().includes(searchTerm.toLowerCase()))
+                    {navItems.map((item) => {
+                        const hasSubItems = !!item.subItems
+                        const filteredSubs = item.subItems?.filter(s =>
+                            s.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            (s.key && t(s.key as any).toLowerCase().includes(searchTerm.toLowerCase()))
                         )
                         
-                        const groupLabel = t(group.key as any);
-                        const isExpanded = expandedGroups.includes(group.key);
-                        const hasMatchingItems = filteredItems.length > 0;
-                        const isGroupActive = group.items.some(item => isActive(item.href));
+                        const label = t(item.key as any);
+                        const isExpanded = expandedItems.includes(item.key);
+                        const isMainActive = isActive(item.href);
+                        const hasActiveSub = item.subItems?.some(s => isActive(s.href));
 
-                        if (searchTerm && !hasMatchingItems && !groupLabel.toLowerCase().includes(searchTerm.toLowerCase())) return null;
+                        if (searchTerm && !label.toLowerCase().includes(searchTerm.toLowerCase()) && (!filteredSubs || filteredSubs.length === 0)) return null;
 
                         return (
-                            <div key={group.key} className="space-y-1">
+                            <div key={item.key} className="space-y-1">
                                 {sidebarOpen ? (
                                     <>
-                                        <button
-                                            onClick={() => toggleGroup(group.key)}
-                                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all text-[12px] font-bold tracking-wider ${isGroupActive ? "text-indigo-500" : "text-zinc-500 hover:text-zinc-400"} ${dark ? "hover:bg-white/5" : "hover:bg-zinc-100/50"}`}
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <group.icon size={16} className={isGroupActive ? "text-indigo-500" : "text-zinc-400"} />
-                                                <span>{groupLabel}</span>
-                                            </div>
-                                            <motion.div
-                                                animate={{ rotate: isExpanded ? 180 : 0 }}
-                                                transition={{ duration: 0.2 }}
+                                        {hasSubItems ? (
+                                            <button
+                                                onClick={() => toggleItem(item.key)}
+                                                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-[14px] font-medium ${hasActiveSub ? "text-white bg-white/5" : "text-zinc-500 hover:text-white hover:bg-white/5"}`}
                                             >
-                                                <ChevronDown size={14} />
-                                            </motion.div>
-                                        </button>
+                                                <div className="flex items-center gap-3">
+                                                    <item.icon size={18} className={hasActiveSub ? "text-white" : "text-zinc-500"} />
+                                                    <span className="font-bold">{label}</span>
+                                                </div>
+                                                <motion.div
+                                                    animate={{ rotate: isExpanded ? 180 : 0 }}
+                                                    transition={{ duration: 0.2 }}
+                                                >
+                                                    <ChevronDown size={14} />
+                                                </motion.div>
+                                            </button>
+                                        ) : (
+                                            <Link
+                                                href={getTargetHref(item.href)}
+                                                onClick={() => setMobileMenuOpen(false)}
+                                                className={`flex items-center px-3 py-2.5 rounded-xl transition-all text-[14px] font-medium gap-3 ${isMainActive ? "text-white bg-white/5" : "text-zinc-500 hover:text-white hover:bg-white/5"}`}
+                                            >
+                                                <item.icon size={18} className={isMainActive ? "text-white" : "text-zinc-500"} />
+                                                <span className="font-bold">{label}</span>
+                                            </Link>
+                                        )}
                                         
                                         <AnimatePresence initial={false}>
-                                            {isExpanded && (
+                                            {hasSubItems && isExpanded && (
                                                 <motion.div
                                                     initial={{ height: 0, opacity: 0 }}
                                                     animate={{ height: "auto", opacity: 1 }}
                                                     exit={{ height: 0, opacity: 0 }}
-                                                    className="overflow-hidden space-y-0.5 ml-4 border-l border-zinc-800/50 pl-2"
+                                                    className="overflow-hidden space-y-1 mt-1 ml-9"
                                                 >
-                                                    {filteredItems.map(({ label, key, href, icon: Icon, external }: any) => {
-                                                        const targetHref = getTargetHref(href)
-                                                        const displayLabel = key ? t(key as any) : label;
+                                                    {(filteredSubs || item.subItems)?.map((sub: any) => {
+                                                        const targetHref = getTargetHref(sub.href)
+                                                        const displayLabel = sub.key ? t(sub.key as any) : sub.label;
+                                                        const isSubActive = isActive(sub.href);
                                                         return (
-                                                            <motion.div
-                                                                key={href}
-                                                                whileHover={{ x: 4 }}
-                                                                whileTap={{ scale: 0.98 }}
+                                                            <Link
+                                                                key={sub.href}
+                                                                href={targetHref}
+                                                                onClick={() => setMobileMenuOpen(false)}
+                                                                className={`flex items-center px-3 py-1.5 rounded-lg transition-all text-[13px] font-medium ${isSubActive ? "text-white" : "text-zinc-500 hover:text-zinc-300"}`}
                                                             >
-                                                                <Link
-                                                                    href={targetHref}
-                                                                    target={external ? "_blank" : undefined}
-                                                                    onClick={() => setMobileMenuOpen(false)}
-                                                                    className={`flex items-center px-3 py-2 rounded-xl transition-all text-[13px] font-medium gap-3 ${isActive(href) ? activeClass : inactiveClass}`}
-                                                                >
-                                                                    <Icon className="w-4 h-4 shrink-0" />
-                                                                    <span>{displayLabel}</span>
-                                                                </Link>
-                                                            </motion.div>
+                                                                <span>{displayLabel}</span>
+                                                            </Link>
                                                         )
                                                     })}
                                                 </motion.div>
@@ -285,34 +313,25 @@ function DashboardContent({ children }: { children: ReactNode }) {
                                     </>
                                 ) : (
                                     <div className="flex flex-col items-center gap-1">
-                                        <div className={`p-2 rounded-xl ${isGroupActive ? "text-indigo-500 bg-indigo-500/10" : "text-zinc-500"}`} title={groupLabel}>
-                                            <group.icon size={20} />
-                                        </div>
-                                        {group.items.map(item => {
-                                            if (searchTerm && !item.label.toLowerCase().includes(searchTerm.toLowerCase()) && !t(item.key as any).toLowerCase().includes(searchTerm.toLowerCase())) return null;
-                                            return (
-                                                <Link
-                                                    key={item.href}
-                                                    href={getTargetHref(item.href)}
-                                                    className={`p-2 rounded-lg transition-all ${isActive(item.href) ? "bg-indigo-500/20 text-indigo-400" : "text-zinc-500 hover:text-white"}`}
-                                                    title={t(item.key as any)}
-                                                >
-                                                    <item.icon size={16} />
-                                                </Link>
-                                            )
-                                        })}
+                                        <Link
+                                            href={getTargetHref(item.href)}
+                                            className={`p-2 rounded-xl transition-all ${isMainActive || hasActiveSub ? "text-white bg-white/10" : "text-zinc-500 hover:text-white"}`}
+                                            title={label}
+                                        >
+                                            <item.icon size={20} />
+                                        </Link>
                                     </div>
                                 )}
                             </div>
                         )
                     })}
-                    {navGroups.every(group => {
-                        const groupLabel = t(group.key as any);
-                        const hasMatchingItems = group.items.some(item =>
-                            item.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            (item.key && t(item.key as any).toLowerCase().includes(searchTerm.toLowerCase()))
+                    {navItems.every(item => {
+                        const label = t(item.key as any);
+                        const hasMatchingSubs = item.subItems?.some(s =>
+                            s.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            (s.key && t(s.key as any).toLowerCase().includes(searchTerm.toLowerCase()))
                         );
-                        return searchTerm && !hasMatchingItems && !groupLabel.toLowerCase().includes(searchTerm.toLowerCase());
+                        return searchTerm && !hasMatchingSubs && !label.toLowerCase().includes(searchTerm.toLowerCase());
                     }) && searchTerm && (
                         <div className="px-4 py-8 text-center">
                             <p className="text-[10px] font-semibold text-zinc-500 italic">{t("noMatches")}</p>
@@ -321,33 +340,18 @@ function DashboardContent({ children }: { children: ReactNode }) {
                 </nav>
 
                 {/* Bottom Items */}
-                <div className={`pb-3 px-2 border-t ${dark ? "border-zinc-800" : "border-slate-200"} pt-3 space-y-0.5`}>
-                    {bottomNavItems.map(({ label, key, href, icon: Icon, external }: any) => {
-                        const targetHref = getTargetHref(href)
-                        const displayLabel = key ? t(key as any) : label;
-                        return (
-                            <Link
-                                key={label}
-                                href={targetHref}
-                                target={external ? "_blank" : undefined}
-                                onClick={() => setMobileMenuOpen(false)}
-                                className={`flex items-center ${sidebarOpen ? "px-3" : "justify-center px-2"} py-2.5 rounded-xl transition-all text-[14px] font-medium gap-3 ${isActive(href) ? activeClass : inactiveClass}`}
-                                title={!sidebarOpen ? displayLabel : undefined}
-                            >
-                                <Icon size={18} className="shrink-0" />
-                                {sidebarOpen && <span>{displayLabel}</span>}
-                            </Link>
-                        )
-                    })}
-
-                    <button
-                        onClick={() => signOut({ callbackUrl: "/" })}
-                        className={`w-full flex items-center ${sidebarOpen ? "px-3" : "justify-center px-2"} py-2.5 rounded-xl transition-all text-[14px] font-medium gap-3 text-red-400 hover:bg-red-500/10`}
-                        title={!sidebarOpen ? t("logout") : undefined}
-                    >
-                        <LogOut size={18} className="shrink-0" />
-                        {sidebarOpen && <span>{t("logout")}</span>}
-                    </button>
+                <div className={`pb-3 border-t ${dark ? "border-zinc-800" : "border-slate-200"} pt-1`}>
+                    <UpgradeCard dark={dark} sidebarOpen={sidebarOpen} />
+                    <div className="px-2 mt-2 space-y-0.5">
+                        <button
+                            onClick={() => signOut({ callbackUrl: "/" })}
+                            className={`w-full flex items-center ${sidebarOpen ? "px-3" : "justify-center px-2"} py-2.5 rounded-xl transition-all text-[14px] font-medium gap-3 text-red-400 hover:bg-red-500/10`}
+                            title={!sidebarOpen ? t("logout") : undefined}
+                        >
+                            <LogOut size={18} className="shrink-0" />
+                            {sidebarOpen && <span>{t("logout")}</span>}
+                        </button>
+                    </div>
                 </div>
             </motion.aside>
 
@@ -361,10 +365,10 @@ function DashboardContent({ children }: { children: ReactNode }) {
                         >
                             <Menu size={20} />
                         </button>
-                        <h1 className="text-[16px] font-semibold tracking-tight capitalize italic sm:not-italic sm:normal-case">
+                         <h1 className="text-[16px] font-semibold tracking-tight capitalize italic sm:not-italic sm:normal-case">
                             {(() => {
-                                const allItems = navGroups.flatMap(g => g.items);
-                                const activeItem = allItems.find(n => isActive(n.href)) || bottomNavItems.find(n => isActive(n.href));
+                                const allItems = navItems.flatMap(item => item.subItems ? [item, ...item.subItems] : [item]);
+                                const activeItem = allItems.find(n => isActive(n.href));
                                 return activeItem?.key ? t(activeItem.key as any) : activeItem?.label || t("dashboard");
                             })()}
                         </h1>
@@ -376,13 +380,30 @@ function DashboardContent({ children }: { children: ReactNode }) {
                             {subscription?.plan || "Normal"} Plan
                         </span>
                         <Notifications ownerId={ownerId} />
-                        <button
-                            onClick={toggleDark}
-                            className={`p-2 rounded-xl ${dark ? "bg-zinc-800 hover:bg-zinc-700 text-zinc-300" : "bg-slate-100 hover:bg-slate-200 text-slate-600"} transition-all`}
-                            title={dark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-                        >
-                            {dark ? <Sun size={16} /> : <Moon size={16} />}
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                            <button
+                                onClick={toggleDark}
+                                className={`p-2 rounded-xl relative ${dark ? "bg-zinc-800 hover:bg-zinc-700 text-zinc-300" : "bg-slate-100 hover:bg-slate-200 text-slate-600"} transition-all`}
+                                title={dark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                            >
+                                {dark ? <Sun size={16} /> : <Moon size={16} />}
+                                {isAuto && (
+                                    <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                                    </span>
+                                )}
+                            </button>
+                            {!isAuto && (
+                                <button
+                                    onClick={resetToAuto}
+                                    className={`px-2 py-1.5 text-[10px] font-bold rounded-lg border uppercase tracking-wider transition-all ${dark ? "bg-zinc-950 border-zinc-800 text-zinc-500 hover:text-indigo-400" : "bg-white border-zinc-200 text-zinc-400 hover:text-indigo-500"}`}
+                                    title="Reset to Automatic Theme"
+                                >
+                                    Auto
+                                </button>
+                            )}
+                        </div>
                         <Link
                             href={getTargetHref("/dashboard/profile")}
                             className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-sm font-semibold text-white shadow hover:scale-105 transition-transform cursor-pointer overflow-hidden"

@@ -12,6 +12,7 @@ import { getStoreForDashboard } from "@/lib/dashboard"
 import Link from "next/link"
 import OverviewClient from "@/components/dashboard/OverviewClient"
 import ExportButton from "@/components/dashboard/ExportButton"
+import SetupGuide from "@/components/dashboard/SetupGuide"
 import { headers } from "next/headers"
 import * as Motion from "framer-motion/client"
 import { redirect } from "next/navigation"
@@ -123,6 +124,20 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
     const storeUrl = isLocal 
         ? `http://${store.slug}.localhost:3000` 
         : `/s/${store.slug}`
+
+    const hasProducts = totalProducts > 0
+    const hasPayment = store.isRazorpayEnabled || store.isUpiEnabled
+    const isSetupComplete = hasProducts && hasPayment
+
+    if (!isSetupComplete) {
+        return (
+            <SetupGuide 
+                storeName={store.name} 
+                hasProducts={hasProducts} 
+                hasPayment={hasPayment} 
+            />
+        )
+    }
 
     return (
         <Motion.div 
