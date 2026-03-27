@@ -7,7 +7,7 @@ export default function Loading() {
     <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white/80 backdrop-blur-md">
       <div className="relative">
         <div className="absolute -inset-8 rounded-full bg-blue-500/10 blur-2xl animate-pulse"></div>
-        <HourglassLoader size="64" color="#3b82f6" speed="1.2" />
+        <HourglassLoader size="48" color="#3b82f6" speed="1.2" />
       </div>
       <div className="mt-8 flex flex-col items-center gap-2">
         <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 animate-pulse text-center">

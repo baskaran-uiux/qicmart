@@ -21,8 +21,10 @@ export function HourglassLoader({
     setIsMounted(true)
   }, [])
 
+  const displaySize = typeof size === 'number' ? `${size}px` : size.toString().endsWith('%') || size.toString().endsWith('px') || size.toString().endsWith('rem') ? size.toString() : `${size}px`
+
   // SSR placeholder
-  if (!isMounted) return <div style={{ width: size, height: size }} />
+  if (!isMounted) return <div style={{ width: displaySize, height: displaySize }} />
 
   // We use a custom SVG implementation to be 100% SSR-safe and avoid "HTMLElement is not defined" issues
   // which are common when using Web Component libraries like 'ldrs' in Next.js.
@@ -30,8 +32,8 @@ export function HourglassLoader({
     <div className="flex items-center justify-center p-4">
       <div 
         style={{ 
-          width: size, 
-          height: size,
+          width: displaySize, 
+          height: displaySize,
           animation: `hourglass-spin ${speed}s linear infinite`,
           display: 'flex',
           alignItems: 'center',

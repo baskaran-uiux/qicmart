@@ -101,7 +101,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     return (
         <Suspense fallback={
             <div className="h-screen w-screen bg-zinc-950 flex flex-col items-center justify-center">
-                <HourglassLoader size="60" color="#3b82f6" speed="1.5" />
+                <HourglassLoader size="48" color="#3b82f6" speed="1.5" />
                 <p className="mt-6 text-sm font-medium text-zinc-500 animate-pulse tracking-widest uppercase">
                     Initializing Dashboard...
                 </p>
