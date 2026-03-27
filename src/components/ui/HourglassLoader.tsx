@@ -1,6 +1,5 @@
 "use client"
 
-import { hourglass } from 'ldrs'
 import { useEffect, useState } from 'react'
 
 export interface HourglassLoaderProps {
@@ -19,9 +18,11 @@ export function HourglassLoader({
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
-    // Register the custom element once
-    hourglass.register()
-    setIsMounted(true)
+    // Register the custom element once, only on client
+    import('ldrs').then((mod) => {
+      mod.hourglass.register()
+      setIsMounted(true)
+    })
   }, [])
 
   if (!isMounted) return <div style={{ width: size, height: size }} />
