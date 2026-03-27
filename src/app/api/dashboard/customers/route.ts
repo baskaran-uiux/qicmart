@@ -22,7 +22,10 @@ export async function GET(req: Request) {
     if (!store) return NextResponse.json([])
 
     const customers = await prisma.customer.findMany({
-        where: { storeId: store.id },
+        where: { 
+            storeId: store.id,
+            orders: { some: {} }
+        },
         include: {
             orders: {
                 select: { total: true, createdAt: true }

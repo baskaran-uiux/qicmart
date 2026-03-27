@@ -91,7 +91,19 @@ function DashboardContent({ children }: { children: ReactNode }) {
     const [sidebarOpen, setSidebarOpen] = useState(true)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState("")
-    const [expandedGroups, setExpandedGroups] = useState<string[]>(navGroups.map(g => g.key))
+    const [expandedGroups, setExpandedGroups] = useState<string[]>([])
+    const [hostname, setHostname] = useState("")
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setHostname(window.location.host)
+        }
+    }, [])
+
+    const isLocal = hostname.includes('localhost')
+    const storeUrl = isLocal 
+        ? `http://${slug}.localhost:3000` 
+        : `/s/${slug}`
  
 
     useEffect(() => {
@@ -152,7 +164,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
 
     const toggleGroup = (key: string) => {
         setExpandedGroups(prev =>
-            prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+            prev.includes(key) ? [] : [key]
         )
     }
 
@@ -169,7 +181,14 @@ function DashboardContent({ children }: { children: ReactNode }) {
                 groupsToExpand.push(group.key)
             }
         })
-        setExpandedGroups(prev => Array.from(new Set([...prev, ...groupsToExpand])))
+        if (searchTerm) {
+            setExpandedGroups(prev => Array.from(new Set([...prev, ...groupsToExpand])))
+        } else if (groupsToExpand.length > 0) {
+            // Respect accordion: only one expanded
+            setExpandedGroups([groupsToExpand[0]])
+        } else {
+            setExpandedGroups([]) // Default all closed if no active item
+        }
     }, [pathname, searchTerm])
 
     const bg = dark ? "bg-zinc-950" : "bg-white"
@@ -213,14 +232,24 @@ function DashboardContent({ children }: { children: ReactNode }) {
                 {/* Logo */}
                 <div className={`h-16 flex items-center ${sidebarOpen ? "px-5 justify-between" : "justify-center"} border-b ${dark ? "border-zinc-800" : "border-slate-200"}`}>
                     {sidebarOpen && (
-                        <div className="flex items-center gap-2 overflow-hidden">
-                            {logo ? (
-                                <img src={logo} alt={name} className="h-8 w-auto object-contain" />
-                            ) : (
-                                <span className="text-base font-bold bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent truncate">
-                                    {name}
-                                </span>
-                            )}
+                        <div className="flex items-center gap-4 pr-2 min-w-0">
+                            <div className="flex-1 min-w-0 flex items-center">
+                                {logo ? (
+                                    <img src={logo} alt={name} className="h-8 w-auto max-w-[130px] object-contain" />
+                                ) : (
+                                    <span className="text-base font-bold bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent truncate flex-1 block text-nowrap">
+                                        {name}
+                                    </span>
+                                )}
+                            </div>
+                            <Link 
+                                href={storeUrl} 
+                                target="_blank"
+                                className={`shrink-0 p-2 rounded-xl border transition-all shadow-sm ${dark ? "bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-indigo-400 hover:border-indigo-500/30" : "bg-zinc-50 border-zinc-200 text-zinc-400 hover:text-indigo-500 hover:border-indigo-500/30"}`}
+                                title="View Store"
+                            >
+                                <ExternalLink size={14} />
+                            </Link>
                         </div>
                     )}
                     <button onClick={() => setSidebarOpen(!sidebarOpen)} className={`p-1.5 rounded-lg ${dark ? "hover:bg-zinc-800" : "hover:bg-slate-100"} transition-colors shrink-0`}>

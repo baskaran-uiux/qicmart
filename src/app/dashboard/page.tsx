@@ -125,8 +125,11 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
         ? `http://${store.slug}.localhost:3000` 
         : `/s/${store.slug}`
 
+    let themeConfig: any = {}
+    try { if (store.themeConfig) themeConfig = JSON.parse(store.themeConfig) } catch (e) {}
+    
     const hasProducts = totalProducts > 0
-    const hasPayment = store.isRazorpayEnabled || store.isUpiEnabled
+    const hasPayment = store.isRazorpayEnabled || store.isUpiEnabled || themeConfig.isCodEnabled === true
     const isSetupComplete = hasProducts && hasPayment
 
     if (!isSetupComplete) {

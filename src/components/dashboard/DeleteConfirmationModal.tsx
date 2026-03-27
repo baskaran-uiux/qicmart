@@ -13,6 +13,8 @@ interface DeleteConfirmationModalProps {
     confirmText?: string
     cancelText?: string
     confirmationValue?: string // The value the user must type to confirm
+    dangerText?: string // Text for the danger alert
+    actionType?: "delete" | "reset" | "custom"
 }
 
 export default function DeleteConfirmationModal({
@@ -24,7 +26,9 @@ export default function DeleteConfirmationModal({
     loading = false,
     confirmText = "Yes, delete it!",
     cancelText = "No, cancel!",
-    confirmationValue
+    confirmationValue,
+    dangerText = "This action cannot be undone.",
+    actionType = "delete"
 }: DeleteConfirmationModalProps) {
     const [inputValue, setInputValue] = useState("")
 
@@ -63,7 +67,7 @@ export default function DeleteConfirmationModal({
                             <AlertCircle size={18} />
                         </div>
                         <p className="text-sm font-bold text-orange-900 dark:text-orange-400">
-                            This action cannot be undone.
+                            {dangerText}
                         </p>
                     </div>
 
@@ -93,11 +97,13 @@ export default function DeleteConfirmationModal({
                             className={`w-full py-4 rounded-xl text-[11px] font-black uppercase tracking-[0.1em] transition-all active:scale-95 flex items-center justify-center gap-3 shadow-xl ${
                                 isConfirmDisabled 
                                 ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed shadow-none" 
-                                : "bg-rose-900 dark:bg-rose-900/80 text-white border border-rose-800/50 dark:border-rose-700/50 hover:bg-rose-950 dark:hover:bg-rose-800 shadow-rose-900/20"
+                                : actionType === 'delete' 
+                                  ? "bg-rose-900 dark:bg-rose-900/80 text-white border border-rose-800/50 dark:border-rose-700/50 hover:bg-rose-950 dark:hover:bg-rose-800 shadow-rose-900/20"
+                                  : "bg-amber-600 dark:bg-amber-600/80 text-white border border-amber-500/50 dark:border-amber-500 hover:bg-amber-700 shadow-amber-600/20"
                             }`}
                         >
-                            {loading && <Loader2 className="w-4 h-4 animate-spin text-zinc-400" />}
-                            {loading ? "Deleting..." : "I understand, delete this project"}
+                            {loading && <Loader2 className="w-4 h-4 animate-spin text-white/50" />}
+                            {loading ? (actionType === 'delete' ? "Deleting..." : "Resetting...") : confirmText}
                         </button>
                     </div>
                 </div>

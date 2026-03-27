@@ -77,7 +77,7 @@ export default function SetupGuide({
         },
         {
             title: "Configure Payments",
-            description: "Connect UPI or Razorpay to receive payments from customers.",
+            description: "Connect UPI, Razorpay or enable Cash on Delivery to receive payments.",
             icon: CreditCard,
             isCompleted: hasPayment,
             href: "/dashboard/payment",

@@ -185,7 +185,7 @@ export default function CustomersPage() {
                 ) : (
                     <div className="overflow-x-auto min-h-[400px]">
                         <table className="w-full text-[12px] sm:text-[14px] text-left">
-                            <thead className="bg-[#F8FAFC] dark:bg-zinc-950 text-[#334155] dark:text-zinc-400 font-bold capitalize border-b border-zinc-100 dark:border-zinc-800">
+                            <thead className="bg-zinc-50/50 dark:bg-zinc-950 text-zinc-500 dark:text-zinc-400 font-bold capitalize border-b border-zinc-100 dark:border-zinc-800">
                                 <tr>
                                     <th className="p-4 w-10"><input type="checkbox" className="rounded border-zinc-300" /></th>
                                     <th className="p-4 whitespace-nowrap">Customer Info</th>
@@ -205,16 +205,20 @@ export default function CustomersPage() {
                                         <td className="p-4"><input type="checkbox" className="rounded border-zinc-300" /></td>
                                         <td className="p-4">
                                             <div className="flex flex-col">
-                                                <span className="font-bold text-indigo-600 mb-0.5">{c.firstName} {c.lastName || "Example"}</span>
-                                                <span className="text-zinc-400 text-[10px]">{c.phone || "9724085963"}</span>
+                                                <span className="font-bold text-zinc-900 dark:text-zinc-100 mb-0.5">{c.firstName} {c.lastName || "Example"}</span>
+                                                <span className="text-zinc-400 dark:text-zinc-500 text-[10px]">{c.phone || "9724085963"}</span>
                                             </div>
                                         </td>
                                         <td className="p-4 text-zinc-600 dark:text-zinc-400 font-medium">{c.email}</td>
                                         <td className="p-4 text-zinc-600 dark:text-zinc-400">{formatDate(c.lastActive) || "June 06, 2025"}</td>
                                         <td className="p-4 text-zinc-600 dark:text-zinc-400">{formatDate(c.createdAt)}</td>
-                                         <td className="p-4 text-indigo-600 font-semibold text-center">{c.orderCount || 0}</td>
-                                         <td className="p-4 text-zinc-600 dark:text-zinc-400 text-center font-semibold">{(c.totalSpend || 0).toLocaleString()}</td>
-                                         <td className="p-4 text-zinc-600 dark:text-zinc-400 text-center font-semibold">{Math.round(c.aov || 0).toLocaleString()}</td>
+                                         <td className="p-4 text-center">
+                                             <span className="inline-flex items-center px-2 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg text-xs font-bold border border-indigo-100 dark:border-indigo-500/20">
+                                                 {c.orderCount || 0}
+                                             </span>
+                                         </td>
+                                         <td className="p-4 text-zinc-700 dark:text-zinc-300 text-center font-bold">{(c.totalSpend || 0).toLocaleString()}</td>
+                                         <td className="p-4 text-zinc-700 dark:text-zinc-300 text-center font-bold">{Math.round(c.aov || 0).toLocaleString()}</td>
                                         <td className="p-4">
                                             <div className="relative inline-flex items-center cursor-pointer">
                                                 <div className={`w-10 h-5 rounded-full transition-colors ${c.status === "Active" ? "bg-indigo-600" : "bg-zinc-200 dark:bg-zinc-800"}`}>
@@ -231,15 +235,15 @@ export default function CustomersPage() {
                                                 >
                                                     <Search size={18} />
                                                 </Link>
-                                                <button className="p-1.5 bg-[#F0F9FF] text-[#0EA5E9] rounded-md hover:opacity-80 transition-opacity">
-                                                    <ShoppingCart size={16} />
-                                                </button>
-                                                <button 
-                                                    onClick={() => deleteCustomer(c.id)}
-                                                    className="p-1.5 bg-rose-50 dark:bg-rose-500/10 text-rose-500 rounded-md hover:opacity-80 transition-opacity"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
+                                                 <button className="p-2 text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-all">
+                                                     <ShoppingCart size={18} />
+                                                 </button>
+                                                 <button 
+                                                     onClick={() => deleteCustomer(c.id)}
+                                                     className="p-2 text-zinc-400 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-all"
+                                                 >
+                                                     <Trash2 size={18} />
+                                                 </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -249,7 +253,7 @@ export default function CustomersPage() {
 
                         {/* Pagination Controls */}
                          {totalPages > 1 && (
-                             <div className="px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-zinc-100 dark:border-zinc-800 bg-[#F8FAFC] dark:bg-zinc-950/50">
+                             <div className="px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/50">
                                  <div className="text-[10px] font-bold capitalize text-zinc-400">
                                      Showing <span className="text-indigo-600 font-bold">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="text-indigo-600 font-bold">{Math.min(currentPage * itemsPerPage, filtered.length)}</span> of <span className="text-indigo-600 font-bold">{filtered.length}</span> customers
                                  </div>

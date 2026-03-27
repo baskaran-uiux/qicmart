@@ -122,7 +122,7 @@ function Header({ storeInfo, slug, categories, version }: { storeInfo: StoreInfo
             <nav className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
                 <div className="flex-shrink-0">
                     <Link href={`/s/${slug}`} className="group flex items-center">
-                        <div className="h-14 sm:h-16 w-auto flex items-center justify-center group-hover:scale-105 transition-transform duration-500 overflow-hidden">
+                        <div className="h-10 sm:h-12 w-auto flex items-center justify-center group-hover:scale-105 transition-transform duration-500 overflow-hidden">
                             {storeInfo?.logo ? (
                                 <img src={`${storeInfo.logo}${storeInfo.logo.includes('?') ? '&' : '?'}v=${version}`} alt={storeInfo.name} className="h-full w-auto object-contain" />
                             ) : (
@@ -385,7 +385,7 @@ function Footer({ storeInfo, slug, categories, pages }: { storeInfo: StoreInfo; 
                 <div className="col-span-2 md:col-span-1 flex flex-col items-center md:items-start text-center md:text-left">
                     <div className="mb-6">
                         {storeInfo.logo ? (
-                            <img src={`${storeInfo.logo}${storeInfo.logo.includes('?') ? '&' : '?'}v=${Date.now()}`} alt={storeInfo.name} className="h-16 w-auto object-contain" />
+                            <img src={`${storeInfo.logo}${storeInfo.logo.includes('?') ? '&' : '?'}v=${Date.now()}`} alt={storeInfo.name} className="h-10 w-auto object-contain" />
                         ) : (
                                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--primary-color)] to-[var(--primary-color)] flex items-center justify-center text-white font-bold text-xl italic mx-auto md:mx-0">
                                 {storeInfo.name.charAt(0)}

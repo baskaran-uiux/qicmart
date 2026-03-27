@@ -20,6 +20,7 @@ interface PaymentSettings {
     upiId?: string | null
     upiName?: string | null
     isUpiEnabled?: boolean
+    isCodEnabled?: boolean
 }
 
 export default function PaymentPage() {
@@ -33,6 +34,7 @@ export default function PaymentPage() {
         razorpayKeySecret: "",
         razorpayWebhookSecret: "",
         isRazorpayEnabled: false,
+        isCodEnabled: false,
     })
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
@@ -57,6 +59,7 @@ export default function PaymentPage() {
                     upiId: data.upiId || "",
                     upiName: data.upiName || "",
                     isUpiEnabled: data.isUpiEnabled || false,
+                    isCodEnabled: data.isCodEnabled || false,
                 })
                 setLoading(false)
             })
@@ -316,6 +319,54 @@ export default function PaymentPage() {
                                             Credentials are encrypted at rest and never shared with customers or third parties.
                                         </p>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Cash on Delivery Configuration */}
+                <section className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm transition-all hover:shadow-xl hover:shadow-indigo-500/5">
+                    <div className="p-8 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-800/20">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
+                                <Shield size={24} />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-2xl text-black dark:text-white capitalize">Cash on Delivery</h3>
+                                <p className="text-zinc-500 dark:text-zinc-400 text-xs font-medium capitalize">Allow customers to pay at their doorstep</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <span className={`px-4 py-1.5 rounded-full text-xs font-bold capitalize border transition-all ${settings.isCodEnabled ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-zinc-100 text-zinc-400 border-zinc-200"}`}>
+                                {settings.isCodEnabled ? "Active" : "Disabled"}
+                            </span>
+                            <button 
+                                onClick={() => update("isCodEnabled", !settings.isCodEnabled)}
+                                className={`w-14 h-8 rounded-full transition-all relative flex items-center p-1 ${settings.isCodEnabled ? "bg-indigo-600" : "bg-zinc-200 dark:bg-zinc-800"}`}
+                            >
+                                <div className={`w-6 h-6 bg-white rounded-full shadow-md transition-all ${settings.isCodEnabled ? "translate-x-6" : "translate-x-0"}`} />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="p-8 sm:p-12">
+                        <div className="flex flex-col lg:flex-row gap-8 items-center bg-zinc-50 dark:bg-zinc-800/30 p-8 rounded-[32px] border border-zinc-100 dark:border-zinc-800/50">
+                            <div className="p-6 bg-white dark:bg-zinc-900 rounded-[28px] shadow-xl border border-zinc-100 dark:border-zinc-800 shrink-0">
+                                <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center mb-4">
+                                    <Check size={32} />
+                                </div>
+                                <h4 className="font-bold text-lg mb-1">Low Commitment</h4>
+                                <p className="text-zinc-500 text-xs leading-relaxed max-w-[150px]">Perfect for building trust with new customers.</p>
+                            </div>
+                            
+                            <div className="space-y-4 flex-1">
+                                <h4 className="font-bold text-xl text-black dark:text-white">How it works</h4>
+                                <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                                    When enabled, customers will see **"Cash on Delivery"** as a payment option during checkout. No online payment is required to place the order. You'll receive the order as **"Pending"** and you can collect the payment when you deliver the items.
+                                </p>
+                                <div className="flex items-center gap-2 pt-2 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider">
+                                    <Shield size={14} /> Trust & Safety Guaranteed
                                 </div>
                             </div>
                         </div>

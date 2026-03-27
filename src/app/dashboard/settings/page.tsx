@@ -556,6 +556,79 @@ function PreferencesTab({ settings, update }: any) {
     )
 }
 
+function DangerTab({ setShowStoreDeleteModal, setShowStoreDataDeleteModal }: any) {
+    return (
+        <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-8"
+        >
+            <div className="bg-amber-50/50 dark:bg-amber-950/5 border border-amber-100 dark:border-amber-900/20 rounded-[32px] overflow-hidden">
+                <div className="p-8 sm:p-10">
+                    <div className="flex items-start gap-4 mb-8">
+                        <div className="p-3 bg-amber-500 text-white rounded-2xl shadow-lg shadow-amber-500/20">
+                            <RefreshCw size={24} />
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Delete Store Data</h3>
+                            <p className="text-zinc-500 dark:text-zinc-400 text-sm mt-1">Clear all products, orders, and customer data</p>
+                        </div>
+                    </div>
+
+                    <div className="p-6 bg-amber-100/50 dark:bg-amber-900/20 border border-amber-200/50 dark:border-amber-800/30 rounded-2xl mb-8">
+                        <div className="flex items-start gap-3">
+                            <Info size={18} className="text-amber-600 mt-0.5 shrink-0" />
+                            <div>
+                                <h4 className="text-sm font-bold text-amber-900 dark:text-amber-400">This will erase all your dashboard content.</h4>
+                                <p className="text-xs text-amber-700/70 dark:text-amber-400/60 mt-1 font-medium">Your store settings, logo, and theme will be kept, but all inventory and sales will be wiped.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button 
+                        onClick={() => setShowStoreDataDeleteModal(true)}
+                        className="px-8 py-4 bg-amber-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-700 active:scale-95 transition-all shadow-xl shadow-amber-500/20"
+                    >
+                        Delete store data
+                    </button>
+                </div>
+            </div>
+
+            <div className="bg-rose-50/50 dark:bg-rose-950/10 border border-rose-100 dark:border-rose-900/30 rounded-[32px] overflow-hidden">
+                <div className="p-8 sm:p-10">
+                    <div className="flex items-start gap-4 mb-8">
+                        <div className="p-3 bg-rose-500 text-white rounded-2xl shadow-lg shadow-rose-500/20">
+                            <AlertCircle size={24} />
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Delete Store</h3>
+                            <p className="text-zinc-500 dark:text-zinc-400 text-sm mt-1">Permanently remove your store and its database</p>
+                        </div>
+                    </div>
+
+                    <div className="p-6 bg-rose-100/50 dark:bg-rose-900/20 border border-rose-200/50 dark:border-rose-800/30 rounded-2xl mb-8">
+                        <div className="flex items-start gap-3">
+                            <AlertCircle size={18} className="text-rose-600 mt-0.5 shrink-0" />
+                            <div>
+                                <h4 className="text-sm font-bold text-rose-900 dark:text-rose-400">Deleting this store will also remove your database.</h4>
+                                <p className="text-xs text-rose-700/70 dark:text-rose-400/60 mt-1 font-medium">Make sure you have made a backup if you want to keep your data.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button 
+                        onClick={() => setShowStoreDeleteModal(true)}
+                        className="px-8 py-4 bg-rose-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-700 active:scale-95 transition-all shadow-xl shadow-rose-500/20"
+                    >
+                        Delete store
+                    </button>
+                </div>
+            </div>
+        </motion.div>
+    )
+}
+
 function DomainTab({ domainConfig, newDomain, setNewDomain, handleSaveDomain, domainSaving, domainError, verifying, handleVerifyDomain, handleRemoveDomain }: any) {
     const { t } = useDashboardStore()
     return (
@@ -705,7 +778,9 @@ export default function SettingsPage() {
     const [domainSaving, setDomainSaving] = useState(false)
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [showStoreDeleteModal, setShowStoreDeleteModal] = useState(false)
+    const [showStoreDataDeleteModal, setShowStoreDataDeleteModal] = useState(false)
     const [deleting, setDeleting] = useState(false)
+    const [resetting, setResetting] = useState(false)
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search)
@@ -953,6 +1028,34 @@ export default function SettingsPage() {
         }
     }
 
+    const handleDeleteStoreData = async () => {
+        setResetting(true)
+        setError(null)
+        try {
+            const params = new URLSearchParams(window.location.search)
+            const ownerId = params.get("ownerId")
+            const url = ownerId ? `/api/dashboard/settings/data?ownerId=${ownerId}` : "/api/dashboard/settings/data"
+
+            const res = await fetch(url, { method: "DELETE" })
+            if (res.ok) {
+                setShowStoreDataDeleteModal(false)
+                setSaved(true)
+                setTimeout(() => setSaved(false), 3000)
+                // Optionally reload or redirect
+                window.location.reload()
+            } else {
+                const data = await res.json()
+                setError(data.error || "Failed to erase store data")
+                setShowStoreDataDeleteModal(false)
+            }
+        } catch (e: any) {
+            setError(e.message || "An error occurred during reset")
+            setShowStoreDataDeleteModal(false)
+        } finally {
+            setResetting(false)
+        }
+    }
+
     if (loading) return (
         <div className="flex flex-col items-center justify-center h-96 gap-4 text-zinc-500">
             <Loader2 className="animate-spin text-purple-500" size={32} /> 
@@ -1003,25 +1106,30 @@ export default function SettingsPage() {
             {/* Horizontal Tabs */}
             <div className="flex bg-zinc-100/80 dark:bg-zinc-800/50 p-1.5 rounded-[22px] backdrop-blur-md border border-white/5 shadow-inner">
                 {[
-                    { id: "branding", label: t("branding"), icon: Store },
-                    { id: "appearance", label: t("appearance"), icon: ImageIcon },
-                    { id: "features", label: t("features"), icon: MessageCircle },
-                    { id: "preferences", label: t("preferences"), icon: SettingsIcon },
-                    { id: "domain", label: t("domain"), icon: Globe },
+                    { id: "branding", label: "Branding", icon: Store },
+                    { id: "appearance", label: "Appearance & Design", icon: ImageIcon },
+                    { id: "features", label: "Features & Marketing", icon: MessageCircle },
+                    { id: "preferences", label: "Store Preferences", icon: SettingsIcon },
+                    { id: "domain", label: "Domain", icon: Globe },
+                    { id: "danger", label: "Danger Zone", icon: AlertCircle },
                 ].map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`relative flex items-center gap-2.5 px-6 py-3 rounded-xl text-[11px] font-bold capitalize transition-all whitespace-nowrap ${
                             activeTab === tab.id 
-                            ? "text-indigo-600 dark:text-white" 
+                            ? tab.id === 'danger' ? "text-white" : "text-indigo-600 dark:text-white" 
                             : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                         }`}
                     >
                         {activeTab === tab.id && (
                             <motion.div 
                                 layoutId="activeTab"
-                                className="absolute inset-0 bg-white dark:bg-zinc-700 shadow-sm rounded-xl border border-zinc-100 dark:border-zinc-600"
+                                className={`absolute inset-0 shadow-sm rounded-xl border ${
+                                    tab.id === 'danger' 
+                                    ? "bg-zinc-800 border-zinc-700" 
+                                    : "bg-white dark:bg-zinc-700 border-zinc-100 dark:border-zinc-600"
+                                }`}
                                 transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                             />
                         )}
@@ -1085,6 +1193,13 @@ export default function SettingsPage() {
                             domainError={domainError}
                         />
                     )}
+                    {activeTab === "danger" && (
+                        <DangerTab 
+                            key="danger"
+                            setShowStoreDeleteModal={setShowStoreDeleteModal}
+                            setShowStoreDataDeleteModal={setShowStoreDataDeleteModal}
+                        />
+                    )}
                 </AnimatePresence>
             </div>
 
@@ -1102,39 +1217,8 @@ export default function SettingsPage() {
                 </button>
             </div>
 
-            {/* Danger Zone */}
-            <div className="mt-16 pt-16 border-t border-zinc-100 dark:border-zinc-800">
-                <div className="bg-rose-50/50 dark:bg-rose-950/10 border border-rose-100 dark:border-rose-900/30 rounded-[32px] overflow-hidden">
-                    <div className="p-8 sm:p-10">
-                        <div className="flex items-start gap-4 mb-8">
-                            <div className="p-3 bg-rose-500 text-white rounded-2xl shadow-lg shadow-rose-500/20">
-                                <AlertCircle size={24} />
-                            </div>
-                            <div>
-                                <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Delete project</h3>
-                                <p className="text-zinc-500 dark:text-zinc-400 text-sm mt-1">Permanently remove your project and its database</p>
-                            </div>
-                        </div>
-
-                        <div className="p-6 bg-rose-100/50 dark:bg-rose-900/20 border border-rose-200/50 dark:border-rose-800/30 rounded-2xl mb-8">
-                            <div className="flex items-start gap-3">
-                                <AlertCircle size={18} className="text-rose-600 mt-0.5 shrink-0" />
-                                <div>
-                                    <h4 className="text-sm font-bold text-rose-900 dark:text-rose-400">Deleting this project will also remove your database.</h4>
-                                    <p className="text-xs text-rose-700/70 dark:text-rose-400/60 mt-1 font-medium">Make sure you have made a backup if you want to keep your data.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button 
-                            onClick={() => setShowStoreDeleteModal(true)}
-                            className="px-8 py-4 bg-rose-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-700 active:scale-95 transition-all shadow-xl shadow-rose-500/20"
-                        >
-                            Delete store
-                        </button>
-                    </div>
-                </div>
-            </div>
+            {/* Space at bottom */}
+            <div className="h-12" />
 
             {/* Media Library Modal */}
             <MediaLibraryModal 
@@ -1162,7 +1246,21 @@ export default function SettingsPage() {
                 loading={deleting}
                 confirmationValue={settings.slug}
                 title={`Confirm deletion of ${settings.slug}`}
-                description={`This will permanently delete the ${settings.slug} project and all of its data.`}
+                description={`This will permanently delete the ${settings.slug} store and all of its database configuration.`}
+                confirmText="I understand, delete this store"
+            />
+
+            {/* Delete Store Data Modal */}
+            <DeleteConfirmationModal
+                isOpen={showStoreDataDeleteModal}
+                onClose={() => setShowStoreDataDeleteModal(false)}
+                onConfirm={handleDeleteStoreData}
+                loading={resetting}
+                actionType="reset"
+                dangerText="All products, orders, and customers will be erased."
+                title={`Reset data for ${settings.name}`}
+                description={`This will wipe all inventory, sales, and shopper data for ${settings.name}. This action is irreversible.`}
+                confirmText="Yes, erase all store data"
             />
         </div>
     )

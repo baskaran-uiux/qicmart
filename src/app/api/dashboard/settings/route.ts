@@ -83,6 +83,7 @@ export async function GET(req: Request) {
         footerText: themeConfig.footerText || "",
         timezone: themeConfig.timezone || "Asia/Kolkata",
         language: themeConfig.language || "English",
+        isCodEnabled: themeConfig.isCodEnabled ?? false,
         subscription: (store as any).subscription ? {
             plan: (store as any).subscription.plan.name,
             maxProducts: (store as any).subscription.plan.maxProducts
@@ -144,6 +145,9 @@ export async function PUT(req: Request) {
         if (body.upiId !== undefined) themeConfig.upiId = body.upiId
         if (body.upiName !== undefined) themeConfig.upiName = body.upiName
         if (body.isUpiEnabled !== undefined) themeConfig.isUpiEnabled = body.isUpiEnabled
+
+        // COD settings
+        if (body.isCodEnabled !== undefined) themeConfig.isCodEnabled = body.isCodEnabled
 
         // Social links
         if (body.instagramUrl !== undefined) themeConfig.instagramUrl = body.instagramUrl
