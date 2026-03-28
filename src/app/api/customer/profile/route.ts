@@ -123,14 +123,14 @@ export async function GET(req: Request) {
         }
 
         // Extract first and last name from name
-        const nameParts = user.name?.split(" ") || ["", ""]
-        const firstName = nameParts[0]
-        const lastName = nameParts.slice(1).join(" ")
+        const userNameParts = user.name?.split(" ") || ["", ""]
+        const userFirstName = userNameParts[0] || ""
+        const userLastName = userNameParts.slice(1).join(" ") || ""
 
         return NextResponse.json({
             id: user.id,
-            firstName,
-            lastName,
+            firstName: customerData.firstName || userFirstName || "Customer",
+            lastName: customerData.lastName || userLastName,
             email: user.email,
             phone: customerData.phone || user.phone,
             address: customerData.address || user.address,

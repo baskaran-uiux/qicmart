@@ -50,27 +50,11 @@ export const authOptions: NextAuthOptions = {
                     where: { email: sanitizedEmail }
                 })
 
-                // --- FIREBASE/TEST BYPASS ---
-                const isFirebaseOrTest = credentials.otp === "dummy"
-
-                if (!user) {
-                    if (isFirebaseOrTest) {
-                        // Create user on the fly for Firebase/Test flow
-                        user = await prisma.user.create({
-                            data: {
-                                email: sanitizedEmail,
-                                name: sanitizedEmail.split('@')[0],
-                                role: "CUSTOMER"
-                            }
-                        })
-                        console.log("Created new user via Firebase/Test flow:", user.id)
-                    } else {
-                        throw new Error("User not found")
-                    }
-                }
-
                 // 2. Verify Password if provided
                 if (credentials.password) {
+                    if (!user) {
+                        throw new Error("User not found")
+                    }
                     if (!user.password) {
                         throw new Error("This account does not have a password set. Try another method.")
                     }
@@ -102,14 +86,32 @@ export const authOptions: NextAuthOptions = {
                             throw new Error("Invalid OTP code")
                         }
 
-                        await prisma.verificationToken.delete({
-                            where: {
-                                identifier_token: {
-                                    identifier: verificationToken.identifier,
-                                    token: verificationToken.token
-                                }
-                            }
+                        // Clean up token
+                        await prisma.verificationToken.deleteMany({
+                            where: { identifier: sanitizedEmail }
                         })
+
+                        // Auto-create user if not found for OTP (Shopper Auto-Registration)
+                        if (!user) {
+                            user = await prisma.user.create({
+                                data: {
+                                    email: sanitizedEmail,
+                                    name: sanitizedEmail.split('@')[0],
+                                    role: "CUSTOMER"
+                                }
+                            })
+                        }
+                    } else {
+                        // Dummy test user handling
+                        if (!user) {
+                            user = await prisma.user.create({
+                                data: {
+                                    email: sanitizedEmail,
+                                    name: "Test User",
+                                    role: "CUSTOMER"
+                                }
+                            })
+                        }
                     }
                 } else {
                     throw new Error("Password or OTP is required")
@@ -121,7 +123,7 @@ export const authOptions: NextAuthOptions = {
                     name: user.name,
                     email: user.email,
                     role: user.role,
-                    address: user.address,
+                    address: (user as any).address,
                 }
             },
         }),

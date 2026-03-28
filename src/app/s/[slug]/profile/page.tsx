@@ -26,8 +26,6 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useSession, signIn, signOut } from "next-auth/react"
 import { useLanguage } from "@/context/LanguageContext"
-import { auth } from "@/lib/firebase"
-import { sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth"
 
 export default function ShopperProfilePage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = use(params)
@@ -68,11 +66,13 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
     const [email, setEmail] = useState("")
     const [mobile, setMobile] = useState("")
     
-    // Magic Link Login state
+    // OTP Login state
     const [loginEmail, setLoginEmail] = useState("")
-    const [isMagicLinkSent, setIsMagicLinkSent] = useState(false)
+    const [otpCode, setOtpCode] = useState("")
+    const [showOtpStep, setShowOtpStep] = useState(false)
     const [isMagicLoading, setIsMagicLoading] = useState(false)
     const [loginError, setLoginError] = useState("")
+    const [resendTimer, setResendTimer] = useState(0)
 
     // Address state
     const [address, setAddress] = useState("")
@@ -147,36 +147,6 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
         }
         loadData()
 
-        // 5. Handle Firebase Magic Link completion
-        if (isSignInWithEmailLink(auth, window.location.href)) {
-            let emailForSignIn = window.localStorage.getItem('emailForSignIn');
-            if (!emailForSignIn) {
-                // If it's missing (user used different browser/device), 
-                // we'd normally prompt for it. For now, we'll try to find it.
-                emailForSignIn = window.prompt('Please provide your email for confirmation');
-            }
-
-            if (emailForSignIn) {
-                setIsMagicLoading(true);
-                signInWithEmailLink(auth, emailForSignIn, window.location.href)
-                    .then(async (result) => {
-                        window.localStorage.removeItem('emailForSignIn');
-                        // Use NextAuth to bridge the session
-                        await signIn("credentials", {
-                            email: emailForSignIn,
-                            otp: "dummy", // The CredentialsProvider will need to be updated to trust Firebase users
-                            redirect: false
-                        });
-                        router.replace(`/s/${slug}/profile`);
-                    })
-                    .catch((error) => {
-                        console.error("Firebase sign-in error:", error);
-                        setLoginError("Could not verify your sign-in link. It may have expired.");
-                    })
-                    .finally(() => setIsMagicLoading(false));
-            }
-        }
-
         const viewed = localStorage.getItem("recentlyViewedProducts")
         if (viewed) {
             setRecentlyViewed(JSON.parse(viewed))
@@ -221,30 +191,67 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
         }
     }
 
-    const handleEmailLogin = async (e: React.FormEvent) => {
-        e.preventDefault()
+    const handleSendOtp = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault()
         if (!loginEmail) return
         
         setIsMagicLoading(true)
         setLoginError("")
         try {
-            const actionCodeSettings = {
-                url: window.location.href, // Returns here
-                handleCodeInApp: true,
-            };
+            const res = await fetch("/api/auth/otp/send", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: loginEmail })
+            })
+            const data = await res.json()
             
-            await sendSignInLinkToEmail(auth, loginEmail, actionCodeSettings);
-            
-            // Save email for confirmation
-            window.localStorage.setItem('emailForSignIn', loginEmail);
-            setIsMagicLinkSent(true)
-        } catch (err: any) {
-            console.error("Firebase Auth Error:", err);
-            setLoginError(err.message || "Failed to send magic link. Please check your email and try again.")
+            if (data.error) {
+                setLoginError(data.error)
+            } else {
+                setShowOtpStep(true)
+                setResendTimer(60)
+            }
+        } catch (err) {
+            setLoginError("Failed to send code. Please try again.")
         } finally {
             setIsMagicLoading(false)
         }
     }
+
+    const handleVerifyOtp = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!otpCode || otpCode.length < 6) return
+        
+        setIsMagicLoading(true)
+        setLoginError("")
+        try {
+            const result = await signIn("credentials", {
+                email: loginEmail,
+                otp: otpCode,
+                redirect: false,
+                callbackUrl: window.location.href
+            })
+            
+            if (result?.error) {
+                setLoginError(result.error)
+            } else {
+                // Success - NextAuth will refresh the session automatically
+                window.location.reload()
+            }
+        } catch (err) {
+            setLoginError("Verification failed. Please try again.")
+        } finally {
+            setIsMagicLoading(false)
+        }
+    }
+
+    // Timer for resend
+    useEffect(() => {
+        if (resendTimer > 0) {
+            const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000)
+            return () => clearTimeout(timer)
+        }
+    }, [resendTimer])
 
     const TrackingModal = ({ order, isOpen, onClose }: { order: any, isOpen: boolean, onClose: () => void }) => {
         if (!order) return null;
@@ -294,8 +301,8 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                 <div className="flex items-center gap-4">
                                     <button onClick={onClose} className="p-2 hover:bg-zinc-100 rounded-full transition-all text-zinc-400 md:hidden"><ArrowLeft size={20} /></button>
                                     <div>
-                                        <h3 className="text-lg font-black text-zinc-900 uppercase italic">{t("orderDetails")}</h3>
-                                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mt-0.5">ID: #{order.id.slice(-6).toUpperCase()}</p>
+                                        <h3 className="text-lg font-bold text-zinc-900">{t("orderDetails")}</h3>
+                                        <p className="text-[10px] font-semibold text-zinc-400">ID: #{order.id.slice(-6).toUpperCase()}</p>
                                     </div>
                                 </div>
                                 <button onClick={onClose} className="p-2 hover:bg-zinc-100 rounded-full transition-all text-zinc-400 hidden md:block"><X size={20} /></button>
@@ -306,7 +313,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                 <section>
                                     <div className="flex items-center gap-2 mb-8">
                                         <Package size={16} className="text-zinc-400" />
-                                        <h4 className="text-[11px] font-black text-zinc-400 uppercase tracking-widest">Tracking Status</h4>
+                                        <h4 className="text-[11px] font-bold text-zinc-400">Tracking Status</h4>
                                     </div>
                                     <div className="relative space-y-10 ml-1">
                                         <div className="absolute left-[9px] top-2 bottom-2 w-0.5 bg-zinc-100" />
@@ -336,13 +343,13 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                 <section className="pt-8 border-t border-zinc-100">
                                     <div className="flex items-center gap-2 mb-6">
                                         <MapPin size={16} className="text-zinc-400" />
-                                        <h4 className="text-[11px] font-black text-zinc-400 uppercase tracking-widest">Delivery Address</h4>
+                                        <h4 className="text-[11px] font-bold text-zinc-400">Delivery Address</h4>
                                     </div>
                                     <div className="bg-zinc-50 p-6 rounded-2xl border border-zinc-100">
                                         {(() => {
                                             try {
                                                 const addr = JSON.parse(order.shippingAddress || '{}');
-                                                if (!addr.address && !addr.city) return <p className="text-[11px] font-black text-zinc-400 uppercase tracking-widest italic">{order.shippingAddress || 'No address provided'}</p>;
+                                                if (!addr.address && !addr.city) return <p className="text-[11px] font-semibold text-zinc-400">{order.shippingAddress || 'No address provided'}</p>;
                                                 return (
                                                     <div className="space-y-1">
                                                         <p className="text-[14px] font-black text-zinc-900">{addr.firstName} {addr.lastName}</p>
@@ -354,7 +361,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                                     </div>
                                                 );
                                             } catch (e) {
-                                                return <p className="text-[11px] font-black text-zinc-400 uppercase tracking-widest italic">{order.shippingAddress || 'No address provided'}</p>;
+                                                return <p className="text-[11px] font-semibold text-zinc-400">{order.shippingAddress || 'No address provided'}</p>;
                                             }
                                         })()}
                                     </div>
@@ -364,7 +371,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                 <section className="pt-8 border-t border-zinc-100">
                                     <div className="flex items-center gap-2 mb-6">
                                         <ShoppingBag size={16} className="text-zinc-400" />
-                                        <h4 className="text-[11px] font-black text-zinc-400 uppercase tracking-widest">{t("itemsOverview")}</h4>
+                                        <h4 className="text-[11px] font-bold text-zinc-400">{t("itemsOverview")}</h4>
                                     </div>
                                     <div className="space-y-4">
                                         {order.items.map((item: any) => (
@@ -377,7 +384,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                                     <p className="text-[11px] font-medium text-zinc-400">{t("qty")}: {item.quantity} × ₹{item.price}</p>
                                                 </div>
                                                 <div className="text-right">
-                                                    <p className="text-sm font-black text-zinc-900 italic">₹{item.price * item.quantity}</p>
+                                                    <p className="text-sm font-bold text-zinc-900">₹{item.price * item.quantity}</p>
                                                 </div>
                                             </div>
                                         ))}
@@ -388,7 +395,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                 <section className="pt-8 border-t border-zinc-100">
                                     <div className="flex items-center gap-2 mb-6">
                                         <CreditCard size={16} className="text-zinc-400" />
-                                        <h4 className="text-[11px] font-black text-zinc-400 uppercase tracking-widest">{t("paymentBreakdown")}</h4>
+                                        <h4 className="text-[11px] font-bold text-zinc-400">{t("paymentBreakdown")}</h4>
                                     </div>
                                     <div className="space-y-3 px-1">
                                         <div className="flex justify-between items-center text-xs font-bold text-zinc-500 tracking-tight">
@@ -397,7 +404,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                         </div>
                                         <div className="flex justify-between items-center text-xs font-bold text-zinc-500 tracking-tight">
                                             <span>{t("shipping")}</span>
-                                            <span className="text-emerald-600 font-black">{shipping === 0 ? 'FREE' : `₹${shipping.toFixed(2)}`}</span>
+                                            <span className="text-emerald-600 font-bold">{shipping === 0 ? 'FREE' : `₹${shipping.toFixed(2)}`}</span>
                                         </div>
                                         {tax > 0 && (
                                             <div className="flex justify-between items-center text-xs font-bold text-zinc-500 tracking-tight">
@@ -422,7 +429,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                 <div className="pt-8">
                                     <button 
                                         onClick={() => window.print()}
-                                        className="w-full py-5 bg-white border-2 border-zinc-100 text-zinc-900 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-zinc-50 hover:border-zinc-200 transition-all flex items-center justify-center gap-3 group"
+                                        className="w-full py-5 bg-white border-2 border-zinc-100 text-zinc-900 rounded-2xl text-[11px] font-bold hover:bg-zinc-50 hover:border-zinc-200 transition-all flex items-center justify-center gap-3 group"
                                     >
                                         <FileText size={18} className="text-zinc-300 group-hover:text-zinc-600 transition-colors" />
                                         {t("downloadInvoice")}
@@ -438,7 +445,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
 
     const NavGroup = ({ title, children }: { title: string, children: React.ReactNode }) => (
         <div className="border-b border-zinc-100 last:border-0 pb-4 mb-4">
-            <h3 className="pl-[58px] text-[11px] font-black text-[var(--primary-color)] uppercase tracking-[0.2em] mb-3 opacity-90">{title}</h3>
+            <h3 className="pl-[58px] text-[11px] font-bold text-[var(--primary-color)] mb-3 opacity-90">{title}</h3>
             <div className="space-y-1">{children}</div>
         </div>
     )
@@ -450,9 +457,8 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
         >
             <div className="flex items-center gap-4 flex-1 min-w-0 mr-4">
                 <Icon size={18} className={`flex-shrink-0 ${active ? "text-[var(--primary-color)]" : "text-zinc-400 group-hover:text-[var(--primary-color)]"}`} />
-                <span className={`text-[13px] font-bold uppercase tracking-tight text-left leading-tight block truncate md:whitespace-normal ${active ? "opacity-100" : "opacity-70 group-hover:opacity-100"}`}>{label}</span>
+                <span className={`text-[13px] font-semibold tracking-tight text-left leading-tight block truncate md:whitespace-normal ${active ? "opacity-100" : "opacity-70 group-hover:opacity-100"}`}>{label}</span>
             </div>
-            <ChevronRight size={14} className={`flex-shrink-0 ${active ? "text-[var(--primary-color)]/50" : "text-zinc-300 group-hover:text-[var(--primary-color)]/50"}`} />
         </button>
     )
 
@@ -468,48 +474,30 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
         return (
             <div className="min-h-screen bg-[#f1f3f6] flex items-center justify-center p-4">
                 <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
                     className="w-full max-w-md bg-white rounded-[40px] shadow-2xl p-10 text-center border border-white"
                 >
-                    <div className="w-20 h-20 bg-[var(--primary-color)]/5 rounded-full flex items-center justify-center mx-auto mb-8">
+                    <div className="w-20 h-20 bg-[var(--primary-color)]/5 rounded-full flex items-center justify-center mx-auto mb-8 relative">
                         <User size={32} className="text-[var(--primary-color)]" />
+                        <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full border-4 border-white flex items-center justify-center">
+                            <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                        </div>
                     </div>
                     
-                    <h1 className="text-2xl font-black text-zinc-900 uppercase italic tracking-tight mb-3">Shopper Login</h1>
-                    <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest leading-loose mb-10">Sign in to track orders, save addresses, and manage your account.</p>
+                    <h1 className="text-2xl font-bold text-zinc-900 tracking-tight mb-3">Shopper Login</h1>
+                    <p className="text-xs font-medium text-zinc-400 leading-loose mb-10">Sign in to track orders, save addresses, and manage your account.</p>
                     
-                    {isMagicLinkSent ? (
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="bg-emerald-50 border border-emerald-100 p-8 rounded-[32px] text-center mb-6"
-                        >
-                            <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Bell className="text-emerald-600 animate-bounce" size={24} />
-                            </div>
-                            <h3 className="text-emerald-900 font-black uppercase italic mb-2">Check your email</h3>
-                            <p className="text-[11px] font-bold text-emerald-600/70 uppercase tracking-widest leading-relaxed">
-                                We've sent a secure sign-in link to<br/>
-                                <span className="text-emerald-700">{loginEmail}</span>
-                            </p>
-                            <button 
-                                onClick={() => setIsMagicLinkSent(false)}
-                                className="mt-6 text-[10px] font-black text-emerald-700 underline uppercase tracking-widest"
-                            >
-                                Try another email
-                            </button>
-                        </motion.div>
-                    ) : (
-                        <div className="space-y-6">
-                            <form onSubmit={handleEmailLogin} className="space-y-4">
+                    <div className="space-y-6">
+                        {!showOtpStep ? (
+                            <form onSubmit={handleSendOtp} className="space-y-4">
                                 <div className="space-y-2 text-left">
-                                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block ml-1">Email address</label>
+                                    <label className="text-[10px] font-bold text-zinc-400 block ml-1">Email address</label>
                                     <input 
                                         type="email"
                                         required
                                         value={loginEmail}
-                                        onChange={(e) => setLoginEmail(e.target.value)}
+                                        onChange={(e) => setLoginEmail(e.target.value.toLowerCase())}
                                         placeholder="you@company.com"
                                         className="w-full px-6 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl text-[13px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]/10 focus:border-[var(--primary-color)] transition-all placeholder:text-zinc-300"
                                     />
@@ -518,37 +506,89 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                 <button 
                                     type="submit"
                                     disabled={isMagicLoading}
-                                    className="w-full py-4 bg-[var(--primary-color)] text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-[var(--primary-color)]/20 hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
+                                    className="w-full py-4 bg-[var(--primary-color)] text-white rounded-2xl text-[11px] font-bold shadow-xl shadow-[var(--primary-color)]/20 hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-3"
                                 >
-                                    {isMagicLoading ? "Sending..." : "Send magic link"}
+                                    {isMagicLoading ? <Loader2 className="animate-spin w-4 h-4" /> : "Send Access Code"}
                                 </button>
                             </form>
+                        ) : (
+                            <form onSubmit={handleVerifyOtp} className="space-y-4">
+                                <div className="space-y-2 text-left">
+                                    <div className="flex justify-between items-center mb-1">
+                                        <label className="text-[10px] font-bold text-zinc-400 block ml-1">Access Code</label>
+                                        <button 
+                                            type="button"
+                                            onClick={() => setShowOtpStep(false)}
+                                            className="text-[9px] font-bold text-[var(--primary-color)] hover:underline"
+                                        >
+                                            Change Email
+                                        </button>
+                                    </div>
+                                    <input 
+                                        type="text"
+                                        required
+                                        maxLength={6}
+                                        value={otpCode}
+                                        autoFocus
+                                        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                                        placeholder="······"
+                                        className="w-full px-6 py-5 bg-zinc-50 border border-zinc-100 rounded-2xl text-2xl font-bold text-center tracking-[0.5em] focus:outline-none focus:ring-4 focus:ring-[var(--primary-color)]/5 focus:border-[var(--primary-color)] transition-all placeholder:text-zinc-200"
+                                    />
+                                    <p className="text-[9px] font-semibold text-zinc-400 text-center mt-2">
+                                        Sent to {loginEmail}
+                                    </p>
+                                </div>
+                                
+                                {loginError && <p className="text-[10px] font-bold text-rose-500 uppercase tracking-widest text-left ml-1">❌ {loginError}</p>}
+                                
+                                <button 
+                                    type="submit"
+                                    disabled={isMagicLoading || otpCode.length < 6}
+                                    className="w-full py-4 bg-[var(--primary-color)] text-white rounded-2xl text-[11px] font-bold shadow-xl shadow-[var(--primary-color)]/20 hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                                >
+                                    {isMagicLoading ? <Loader2 className="animate-spin w-4 h-4" /> : "Verify & Sign In"}
+                                </button>
 
-                            <div className="relative py-4">
-                                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-zinc-100"></div></div>
-                                <div className="relative flex justify-center text-[10px] uppercase tracking-[0.2em] font-black text-zinc-300"><span className="bg-white px-4">Or sign in with</span></div>
-                            </div>
-                            
-                            <button 
-                                onClick={() => signIn("google", { callbackUrl: window.location.href })}
-                                className="w-full flex items-center justify-center gap-4 py-4 bg-white border-2 border-zinc-100 rounded-2xl hover:border-zinc-200 transition-all group"
-                            >
-                                <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5 grayscale group-hover:grayscale-0 transition-all" />
-                                <span className="text-[13px] font-black uppercase tracking-widest text-zinc-600">Continue with Google</span>
-                            </button>
+                                <div className="pt-2">
+                                    {resendTimer > 0 ? (
+                                        <p className="text-[9px] font-semibold text-zinc-300">Resend code in {resendTimer}s</p>
+                                    ) : (
+                                        <button 
+                                            type="button"
+                                            onClick={() => handleSendOtp()}
+                                            className="text-[10px] font-bold text-[var(--primary-color)] hover:underline"
+                                        >
+                                            Didn't get the code? Resend
+                                        </button>
+                                    )}
+                                </div>
+                            </form>
+                        )}
+
+                        <div className="relative py-4">
+                            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-zinc-100"></div></div>
+                            <div className="relative flex justify-center text-[10px] uppercase tracking-[0.2em] font-black text-zinc-300"><span className="bg-white px-4">Or sign in with</span></div>
                         </div>
-                    )}
+                        
+                        <button 
+                            onClick={() => signIn("google", { callbackUrl: window.location.href })}
+                            className="w-full flex items-center justify-center gap-4 py-4 bg-white border-2 border-zinc-100 rounded-2xl hover:border-zinc-200 transition-all group"
+                        >
+                            <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5 grayscale group-hover:grayscale-0 transition-all" />
+                            <span className="text-[13px] font-bold text-zinc-600">Continue with Google</span>
+                        </button>
+                    </div>
                     
                     <div className="mt-8">
                         <Link 
                             href={`/s/${slug}`}
-                            className="text-[10px] font-black text-zinc-400 uppercase tracking-widest hover:text-zinc-600 transition-all"
+                            className="text-[10px] font-bold text-zinc-400 hover:text-zinc-600 transition-all"
                         >
                             ← Return to Store
                         </Link>
                     </div>
 
-                    <p className="mt-12 text-[9px] font-bold text-zinc-300 uppercase tracking-widest">
+                    <p className="mt-12 text-[9px] font-semibold text-zinc-300 tracking-wider">
                         By signing in, you agree to our <span className="text-zinc-400 underline cursor-pointer">Terms</span> & <span className="text-zinc-400 underline cursor-pointer">Privacy</span>
                     </p>
                 </motion.div>
@@ -560,7 +600,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
         <div className="min-h-screen bg-[#f1f3f6] pb-20">
             {/* Desktop Header / Breadcrumbs */}
             <div className="bg-white px-6 py-4 shadow-sm mb-6 hidden md:block">
-                <div className="max-w-7xl mx-auto flex items-center gap-2 text-xs font-bold text-zinc-400 uppercase tracking-widest">
+                <div className="max-w-7xl mx-auto flex items-center gap-2 text-xs font-semibold text-zinc-400">
                     <Link href={`/s/${slug}`} className="hover:text-[var(--primary-color)]">{t("home")}</Link>
                     <span>/</span>
                     <span className="text-zinc-900">{t("myAccount")}</span>
@@ -577,8 +617,8 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                             <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${firstName || "Guest"}`} alt="Avatar" className="w-full h-full object-cover" />
                         </div>
                         <div>
-                            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t("hello")}</p>
-                            <h2 className="text-sm font-black text-zinc-900 uppercase italic">{firstName} {lastName}</h2>
+                            <p className="text-[10px] font-semibold text-zinc-400">{t("hello")}</p>
+                            <h2 className="text-sm font-bold text-zinc-900">{firstName} {lastName}</h2>
                         </div>
                     </div>
 
@@ -598,7 +638,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                         >
                             <div className="flex items-center gap-4 flex-1 min-w-0">
                                 <LogOut size={18} className="text-rose-600 flex-shrink-0" />
-                                <span className="text-[13px] uppercase tracking-tight truncate">{t("logout")}</span>
+                                <span className="text-[13px] tracking-tight truncate">{t("logout")}</span>
                             </div>
                         </button>
                     </div>
@@ -612,7 +652,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                             <button onClick={() => setActiveTab(null)} className="p-2 -ml-2 hover:bg-zinc-100 rounded-full transition-all">
                                 <ArrowLeft size={20} className="text-zinc-600" />
                             </button>
-                            <h2 className="text-sm font-black text-zinc-900 uppercase italic">
+                            <h2 className="text-sm font-bold text-zinc-900">
                                 {activeTab === "profile" && t("profile")}
                                 {activeTab === "orders" && t("myOrders")}
                                 {activeTab === "address" && t("manageAddresses")}
@@ -627,13 +667,13 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                         <div className="p-8 md:p-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
                             {/* Section Header */}
                             <div className="flex items-center gap-4 mb-10">
-                                <h2 className="text-xl font-black text-zinc-900 uppercase italic">{t("profile")}</h2>
+                                <h2 className="text-xl font-bold text-zinc-900">{t("profile")}</h2>
                             </div>
 
                             {/* Name Fields */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block ml-1">{t("firstName")}</label>
+                                    <label className="text-[10px] font-bold text-zinc-400 block ml-1">{t("firstName")}</label>
                                     <input 
                                         type="text" 
                                         value={firstName}
@@ -643,7 +683,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block ml-1">{t("lastName")}</label>
+                                    <label className="text-[10px] font-bold text-zinc-400 block ml-1">{t("lastName")}</label>
                                     <input 
                                         type="text" 
                                         value={lastName}
@@ -656,7 +696,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
 
                             {/* Gender selection */}
                             <div className="space-y-4 mb-14">
-                                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block ml-1">{t("gender")}</label>
+                                <label className="text-[10px] font-bold text-zinc-400 block ml-1">{t("gender")}</label>
                                 <div className="flex gap-8">
                                     {["Male", "Female"].map(g => (
                                         <button 
@@ -676,7 +716,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                             {/* Email Address */}
                             <div className="mb-14">
                                 <div className="flex items-center gap-4 mb-6">
-                                    <h3 className="text-sm font-black text-zinc-900 uppercase italic">{t("emailAddress")}</h3>
+                                    <h3 className="text-sm font-bold text-zinc-900">{t("emailAddress")}</h3>
                                 </div>
                                 <input 
                                     type="email" 
@@ -689,7 +729,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                             {/* Mobile Number */}
                             <div className="mb-14">
                                 <div className="flex items-center gap-4 mb-6">
-                                    <h3 className="text-sm font-black text-zinc-900 uppercase italic">{t("mobileNumber")}</h3>
+                                    <h3 className="text-sm font-bold text-zinc-900">{t("mobileNumber")}</h3>
                                 </div>
                                 <input 
                                     type="text" 
@@ -705,7 +745,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                 <button 
                                     onClick={handleSave}
                                     disabled={isSaving}
-                                    className="w-full md:w-auto px-12 py-4 bg-[var(--primary-color)] text-white rounded-xl text-sm font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-xl shadow-[var(--primary-color)]/20 disabled:opacity-50 flex items-center justify-center gap-3"
+                                    className="w-full md:w-auto px-12 py-4 bg-[var(--primary-color)] text-white rounded-xl text-sm font-bold hover:opacity-90 transition-all shadow-xl shadow-[var(--primary-color)]/20 disabled:opacity-50 flex items-center justify-center gap-3"
                                 >
                                     {isSaving ? "Saving..." : t("saveChanges")}
                                 </button>
@@ -714,7 +754,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                     <motion.p 
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        className="mt-6 text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2"
+                                        className="mt-6 text-[10px] font-bold text-emerald-600 flex items-center gap-2"
                                     >
                                         ✨ Profile updated successfully!
                                     </motion.p>
@@ -787,7 +827,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                 {!isEditing && (
                                     <button 
                                         onClick={() => setIsEditing(true)}
-                                        className="px-6 py-2 border-2 border-[var(--primary-color)] text-[var(--primary-color)] rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[var(--primary-color)]/10 transition-all"
+                                        className="px-6 py-2 border-2 border-[var(--primary-color)] text-[var(--primary-color)] rounded-xl text-[10px] font-bold hover:bg-[var(--primary-color)]/10 transition-all"
                                     >
                                         {t("editAddress")}
                                     </button>
@@ -796,7 +836,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                                 <div className="md:col-span-2 space-y-2">
-                                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block ml-1">Street Address</label>
+                                    <label className="text-[10px] font-bold text-zinc-400 block ml-1">Street Address</label>
                                     <input 
                                         type="text" 
                                         disabled={!isEditing}
@@ -807,7 +847,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block ml-1">Area / Landmark</label>
+                                    <label className="text-[10px] font-bold text-zinc-400 block ml-1">Area / Landmark</label>
                                     <input 
                                         type="text" 
                                         disabled={!isEditing}
@@ -817,7 +857,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block ml-1">City</label>
+                                    <label className="text-[10px] font-bold text-zinc-400 block ml-1">City</label>
                                     <input 
                                         type="text" 
                                         disabled={!isEditing}
@@ -827,7 +867,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block ml-1">State</label>
+                                    <label className="text-[10px] font-bold text-zinc-400 block ml-1">State</label>
                                     <input 
                                         type="text" 
                                         disabled={!isEditing}
@@ -837,7 +877,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block ml-1">Pincode</label>
+                                    <label className="text-[10px] font-bold text-zinc-400 block ml-1">Pincode</label>
                                     <input 
                                         type="text" 
                                         disabled={!isEditing}
@@ -853,13 +893,13 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                     <button 
                                         onClick={handleSave}
                                         disabled={isSaving}
-                                        className="px-10 py-4 bg-[var(--primary-color)] text-white rounded-xl text-xs font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-lg shadow-[var(--primary-color)]/20"
+                                        className="px-10 py-4 bg-[var(--primary-color)] text-white rounded-xl text-xs font-bold hover:opacity-90 transition-all shadow-lg shadow-[var(--primary-color)]/20"
                                     >
                                         {isSaving ? "Saving..." : t("saveAddress")}
                                     </button>
                                     <button 
                                         onClick={() => setIsEditing(false)}
-                                        className="px-10 py-4 border-2 border-zinc-200 text-zinc-500 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-zinc-50 transition-all"
+                                        className="px-10 py-4 border-2 border-zinc-200 text-zinc-500 rounded-xl text-xs font-bold hover:bg-zinc-50 transition-all"
                                     >
                                         Cancel
                                     </button>
@@ -869,7 +909,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                     <motion.p 
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        className="mt-6 text-[10px] font-black text-emerald-600 uppercase tracking-widest"
+                                        className="mt-6 text-[10px] font-bold text-emerald-600"
                                     >
                                         ✅ Address saved successfully!
                                     </motion.p>
@@ -964,7 +1004,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
 
                     {activeTab === "notifications" && (
                         <div className="p-8 md:p-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <h2 className="text-xl font-black text-zinc-900 uppercase italic mb-10">{t("notifications")}</h2>
+                            <h2 className="text-xl font-bold text-zinc-900 mb-10">{t("notifications")}</h2>
                             <div className="space-y-6 max-w-xl">
                                 {[
                                     { id: 'email', label: 'Email Notifications', desc: 'Get order updates and promo deals via email', state: emailNotif, setter: setEmailNotif },
@@ -973,8 +1013,8 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                 ].map((item) => (
                                     <div key={item.id} className="flex items-start justify-between p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
                                         <div className="space-y-1">
-                                            <h3 className="text-sm font-black text-zinc-900 uppercase tracking-tight">{item.label}</h3>
-                                            <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest leading-loose">{item.desc}</p>
+                                            <h3 className="text-sm font-bold text-zinc-900">{item.label}</h3>
+                                            <p className="text-[11px] font-medium text-zinc-400 leading-normal">{item.desc}</p>
                                         </div>
                                         <button 
                                             onClick={() => item.setter(!item.state)}
