@@ -29,7 +29,21 @@ export async function middleware(req: NextRequest) {
         return NextResponse.next();
     }
 
-    // 2. Ignore main domain and reserved subdomains (skip rewrites)
+    // 2. Auth Role Check (Block Super Admin from storefront)
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+    if (token) {
+        const userRole = (token as any).role
+        if (userRole === "SUPER_ADMIN") {
+            // If super admin tries to access storefront (rewritten or direct)
+            if (!pathname.startsWith("/admin") && !pathname.startsWith("/dashboard") && !pathname.startsWith("/api")) {
+                console.log(`[MIDDLEWARE] Super Admin restricted from ${pathname}, redirecting to /admin`)
+                url.pathname = "/admin"
+                return NextResponse.redirect(url)
+            }
+        }
+    }
+
+    // 3. Ignore main domain and reserved subdomains (skip rewrites)
     if (
         hostname === "qicmart.com" ||
         hostname === "localhost:3000" ||
@@ -37,8 +51,6 @@ export async function middleware(req: NextRequest) {
     ) {
         // Handle auth protection for dashboard/admin on main domain
         if (pathname.startsWith("/admin") || pathname.startsWith("/dashboard")) {
-            const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
-            
             if (!token) {
                 console.log(`[MIDDLEWARE] No token for ${pathname}, redirecting to /login`)
                 url.pathname = "/login"
@@ -68,7 +80,7 @@ export async function middleware(req: NextRequest) {
         return NextResponse.next();
     }
 
-    // 3. Multi-tenant Subdomain Logic
+    // 4. Multi-tenant Subdomain Logic
     // Only attempt rewrite if it LOOKS like a subdomain (contains .localhost:3000 or .qicmart.com)
     let slug = "";
     if (hostname.includes(".localhost:3000")) {

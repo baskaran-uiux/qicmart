@@ -113,17 +113,17 @@ export default function EditCustomPage() {
     return (
         <div className="max-w-5xl mx-auto space-y-8 pb-20">
             {/* Header */}
-            <div className="flex items-center justify-between bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl p-6 rounded-[32px] border border-zinc-200 dark:border-zinc-800 sticky top-4 z-40 shadow-2xl">
-                <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800 sticky top-0 bg-white/80 dark:bg-black/80 backdrop-blur-md z-40 pt-4">
+                <div className="flex items-center gap-4 flex-1 min-w-0">
                     <Link 
                         href={ownerId ? `/dashboard/pages?ownerId=${ownerId}` : "/dashboard/pages"}
-                        className="p-3 bg-zinc-100 dark:bg-zinc-800 rounded-2xl hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all active:scale-90"
+                        className="p-2 bg-zinc-50 dark:bg-zinc-800 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all active:scale-90"
                     >
-                        <ChevronLeft size={20} />
+                        <ChevronLeft size={18} />
                     </Link>
-                    <div>
-                        <h1 className="text-xl font-black italic tracking-tight">{form.title}</h1>
-                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Edit Custom Page</p>
+                    <div className="min-w-0">
+                        <h2 className="text-[20px] sm:text-[24px] font-bold tracking-tight text-black dark:text-white capitalize truncate">{form.title || "Untitled Page"}</h2>
+                        <p className="text-[12px] font-medium text-zinc-500 tracking-normal">Edit Custom Page Content</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -155,9 +155,9 @@ export default function EditCustomPage() {
                     <button 
                         onClick={() => handleSubmit()}
                         disabled={saving}
-                        className="px-8 py-3 bg-indigo-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-indigo-600/20 hover:bg-indigo-700 transition-all active:scale-95 flex items-center gap-2"
+                        className="px-8 py-3 bg-indigo-600 dark:bg-white text-white dark:text-black rounded-2xl font-semibold text-[10px] capitalize tracking-wide shadow-xl shadow-indigo-500/10 hover:opacity-90 transition-all active:scale-95 flex items-center gap-2"
                     >
-                        {saving ? <Loader2 className="animate-spin" size={18} /> : isDirty ? <RefreshCw size={18} className="animate-spin-slow" /> : <Check size={18} />}
+                        {saving ? <Loader2 className="animate-spin" size={16} /> : isDirty ? <RefreshCw size={16} className="animate-spin-slow" /> : <Check size={16} />}
                         {saving ? "Saving..." : isDirty ? "Sync Now" : "Published"}
                     </button>
                 </div>
@@ -177,7 +177,7 @@ export default function EditCustomPage() {
                             <div className="space-y-2">
                                 <label className="text-[11px] font-black uppercase tracking-widest text-zinc-400 ml-1">URL Slug</label>
                                 <div className="relative group">
-                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-xs italic">/page/</div>
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-xs">/page/</div>
                                     <input 
                                         type="text"
                                         value={form.slug}
@@ -226,7 +226,7 @@ export default function EditCustomPage() {
                         <div className="space-y-6">
                             <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl border border-transparent hover:border-indigo-500/20 transition-all">
                                 <div className="space-y-0.5">
-                                    <p className="text-sm font-black italic">Public Status</p>
+                                    <p className="text-sm font-black">Public Status</p>
                                     <p className="text-[10px] font-bold text-zinc-500">Visible on storefront</p>
                                 </div>
                                 <label className="relative inline-flex items-center cursor-pointer">
@@ -259,7 +259,7 @@ export default function EditCustomPage() {
                     <Section card title="Aesthetics" icon={Sparkles}>
                         <div className="p-6 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl text-white space-y-4 shadow-xl shadow-indigo-500/20 relative overflow-hidden group">
                            <div className="relative z-10">
-                                <h4 className="font-black italic text-lg leading-tight mb-2 text-nowrap select-none">Design Your Identity</h4>
+                                <h4 className="font-black text-lg leading-tight mb-2 text-nowrap select-none">Design Your Identity</h4>
                                 <p className="text-xs font-bold text-white/80 leading-relaxed select-none">Every page is an opportunity to tell your customers who you are. Make it bold.</p>
                            </div>
                            <Sparkles className="absolute -right-4 top-0 opacity-20 group-hover:scale-150 transition-transform" size={100} />
@@ -291,7 +291,7 @@ function Section({ children, title, icon: Icon, card }: any) {
                 <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-xl">
                     <Icon size={18} strokeWidth={2.5} />
                 </div>
-                <h3 className="text-sm font-black uppercase tracking-[0.2em] text-zinc-400 italic">{title}</h3>
+                <h3 className="text-sm font-black uppercase tracking-[0.2em] text-zinc-400">{title}</h3>
             </div>
             {children}
         </div>

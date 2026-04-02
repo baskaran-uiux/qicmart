@@ -47,11 +47,15 @@ export default function ProductDetailClient({
     relatedProducts = [],
     slug,
     currency = "INR",
+    storeTheme = "modern",
+    layoutStyle = "default",
 }: {
     product: Product
     relatedProducts?: Product[]
     slug: string
     currency?: string
+    storeTheme?: string
+    layoutStyle?: string
 }) {
     const { data: session } = useSession()
     const router = useRouter()
@@ -696,6 +700,8 @@ export default function ProductDetailClient({
                                     product={p as any} 
                                     slug={slug} 
                                     currency={currency} 
+                                    storeTheme={storeTheme}
+                                    layoutStyle={layoutStyle}
                                 />
                             ))}
                         </div>

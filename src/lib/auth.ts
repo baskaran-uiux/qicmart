@@ -86,6 +86,11 @@ export const authOptions: NextAuthOptions = {
                             throw new Error("Invalid OTP code")
                         }
 
+                        // RESTRICTION: SUPER_ADMIN cannot login via OTP (Storefront)
+                        if (user && user.role === "SUPER_ADMIN") {
+                            throw new Error("Platform administrators cannot login via OTP. Please use the Admin Portal.")
+                        }
+
                         // Clean up token
                         await prisma.verificationToken.deleteMany({
                             where: { identifier: sanitizedEmail }

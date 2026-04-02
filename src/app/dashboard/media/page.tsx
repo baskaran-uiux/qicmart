@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { Image as ImageIcon, Upload, Trash2, Copy, Check, Search, X, Grid, List, Loader2, Link as LinkIcon, FileVideo, HardDrive, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react"
 import DeleteConfirmationModal from "@/components/dashboard/DeleteConfirmationModal"
+import PremiumButton from "@/components/dashboard/PremiumButton"
 
 interface MediaItem {
     id: string
@@ -23,9 +25,6 @@ export default function MediaLibraryPage() {
     const [preview, setPreview] = useState<MediaItem | null>(null)
     const [currentPage, setCurrentPage] = useState(1)
     const itemsPerPage = 50
-    const [showDeleteModal, setShowDeleteModal] = useState(false)
-    const [itemToDelete, setItemToDelete] = useState<string | null>(null)
-    const [deleting, setDeleting] = useState(false)
 
     const fetchMedia = async () => {
         const params = new URLSearchParams(window.location.search)
@@ -75,30 +74,26 @@ export default function MediaLibraryPage() {
         setUploading(false)
     }
 
-    const confirmDelete = async () => {
-        if (!itemToDelete) return
-        setDeleting(true)
+    const deleteMedia = async (id: string) => {
+        // Optimistic UI Update: Remove from local state immediately
+        setMedia(prev => prev.filter(m => m.id !== id))
+        if (preview?.id === id) setPreview(null)
+
         try {
             const params = new URLSearchParams(window.location.search)
             const ownerId = params.get("ownerId")
-            const url = `/api/dashboard/media?id=${itemToDelete}${ownerId ? `&ownerId=${ownerId}` : ""}`
+            const url = `/api/dashboard/media?id=${id}${ownerId ? `&ownerId=${ownerId}` : ""}`
             
             const res = await fetch(url, { method: "DELETE" })
-            if (res.ok) {
+            if (!res.ok) {
+                // If it failed, restore the UI by refetching
+                console.error("Delete failed on server")
                 fetchMedia()
-                setShowDeleteModal(false)
-                setItemToDelete(null)
-                if (preview?.id === itemToDelete) setPreview(null)
             }
         } catch (e) {
             console.error("Failed to delete media", e)
+            fetchMedia()
         }
-        setDeleting(false)
-    }
-
-    const deleteMedia = (id: string) => {
-        setItemToDelete(id)
-        setShowDeleteModal(true)
     }
 
     const copyUrl = (url: string) => {
@@ -144,11 +139,17 @@ export default function MediaLibraryPage() {
                             <List size={18} />
                         </button>
                     </div>
-                    <label className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-3.5 bg-indigo-600 hover:opacity-90 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-black rounded-2xl text-[10px] capitalize font-semibold tracking-wide cursor-pointer transition-all shadow-xl active:scale-95">
-                        {uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-                        {uploading ? "Uploading..." : "Add Media"}
-                        <input type="file" className="hidden" accept="image/*,video/*" multiple onChange={handleFileUpload} disabled={uploading} />
-                    </label>
+                    <PremiumButton
+                        isLoading={uploading}
+                        icon={uploading ? Loader2 : Upload}
+                        className="cursor-pointer"
+                        loadingText="Uploading..."
+                    >
+                        <label className="cursor-pointer h-full w-full flex items-center justify-center">
+                            Add Media
+                            <input type="file" className="hidden" accept="image/*,video/*" multiple onChange={handleFileUpload} disabled={uploading} />
+                        </label>
+                    </PremiumButton>
                 </div>
             </div>
 
@@ -189,46 +190,63 @@ export default function MediaLibraryPage() {
                 </div>
             ) : view === "grid" ? (
                 <div className="space-y-8 pb-20">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-                        {paginatedMedia.map((item) => (
-                        <div
-                            key={item.id}
-                            className="group relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[28px] overflow-hidden cursor-pointer hover:border-indigo-500/50 dark:hover:border-purple-500/50 transition-all shadow-sm hover:shadow-xl dark:hover:shadow-purple-500/5"
-                            onClick={() => setPreview(item)}
-                        >
-                            <div className="aspect-square bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center overflow-hidden">
-                                {item.type === "VIDEO" ? (
-                                    <div className="relative w-full h-full flex items-center justify-center">
-                                        <div className="absolute inset-0 bg-black/40 z-10" />
-                                        <FileVideo className="w-12 h-12 text-white/50 z-20 animate-pulse" />
-                                    </div>
-                                ) : (
-                                    <img 
-                                        src={item.url} 
-                                        alt={item.name} 
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                                        onError={(e) => { e.currentTarget.style.display = "none" }} 
-                                    />
-                                )}
-                            </div>
-                            
-                            <div className="absolute inset-x-3 top-3 transition-all flex items-center justify-end gap-2 z-30">
-                                <button onClick={e => { e.stopPropagation(); copyUrl(item.url) }} className="p-2.5 bg-white/90 dark:bg-zinc-800/90 text-slate-900 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-white rounded-xl backdrop-blur-md shadow-xl transition-all scale-90 group-hover:scale-100">
-                                    {copied === item.url ? <Check size={16} /> : <LinkIcon size={16} />}
-                                </button>
-                                <button onClick={e => { e.stopPropagation(); deleteMedia(item.id) }} className="p-2.5 bg-rose-500/90 hover:bg-rose-600 text-white rounded-xl backdrop-blur-md shadow-xl transition-all scale-90 group-hover:scale-100">
-                                    <Trash2 size={16} />
-                                </button>
-                            </div>
+                    <motion.div 
+                        layout
+                        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6"
+                    >
+                        <AnimatePresence mode="popLayout">
+                            {paginatedMedia.map((item) => (
+                            <motion.div
+                                layout
+                                key={item.id}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ 
+                                    opacity: 0, 
+                                    scale: 0.3, 
+                                    rotate: Math.random() * 60 - 30,
+                                    x: (Math.random() - 0.5) * 150,
+                                    y: (Math.random() - 0.5) * 150,
+                                    filter: "blur(8px)",
+                                    transition: { duration: 0.6, ease: "circIn" }
+                                }}
+                                className="group relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[28px] overflow-hidden cursor-pointer hover:border-indigo-500/50 dark:hover:border-purple-500/50 transition-all shadow-sm hover:shadow-xl dark:hover:shadow-purple-500/5"
+                                onClick={() => setPreview(item)}
+                            >
+                                <div className="aspect-square bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center overflow-hidden">
+                                    {item.type === "VIDEO" ? (
+                                        <div className="relative w-full h-full flex items-center justify-center">
+                                            <div className="absolute inset-0 bg-black/40 z-10" />
+                                            <FileVideo className="w-12 h-12 text-white/50 z-20 animate-pulse" />
+                                        </div>
+                                    ) : (
+                                        <img 
+                                            src={item.url} 
+                                            alt={item.name} 
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                                            onError={(e) => { e.currentTarget.style.display = "none" }} 
+                                        />
+                                    )}
+                                </div>
+                                
+                                <div className="absolute inset-x-3 top-3 transition-all flex items-center justify-end gap-2 z-30">
+                                    <button onClick={e => { e.stopPropagation(); copyUrl(item.url) }} className="p-2.5 bg-white/90 dark:bg-zinc-800/90 text-slate-900 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-white rounded-xl backdrop-blur-md shadow-xl transition-all scale-90 group-hover:scale-100">
+                                        {copied === item.url ? <Check size={16} /> : <LinkIcon size={16} />}
+                                    </button>
+                                    <button onClick={e => { e.stopPropagation(); deleteMedia(item.id) }} className="p-2.5 bg-rose-500/90 hover:bg-rose-600 text-white rounded-xl backdrop-blur-md shadow-xl transition-all scale-90 group-hover:scale-100">
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
 
-                            <div className="p-4 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm border-t border-zinc-100 dark:border-zinc-800">
-                                <p className="text-[11px] font-semibold text-slate-800 dark:text-zinc-300 truncate">{item.name}</p>
-                                <p className="text-[12px] text-zinc-500 capitalize">{item.type.split('/')[1]}</p>
-                                <p className="text-[12px] text-zinc-500">{formatSize(item.size)}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                                <div className="p-4 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm border-t border-zinc-100 dark:border-zinc-800">
+                                    <p className="text-[11px] font-semibold text-slate-800 dark:text-zinc-300 truncate">{item.name}</p>
+                                    <p className="text-[12px] text-zinc-500 capitalize">{item.type.split('/')[1]}</p>
+                                    <p className="text-[12px] text-zinc-500">{formatSize(item.size)}</p>
+                                </div>
+                            </motion.div>
+                        ))}
+                        </AnimatePresence>
+                    </motion.div>
                 
                 {/* Pagination Controls */}
                 {totalPages > 1 && (
@@ -294,31 +312,46 @@ export default function MediaLibraryPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/50">
-                            {paginatedMedia.map(item => (
-                                <tr key={item.id} className="group hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors">
-                                    <td className="px-8 py-5 flex items-center gap-4">
-                                        <div className="w-14 h-14 rounded-2xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 shrink-0 shadow-sm">
-                                            {item.type === "VIDEO" ? (
-                                                <div className="w-full h-full flex items-center justify-center text-indigo-500"><FileVideo size={20} /></div>
-                                            ) : (
-                                                <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
-                                            )}
-                                        </div>
-                                        <span className="font-semibold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-purple-400 transition-colors truncate max-w-xs">{item.name}</span>
-                                    </td>
-                                    <td className="px-6 py-5 shrink-0"><span className="px-2.5 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-[10px] capitalize font-semibold text-zinc-400 dark:text-zinc-500 border border-zinc-200 dark:border-zinc-700">{item.type}</span></td>
-                                    <td className="px-6 py-5 text-xs font-semibold text-slate-700 dark:text-zinc-400">{formatSize(item.size)}</td>
-                                    <td className="px-6 py-5 text-xs text-zinc-400 font-semibold">{new Date(item.createdAt).toLocaleDateString()}</td>
-                                    <td className="px-8 py-5 text-right">
-                                        <div className="flex items-center justify-end gap-3 transition-all">
-                                            <button onClick={() => copyUrl(item.url)} className="p-2.5 text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-xl transition-all" title="Copy URL">
-                                                {copied === item.url ? <Check size={18} /> : <LinkIcon size={18} />}
-                                            </button>
-                                            <button onClick={() => deleteMedia(item.id)} className="p-2.5 text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-all" title="Delete"><Trash2 size={18} /></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                            <AnimatePresence mode="popLayout">
+                                {paginatedMedia.map(item => (
+                                    <motion.tr 
+                                        layout
+                                        key={item.id} 
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ 
+                                            opacity: 0, 
+                                            scale: 0.8, 
+                                            x: (Math.random() - 0.5) * 50,
+                                            filter: "blur(5px)",
+                                            transition: { duration: 0.4 }
+                                        }}
+                                        className="group hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors"
+                                    >
+                                        <td className="px-8 py-5 flex items-center gap-4">
+                                            <div className="w-14 h-14 rounded-2xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 shrink-0 shadow-sm">
+                                                {item.type === "VIDEO" ? (
+                                                    <div className="w-full h-full flex items-center justify-center text-indigo-500"><FileVideo size={20} /></div>
+                                                ) : (
+                                                    <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
+                                                )}
+                                            </div>
+                                            <span className="font-semibold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-purple-400 transition-colors truncate max-w-xs">{item.name}</span>
+                                        </td>
+                                        <td className="px-6 py-5 shrink-0"><span className="px-2.5 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-[10px] capitalize font-semibold text-zinc-400 dark:text-zinc-500 border border-zinc-200 dark:border-zinc-700">{item.type}</span></td>
+                                        <td className="px-6 py-5 text-xs font-semibold text-slate-700 dark:text-zinc-400">{formatSize(item.size)}</td>
+                                        <td className="px-6 py-5 text-xs text-zinc-400 font-semibold">{new Date(item.createdAt).toLocaleDateString()}</td>
+                                        <td className="px-8 py-5 text-right">
+                                            <div className="flex items-center justify-end gap-3 transition-all">
+                                                <button onClick={() => copyUrl(item.url)} className="p-2.5 text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-xl transition-all" title="Copy URL">
+                                                    {copied === item.url ? <Check size={18} /> : <LinkIcon size={18} />}
+                                                </button>
+                                                <button onClick={() => deleteMedia(item.id)} className="p-2.5 text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-all" title="Delete"><Trash2 size={18} /></button>
+                                            </div>
+                                        </td>
+                                    </motion.tr>
+                                ))}
+                            </AnimatePresence>
                         </tbody>
                     </table>
 
@@ -381,20 +414,6 @@ export default function MediaLibraryPage() {
                     </div>
                 </div>
             )}
-            {/* Delete Confirmation Modal */}
-            <DeleteConfirmationModal
-                isOpen={showDeleteModal}
-                onClose={() => {
-                    if (!deleting) {
-                        setShowDeleteModal(false)
-                        setItemToDelete(null)
-                    }
-                }}
-                onConfirm={confirmDelete}
-                loading={deleting}
-                title="Delete Media File?"
-                description="This file will be permanently removed from your storage. This action cannot be undone."
-            />
         </div>
     )
 }

@@ -4,7 +4,10 @@ import { prisma } from "@/lib/prisma"
 export async function POST(req: Request) {
     try {
         const body = await req.json()
-        const { slug, userId, formData, items, paymentMethod, total, upiUTR, upiProofImage } = body
+        const { 
+            slug, userId, formData, items, paymentMethod, total, 
+            upiUTR, upiProofImage, shippingCost, carrier 
+        } = body
 
         console.log(`[Checkout] Processing order for store: ${slug}, Total: ${total}`)
 
@@ -22,32 +25,60 @@ export async function POST(req: Request) {
         })
         if (!store) return NextResponse.json({ error: "Store not found" }, { status: 404 })
 
-        // 2. Create or Update Customer
+        // 2. Create or Update Customer & User Profile
         let customer = await prisma.customer.findFirst({
             where: { 
                 storeId: store.id,
-                email: formData.email
+                email: {
+                    equals: formData.email,
+                    mode: 'insensitive'
+                }
             }
         })
 
+        const customerData = {
+            storeId: store.id,
+            userId: userId || undefined,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            phone: formData.phone || undefined,
+            address: formData.address,
+            area: formData.apartment || undefined,
+            city: formData.city,
+            state: formData.state,
+            pincode: formData.zip,
+        }
+
         if (!customer) {
             customer = await prisma.customer.create({
-                data: {
-                    storeId: store.id,
-                    userId: userId || undefined, // Link to User if provided
-                    firstName: formData.firstName,
-                    lastName: formData.lastName,
-                    email: formData.email,
-                    phone: formData.phone,
-                    address: `${formData.address}${formData.apartment ? ', ' + formData.apartment : ''}, ${formData.city}, ${formData.state} ${formData.zip}`
-                }
+                data: customerData
             })
-        } else if (userId && !customer.userId) {
-            // Link existing customer to the newly logged-in user
+        } else {
+            // Update existing customer with latest details
             customer = await prisma.customer.update({
                 where: { id: customer.id },
-                data: { userId }
+                data: {
+                    ...customerData,
+                    userId: userId || customer.userId // Preserve existing link or update
+                }
             })
+        }
+
+        // 2.1 Update Global User Profile (if logged in)
+        if (userId) {
+            await prisma.user.update({
+                where: { id: userId },
+                data: {
+                    name: `${formData.firstName} ${formData.lastName}`.trim(),
+                    phone: formData.phone || undefined,
+                    address: formData.address,
+                    area: formData.apartment || undefined,
+                    city: formData.city,
+                    state: formData.state,
+                    pincode: formData.zip,
+                }
+            }).catch(err => console.error("[Checkout] Failed to update user profile:", err))
         }
 
         const tempOrderNumber = Math.random().toString(36).substring(7).toUpperCase()
@@ -78,6 +109,8 @@ export async function POST(req: Request) {
                 customerId: customer.id,
                 total: parseFloat(total),
                 status: "PENDING",
+                shippingCost: parseFloat(shippingCost || 0),
+                carrier: carrier || null,
                 shippingAddress: JSON.stringify(formData),
                 items: {
                     create: items.map((item: any) => ({
@@ -147,6 +180,30 @@ export async function POST(req: Request) {
                 visitors: 0
             }
         })
+
+        // 6. Automated Notifications
+        try {
+            let themeConfig: Record<string, any> = {}
+            try { if (store.themeConfig) themeConfig = JSON.parse(store.themeConfig) } catch { }
+
+            const { sendOrderConfirmationEmail, sendAdminOrderAlert } = await import("@/lib/email")
+            
+            // Notification flags (default to true)
+            const isEmailEnabled = themeConfig.isEmailNotificationEnabled !== false
+            const isAdminEnabled = themeConfig.isAdminAlertEnabled !== false
+
+            // Send to Customer
+            if (isEmailEnabled) {
+                await sendOrderConfirmationEmail(order.id)
+            }
+            
+            // Send to Admin
+            if (isAdminEnabled) {
+                await sendAdminOrderAlert(order.id)
+            }
+        } catch (emailError) {
+            console.error("[CHECKOUT_EMAIL_ERROR] Failed to send automated notifications", emailError)
+        }
 
         return NextResponse.json({ ok: true, orderNumber: order.id.substring(0, 8), id: order.id })
     } catch (error: any) {

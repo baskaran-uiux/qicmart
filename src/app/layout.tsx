@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Outfit, Montserrat, Poppins, Playfair_Display, Open_Sans, Ubuntu, Lato } from "next/font/google"; 
+import { Inter, Outfit, Montserrat, Poppins, Playfair_Display, Open_Sans, Ubuntu, Lato, JetBrains_Mono } from "next/font/google"; 
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 
@@ -11,6 +11,7 @@ const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfa
 const opensans = Open_Sans({ subsets: ["latin"], variable: "--font-opensans" });
 const ubuntu = Ubuntu({ subsets: ["latin"], weight: ["300", "400", "500", "700"], variable: "--font-ubuntu" });
 const lato = Lato({ subsets: ["latin"], weight: ["100", "300", "400", "700", "900"], variable: "--font-lato" });
+const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
   title: "QICMART SaaS",
@@ -26,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${outfit.variable} ${montserrat.variable} ${poppins.variable} ${playfair.variable} ${opensans.variable} ${ubuntu.variable} ${lato.variable} font-sans bg-background text-foreground antialiased transition-colors duration-300`}>
+      <body className={`${inter.variable} ${outfit.variable} ${montserrat.variable} ${poppins.variable} ${playfair.variable} ${opensans.variable} ${ubuntu.variable} ${lato.variable} ${jetbrains.variable} font-sans bg-background text-foreground antialiased transition-colors duration-300`}>
         <Providers>
           {children}
           <Toaster richColors position="top-right" closeButton />

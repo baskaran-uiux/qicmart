@@ -25,8 +25,8 @@ export default function CartPage({
             })
     }, [slug])
 
-    const shipping = totalPrice > 499 ? 0 : totalPrice === 0 ? 0 : 50
-    const total = totalPrice + shipping
+    const shipping = 0
+    const total = totalPrice
 
     if (loading) return (
         <div className="flex flex-col items-center justify-center h-96 gap-4 text-zinc-500">
@@ -118,15 +118,6 @@ export default function CartPage({
                                     <span>Subtotal ({totalItems} items)</span>
                                     <span className="font-medium text-zinc-900">{formatPrice(totalPrice, currency)}</span>
                                 </div>
-                                <div className="flex justify-between text-sm text-zinc-600">
-                                    <span>Shipping</span>
-                                    <span className={`font-medium ${shipping === 0 && totalPrice > 0 ? "text-emerald-600" : "text-zinc-900"}`}>
-                                        {shipping === 0 && totalPrice > 0 ? "FREE 🎉" : formatPrice(shipping, currency)}
-                                    </span>
-                                </div>
-                                {shipping > 0 && (
-                                    <p className="text-xs text-zinc-400">Add {formatPrice(499 - totalPrice, currency)} more for free shipping</p>
-                                )}
                             </div>
 
                             <div className="border-t border-zinc-200 pt-4 flex justify-between mb-6">

@@ -21,6 +21,15 @@ export async function GET(req: Request) {
     const store = await getStoreForDashboard(targetUserId, dashboardType)
 
     if (!store) return NextResponse.json({ notifications: [] })
+    
+    // Check if notifications are enabled in themeConfig
+    let themeConfig: Record<string, any> = {}
+    try { if (store.themeConfig) themeConfig = JSON.parse(store.themeConfig) } catch { }
+    
+    const isOrderNotificationEnabled = themeConfig.isOrderNotificationEnabled !== false
+    if (!isOrderNotificationEnabled) {
+        return NextResponse.json({ notifications: [] })
+    }
 
     // Get pending orders from the last 24 hours
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000)

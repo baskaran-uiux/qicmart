@@ -4,13 +4,15 @@ import { ReactNode, useState, useEffect, Suspense } from "react"
 import Link from "next/link"
 import { usePathname as usePN, useSearchParams } from "next/navigation"
 import { signOut, useSession } from "next-auth/react"
-import { LayoutDashboard, Package, ShoppingCart, Users, Settings, LogOut,
+import {
+    LayoutDashboard, Package, ShoppingCart, Users, Settings, LogOut,
     Tag, FolderOpen, Sun, Moon, ChevronLeft, Menu, BarChart2, ExternalLink, Image as ImageIcon, Search, Zap, ShieldAlert, Layout, Globe, Star, CreditCard, ChevronDown, Ticket, Mail, PenTool, Truck, Palette, RotateCcw, MapPin
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { DashboardStoreProvider, useDashboardStore } from "@/components/DashboardStoreProvider"
 import { Notifications } from "@/components/dashboard/Notifications"
-import { HourglassLoader } from "@/components/ui/HourglassLoader"
+import PremiumButton from "@/components/dashboard/PremiumButton"
+import DigitalLoader from "@/components/ui/DigitalLoader"
 
 const navGroups = [
     {
@@ -26,15 +28,6 @@ const navGroups = [
         items: [
             { label: "All Orders", key: "allOrders", href: "/dashboard/orders", icon: ShoppingCart },
             { label: "Returns/Refunds", key: "returnsRefunds", href: "/dashboard/orders/returns", icon: RotateCcw },
-        ]
-    },
-    {
-        label: "Delivery",
-        key: "delivery",
-        icon: Truck,
-        items: [
-            { label: "Shipping Partners", key: "shippingPartners", href: "/dashboard/delivery/partners", icon: Truck },
-            { label: "Order Tracking", key: "orderTracking", href: "/dashboard/delivery/tracking", icon: MapPin },
         ]
     },
     {
@@ -69,6 +62,12 @@ const navGroups = [
         href: "/dashboard/coupons"
     },
     {
+        label: "Shipping Management",
+        key: "shippingManagement",
+        icon: Truck,
+        href: "/dashboard/delivery/shipping"
+    },
+    {
         label: "Audience",
         key: "audience",
         icon: Users,
@@ -83,9 +82,20 @@ const navGroups = [
         key: "appearance",
         icon: Palette,
         items: [
+            { label: "Hero Banners", key: "heroBanners", href: "/dashboard/appearance/hero", icon: Palette },
+            { label: "Themes", key: "themes", href: "/dashboard/themes", icon: Palette },
             { label: "Menu Manager", key: "menuManager", href: "/dashboard/menu", icon: Layout },
             { label: "Custom Pages", key: "customPages", href: "/dashboard/pages", icon: Layout },
             { label: "Blogs/Articles", key: "blogs", href: "/dashboard/blogs", icon: PenTool },
+        ]
+    },
+    {
+        label: "Plugins",
+        key: "plugins",
+        icon: Zap,
+        items: [
+            { label: "All Plugins", key: "allPlugins", href: "/dashboard/plugins", icon: Layout },
+            { label: "Installed", key: "installed", href: "/dashboard/plugins/installed", icon: Package },
         ]
     },
     {
@@ -99,14 +109,7 @@ const navGroups = [
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
     return (
-        <Suspense fallback={
-            <div className="h-screen w-screen bg-zinc-950 flex flex-col items-center justify-center">
-                <HourglassLoader size="48" color="#3b82f6" speed="1.5" />
-                <p className="mt-6 text-sm font-medium text-zinc-500 animate-pulse tracking-widest uppercase">
-                    Initializing Dashboard...
-                </p>
-            </div>
-        }>
+        <Suspense fallback={<DigitalLoader />}>
             <DashboardStoreProvider dashboardType="1">
                 <DashboardContent>{children}</DashboardContent>
             </DashboardStoreProvider>
@@ -136,17 +139,17 @@ function DashboardContent({ children }: { children: ReactNode }) {
     }, [])
 
     const isLocal = hostname.includes('localhost')
-    const storeUrl = isLocal 
-        ? `http://${slug}.localhost:3000` 
+    const storeUrl = isLocal
+        ? `http://${slug}.localhost:3000`
         : `/s/${slug}`
- 
+
 
     useEffect(() => {
         const updateTheme = () => {
             const hour = new Date().getHours()
             const isNight = hour < 6 || hour >= 18
             const saved = localStorage.getItem("dashboard-dark")
-            
+
             if (saved !== null) {
                 setDark(saved === "true")
                 setIsAuto(false)
@@ -157,7 +160,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
         }
 
         updateTheme()
-        
+
         const interval = setInterval(() => {
             if (localStorage.getItem("dashboard-dark") === null) {
                 const hour = new Date().getHours()
@@ -184,11 +187,24 @@ function DashboardContent({ children }: { children: ReactNode }) {
     }
 
     const isActive = (href: string) => {
-        // Exact match for dashboard root, but allow for trailing slash
-        if (href === "/dashboard") {
+        const path = href.split('?')[0]
+        if (path === "/dashboard") {
             return pathname === "/dashboard" || pathname === "/dashboard/"
         }
-        return pathname.startsWith(href)
+
+        const isExact = pathname === path || pathname === path + "/"
+        if (isExact) return true
+
+        const isSubPath = pathname.startsWith(path + "/")
+        if (!isSubPath) return false
+
+        // Best match strategy: only mark as active if there isn't a more specific match in the navGroups
+        const hasBetterMatch = navGroups.some(g => {
+            if (g.href && g.href !== path && pathname.startsWith(g.href.split('?')[0])) return true
+            return g.items?.some(i => i.href !== path && pathname.startsWith(i.href.split('?')[0]))
+        })
+
+        return !hasBetterMatch
     }
 
     const getTargetHref = (href: string) => {
@@ -226,14 +242,14 @@ function DashboardContent({ children }: { children: ReactNode }) {
         }
     }, [pathname, searchTerm])
 
-    const bg = dark ? "bg-zinc-950" : "bg-white"
-    const sidebar = dark ? "bg-zinc-950/80 backdrop-blur-3xl border-white/5 shadow-2xl" : "bg-white/95 backdrop-blur-3xl border-zinc-200 shadow-2xl"
-    const text = dark ? "text-white" : "text-zinc-900"
-    const subtext = dark ? "text-zinc-500" : "text-zinc-500"
-    const navHover = dark ? "hover:bg-white/5 hover:text-white" : "hover:bg-zinc-100/50 hover:text-black"
-    const activeClass = dark ? "bg-white/10 text-white shadow-[0_0_15px_rgba(255,255,255,0.05)] border border-white/20" : "bg-zinc-100 text-zinc-900 border border-zinc-200 shadow-sm font-semibold"
-    const inactiveClass = dark ? `${subtext} ${navHover} border border-transparent` : `${subtext} ${navHover} border border-transparent`
-    const headerBg = dark ? "bg-zinc-950/60 border-white/5" : "bg-white/60 border-zinc-200"
+    let bg = dark ? "bg-zinc-950" : "bg-white"
+    let sidebar = dark ? "bg-zinc-950/80 backdrop-blur-3xl border-white/5 shadow-2xl" : "bg-white/95 backdrop-blur-3xl border-zinc-200 shadow-2xl"
+    let text = dark ? "text-white" : "text-zinc-900"
+    let subtext = "text-zinc-500"
+    let navHover = dark ? "hover:bg-white/5 hover:text-white" : "hover:bg-zinc-100/50 hover:text-black"
+    let activeClass = dark ? "bg-white/10 text-white border border-white/20" : "bg-zinc-100 text-zinc-900 border border-zinc-300 font-medium"
+    let inactiveClass = `${subtext} ${navHover} border border-transparent`
+    let headerBg = dark ? "bg-zinc-950/60 border-white/5" : "bg-white/60 border-zinc-200"
 
     const getFontFamily = (font: string) => {
         switch (font) {
@@ -255,7 +271,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
             )}
 
             {/* Sidebar */}
-            <motion.aside 
+            <motion.aside
                 initial={false}
                 animate={{ width: sidebarOpen ? 240 : 64 }}
                 style={{ fontFamily: getFontFamily(fontFamily) }}
@@ -278,8 +294,8 @@ function DashboardContent({ children }: { children: ReactNode }) {
                                     </span>
                                 )}
                             </div>
-                            <Link 
-                                href={storeUrl} 
+                            <Link
+                                href={storeUrl}
                                 target="_blank"
                                 className={`shrink-0 p-2 rounded-xl border transition-all shadow-sm ${dark ? "bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-white hover:border-white/30" : "bg-zinc-50 border-zinc-200 text-zinc-400 hover:text-black hover:border-zinc-300"}`}
                                 title="View Store"
@@ -319,7 +335,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                             item.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             (item.key && t(item.key as any).toLowerCase().includes(searchTerm.toLowerCase()))
                         )
-                        
+
                         const groupLabel = t(group.key as any);
                         const isExpanded = expandedGroups.includes(group.key);
                         const isGroupActive = group.href ? isActive(group.href) : group.items?.some(item => isActive(item.href));
@@ -332,7 +348,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                                     group.href ? (
                                         <Link
                                             href={getTargetHref(group.href)}
-                                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all text-[14px] font-semibold ${isActive(group.href) ? activeClass : inactiveClass}`}
+                                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all text-[14px] font-medium ${isActive(group.href) ? activeClass : inactiveClass}`}
                                         >
                                             <motion.div
                                                 whileHover={{ scale: 1.1, rotate: 5 }}
@@ -346,7 +362,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                                         <>
                                             <button
                                                 onClick={() => toggleGroup(group.key)}
-                                                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all text-[14px] ${language === "Tamil" ? "font-medium" : "font-semibold"} ${isGroupActive ? dark ? "text-white" : "text-zinc-900" : "text-zinc-500 hover:text-zinc-400"} ${dark ? "hover:bg-white/5" : "hover:bg-zinc-100/50"}`}
+                                                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all text-[14px] font-medium ${isGroupActive ? dark ? "text-white" : "text-zinc-900" : "text-zinc-500 hover:text-zinc-400"} ${dark ? "hover:bg-white/5" : "hover:bg-zinc-100/50"}`}
                                             >
                                                 <div className="flex items-center gap-3">
                                                     <motion.div
@@ -364,7 +380,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                                                     <ChevronDown size={14} />
                                                 </motion.div>
                                             </button>
-                                            
+
                                             <AnimatePresence initial={false}>
                                                 {isExpanded && (
                                                     <motion.div
@@ -432,45 +448,47 @@ function DashboardContent({ children }: { children: ReactNode }) {
                         );
                         return searchTerm && !hasMatchingItems && !groupLabel.toLowerCase().includes(searchTerm.toLowerCase());
                     }) && searchTerm && (
-                        <div className="px-4 py-8 text-center">
-                            <p className="text-[10px] font-semibold text-zinc-500 italic">{t("noMatches")}</p>
-                        </div>
-                    )}
+                            <div className="px-4 py-8 text-center">
+                                <p className="text-[10px] font-semibold text-zinc-500 italic">{t("noMatches")}</p>
+                            </div>
+                        )}
                 </nav>
 
                 {/* Sidebar Footer / Upgrade Card */}
                 <div className={`mt-auto ${sidebarOpen ? "px-4 py-6" : "px-2 pb-6"} border-t ${dark ? "border-white/5" : "border-zinc-200"}`}>
                     {sidebarOpen ? (
                         <>
-                            <div className={`p-4 rounded-2xl ${dark ? "bg-indigo-500/10 border border-indigo-500/20" : "bg-indigo-50 border border-indigo-100"} relative overflow-hidden group`}>
-                                <div className="absolute -right-4 -top-4 w-20 h-20 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-400/20 transition-all duration-500" />
-                                
+                            <div className={`p-4 rounded-2xl ${dark ? "bg-purple-500/10 border border-purple-500/20" : "bg-purple-50 border border-purple-200 shadow-sm"} relative overflow-hidden group`}>
+                                <div className="absolute -right-4 -top-4 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-400/20 transition-all duration-500" />
+
                                 <div className="relative z-10 flex flex-col gap-3">
                                     <div className="flex items-center gap-2">
-                                        <div className="p-1.5 rounded-lg bg-indigo-500 text-white shadow-lg shadow-indigo-500/20">
+                                        <div className="p-1.5 rounded-lg bg-purple-500 text-white shadow-lg shadow-purple-500/20">
                                             <Zap size={14} fill="currentColor" />
                                         </div>
-                                        <span className="text-[12px] font-bold uppercase tracking-wider text-indigo-500">{subscription?.plan || "Free"} Plan</span>
+                                        <span className="text-[12px] font-bold uppercase tracking-wider text-purple-500">{subscription?.plan || "Free"} Plan</span>
                                     </div>
-                                    
+
                                     <p className={`text-[11px] leading-relaxed ${dark ? "text-zinc-400" : "text-zinc-500"} font-medium`}>
-                                        Manage your subscription and unlock premium features.
+                                        Manage your store and grow your business. Pro features coming soon!
                                     </p>
-                                    
-                                    <Link 
+
+                                    <PremiumButton
                                         href={getTargetHref("/dashboard/plans")}
-                                        className="w-full py-2 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white text-[12px] font-bold shadow-lg shadow-indigo-500/20 transition-all text-center"
+                                        className="w-full"
+                                        size="sm"
+                                        icon={Zap}
                                     >
-                                        Upgrade
-                                    </Link>
+                                        Pro Coming Soon
+                                    </PremiumButton>
                                 </div>
                             </div>
                         </>
                     ) : (
                         <div className="flex flex-col items-center gap-4">
-                            <Link 
+                            <Link
                                 href={getTargetHref("/dashboard/plans")}
-                                className={`p-2 rounded-xl transition-all ${dark ? "bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30" : "bg-indigo-50 text-indigo-600 hover:bg-indigo-100"}`}
+                                className={`p-2 rounded-xl transition-all ${dark ? "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30" : "bg-purple-50 text-purple-600 hover:bg-purple-100"}`}
                                 title="Upgrade Plan"
                             >
                                 <Zap size={18} fill="currentColor" />
@@ -501,8 +519,8 @@ function DashboardContent({ children }: { children: ReactNode }) {
                         <div className="hidden" id="debug-data" data-slug={slug} data-name={name} data-user-id={(session?.user as any)?.id} data-store-exists={!!slug}></div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <span className={`px-2.5 py-1 text-nowrap rounded-full text-[12px] font-semibold ${subscription?.plan === 'Pro' ? dark ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400' : 'bg-amber-50 border border-amber-200 text-amber-700' : dark ? 'bg-zinc-500/10 border border-zinc-500/20 text-zinc-400' : 'bg-zinc-100 border border-zinc-200 text-zinc-600'}`}>
-                            {subscription?.plan || "Normal"} Plan
+                        <span className={`px-2.5 py-1 text-nowrap rounded-full text-[12px] font-semibold ${dark ? 'bg-purple-500/10 border border-purple-500/20 text-purple-400' : 'bg-purple-50 border border-purple-200 text-purple-700'}`}>
+                            Standard Plan
                         </span>
                         <div className="flex items-center gap-1.5">
                             <Notifications ownerId={ownerId} />
@@ -522,7 +540,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                             {!isAuto && (
                                 <button
                                     onClick={resetToAuto}
-                                    className={`px-2 py-1.5 text-[10px] font-bold rounded-lg border uppercase tracking-wider transition-all ${dark ? "bg-zinc-950 border-zinc-800 text-zinc-500 hover:text-indigo-400" : "bg-white border-zinc-200 text-zinc-400 hover:text-indigo-500"}`}
+                                    className={`px-2 py-1.5 text-[10px] font-bold rounded-lg border tracking-wide transition-all ${dark ? "bg-zinc-950 border-zinc-800 text-zinc-500 hover:text-indigo-400" : "bg-white border-zinc-200 text-zinc-400 hover:text-indigo-500"}`}
                                     title="Reset to Automatic Theme"
                                 >
                                     Auto

@@ -8,6 +8,8 @@ import {
 } from "lucide-react"
 import { useDashboardStore } from "@/components/DashboardStoreProvider"
 import { motion, AnimatePresence } from "framer-motion"
+import { KpiCardSkeleton, TableSkeleton } from "@/components/dashboard/DashboardSkeletons"
+import PremiumButton from "@/components/dashboard/PremiumButton"
 
 interface Coupon {
     id: string
@@ -139,40 +141,48 @@ export default function CouponsPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                 <div>
-                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize italic">{t('couponsTitle')}</h2>
+                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize">{t('couponsTitle')}</h2>
                     <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">{t('couponsSummary')}</p>
                 </div>
-                <button 
+                <PremiumButton 
                     onClick={() => setShowModal(true)}
-                    className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl text-[14px] font-bold hover:bg-indigo-700 transition-all active:scale-95 shadow-xl shadow-indigo-600/20"
+                    icon={Plus}
                 >
-                    <Plus size={18} /> {t('addCoupon')}
-                </button>
+                    {t('addCoupon')}
+                </PremiumButton>
             </div>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                    { label: t('active'), value: stats.active, icon: Ticket, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-                    { label: t('totalUsage'), value: stats.totalUsage, icon: Users, color: "text-indigo-500", bg: "bg-indigo-500/10" },
-                    { label: t('expired') || "Expired", value: stats.expired, icon: Clock, color: "text-rose-500", bg: "bg-rose-500/10" },
-                ].map((stat, i) => (
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                        key={stat.label}
-                        className="p-8 bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 shadow-sm"
-                    >
-                        <div className="flex items-center justify-between mb-4">
-                            <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{stat.label}</span>
-                            <div className={`p-3 ${stat.bg} ${stat.color} rounded-2xl`}>
-                                <stat.icon size={20} />
+                {loading ? (
+                    <>
+                        <KpiCardSkeleton />
+                        <KpiCardSkeleton />
+                        <KpiCardSkeleton />
+                    </>
+                ) : (
+                    [
+                        { label: t('active'), value: stats.active, icon: Ticket, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+                        { label: t('totalUsage'), value: stats.totalUsage, icon: Users, color: "text-indigo-500", bg: "bg-indigo-500/10" },
+                        { label: t('expired') || "Expired", value: stats.expired, icon: Clock, color: "text-rose-500", bg: "bg-rose-500/10" },
+                    ].map((stat, i) => (
+                        <motion.div 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            key={stat.label}
+                            className="p-8 bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 shadow-sm"
+                        >
+                            <div className="flex items-center justify-between mb-4">
+                                <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{stat.label}</span>
+                                <div className={`p-3 ${stat.bg} ${stat.color} rounded-2xl`}>
+                                    <stat.icon size={20} />
+                                </div>
                             </div>
-                        </div>
-                        <p className="text-3xl font-black text-black dark:text-white italic">{stat.value}</p>
-                    </motion.div>
-                ))}
+                            <p className="text-3xl font-bold text-black dark:text-white">{stat.value}</p>
+                        </motion.div>
+                    ))
+                )}
             </div>
 
             {/* Main Table Content */}
@@ -192,10 +202,7 @@ export default function CouponsPage() {
 
                 <div className="overflow-x-auto">
                     {loading ? (
-                        <div className="py-24 text-center">
-                            <Loader2 className="animate-spin mx-auto text-zinc-400 mb-4" size={32} />
-                            <p className="text-zinc-500">{t('initializing')}</p>
-                        </div>
+                        <TableSkeleton />
                     ) : filtered.length === 0 ? (
                         <div className="py-24 text-center">
                             <Ticket className="w-16 h-16 text-zinc-100 dark:text-zinc-800 mx-auto mb-6" />
@@ -204,7 +211,7 @@ export default function CouponsPage() {
                         </div>
                     ) : (
                         <table className="w-full text-left">
-                            <thead className="text-[11px] font-black uppercase tracking-widest text-zinc-400 bg-zinc-50 dark:bg-zinc-950/50 border-b border-zinc-100 dark:border-zinc-800">
+                            <thead className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 bg-zinc-50 dark:bg-zinc-950/50 border-b border-zinc-100 dark:border-zinc-800">
                                 <tr>
                                     <th className="px-8 py-5">{t('couponCode') || "Code"}</th>
                                     <th className="px-8 py-5">{t('discount') || "Discount"}</th>
@@ -219,7 +226,7 @@ export default function CouponsPage() {
                                     <tr key={coupon.id} className="group hover:bg-zinc-50/50 dark:hover:bg-zinc-800/20 transition-all">
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-3">
-                                                <div className="px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-xs font-black uppercase tracking-widest text-black dark:text-white border border-zinc-200 dark:border-zinc-700">
+                                                <div className="px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-xs font-bold uppercase tracking-widest text-black dark:text-white border border-zinc-200 dark:border-zinc-700">
                                                     {coupon.code}
                                                 </div>
                                                 <button onClick={() => {
@@ -231,7 +238,7 @@ export default function CouponsPage() {
                                         </td>
                                         <td className="px-8 py-6">
                                             <div className="flex flex-col">
-                                                <span className="font-bold text-black dark:text-white text-sm italic">
+                                                <span className="font-bold text-black dark:text-white text-sm">
                                                     {coupon.discountType === 'PERCENTAGE' ? `${coupon.discountValue}% Off` : `${currencySymbol}${coupon.discountValue} Off`}
                                                 </span>
                                                 <span className="text-[10px] text-zinc-400 font-bold uppercase">
@@ -412,13 +419,13 @@ export default function CouponsPage() {
                                 </div>
 
                                 <div className="md:col-span-2 pt-4">
-                                    <button 
+                                    <PremiumButton 
                                         type="submit"
-                                        disabled={saving}
-                                        className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all active:scale-[0.98] disabled:opacity-50"
+                                        isLoading={saving}
+                                        className="w-full"
                                     >
                                         {saving ? t('savingChanges') : editingCoupon ? t('saveChanges') : t('addCoupon')}
-                                    </button>
+                                    </PremiumButton>
                                 </div>
                             </form>
                         </motion.div>

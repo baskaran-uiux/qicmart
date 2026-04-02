@@ -18,7 +18,12 @@ export async function GET(req: Request) {
 
         const orConditions: any[] = [{ userId: userId }]
         if (userEmail) {
-            orConditions.push({ email: userEmail })
+            orConditions.push({ 
+                email: {
+                    equals: userEmail,
+                    mode: 'insensitive'
+                }
+            })
         }
 
         // Fetch orders linked to customers that belong to this user (by ID or Email) and optionally this store

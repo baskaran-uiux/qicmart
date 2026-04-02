@@ -1,5 +1,5 @@
 // test-db.ts
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from './src/generated/prisma';
 
 const prisma = new PrismaClient();
 

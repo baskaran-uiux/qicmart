@@ -24,7 +24,13 @@ export async function GET(req: Request) {
     const customers = await prisma.customer.findMany({
         where: { 
             storeId: store.id,
-            orders: { some: {} }
+            // Exclude admins and owners
+            NOT: {
+                OR: [
+                    { user: { role: { in: ['SUPER_ADMIN', 'ADMIN'] } } },
+                    { userId: store.ownerId }
+                ]
+            }
         },
         include: {
             orders: {

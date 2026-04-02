@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma"
 export async function POST(req: Request) {
     try {
         const body = await req.json()
-        const { storeId, isStorefrontDisabled, isAdminPanelDisabled, planName } = body
+        const { storeId, isStorefrontDisabled, isAdminPanelDisabled, planName, billingCycle, expiryDate } = body
 
         if (!storeId) {
             return NextResponse.json({ error: "Store ID is required" }, { status: 400 })
@@ -35,42 +35,49 @@ export async function POST(req: Request) {
             })
         }
 
-        // Handle Plan Update
-        if (planName) {
-            console.log(`Plan change requested for store ${storeId}: ${planName}`)
-            const plan = await prisma.subscriptionPlan.findFirst({
-                where: { name: planName }
+        // Handle Subscription Updates (Plan, Cycle, Expiry)
+        if (planName || billingCycle || expiryDate) {
+            console.log(`Subscription update requested for store ${storeId}: Plan=${planName}, Cycle=${billingCycle}, Expiry=${expiryDate}`)
+            
+            // Find existing sub first
+            const existingSub = await prisma.subscription.findUnique({
+                where: { storeId: storeId }
             })
 
-            if (plan) {
-                console.log(`Found plan: ${plan.name} (${plan.id})`)
-                // Find or create subscription
-                const existingSub = await prisma.subscription.findUnique({
-                    where: { storeId: storeId }
-                })
+            let planId = existingSub?.planId
 
-                if (existingSub) {
-                    await prisma.subscription.update({
-                        where: { id: existingSub.id },
-                        data: { 
-                            planId: plan.id,
-                            status: "ACTIVE"
-                        }
-                    })
-                    console.log(`Updated existing subscription for store ${storeId}`)
-                } else {
-                    await prisma.subscription.create({
-                        data: {
-                            storeId: storeId,
-                            planId: plan.id,
-                            status: "ACTIVE",
-                            currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
-                        }
-                    })
-                    console.log(`Created new subscription for store ${storeId}`)
-                }
-            } else {
-                console.error(`Plan not found: ${planName}`)
+            if (planName) {
+                const plan = await prisma.subscriptionPlan.findFirst({
+                    where: { name: planName }
+                })
+                if (plan) planId = plan.id
+            }
+
+            const subUpdateData: any = {
+                status: "ACTIVE"
+            }
+            if (planId) subUpdateData.planId = planId
+            if (billingCycle) subUpdateData.billingCycle = billingCycle.toUpperCase()
+            if (expiryDate) subUpdateData.currentPeriodEnd = new Date(expiryDate)
+
+            if (existingSub) {
+                await prisma.subscription.update({
+                    where: { id: existingSub.id },
+                    data: subUpdateData
+                })
+                console.log(`Updated existing subscription for store ${storeId}`)
+            } else if (planId) {
+                // If no sub exists, create one with defaults
+                await prisma.subscription.create({
+                    data: {
+                        storeId: storeId,
+                        planId: planId,
+                        status: "ACTIVE",
+                        billingCycle: subUpdateData.billingCycle || "MONTHLY",
+                        currentPeriodEnd: subUpdateData.currentPeriodEnd || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+                    }
+                })
+                console.log(`Created new subscription for store ${storeId}`)
             }
         }
 

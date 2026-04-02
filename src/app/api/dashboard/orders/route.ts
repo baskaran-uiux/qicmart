@@ -58,7 +58,7 @@ export async function PUT(req: Request) {
     if (!store) return NextResponse.json({ error: "Store not found" }, { status: 404 })
 
     const body = await req.json()
-    const { orderId, status, trackingNumber, carrier, trackingUrl, estimatedDelivery, comment } = body
+    const { orderId, status, trackingNumber, carrier, trackingUrl, estimatedDelivery, comment, items } = body
 
     const existingOrder = await prisma.order.findUnique({
         where: { id: orderId }
@@ -77,6 +77,33 @@ export async function PUT(req: Request) {
             estimatedDelivery: estimatedDelivery ? new Date(estimatedDelivery) : undefined 
         }
     })
+
+    // Update items if provided
+    if (items && Array.isArray(items)) {
+        // Delete existing items for this order
+        await prisma.orderItem.deleteMany({
+            where: { orderId: orderId }
+        })
+
+        // Create new items
+        // Filter out temporary IDs if any
+        await prisma.orderItem.createMany({
+            data: items.map((item: any) => ({
+                orderId: orderId,
+                productId: item.productId,
+                quantity: item.quantity,
+                price: item.price,
+                options: item.options || null
+            }))
+        })
+
+        // Recalculate total if needed (optional, depends on if frontend sends correct total)
+        const newTotal = items.reduce((acc: number, item: any) => acc + (item.price * item.quantity), 0)
+        await prisma.order.update({
+            where: { id: orderId },
+            data: { total: newTotal }
+        })
+    }
     
     // If status is "PAID", also update payment status to "COMPLETED"
     if (status === "PAID") {

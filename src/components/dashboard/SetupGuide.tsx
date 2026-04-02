@@ -13,16 +13,19 @@ interface StepProps {
     isCompleted: boolean
     href: string
     actionLabel: string
+    ownerId?: string
 }
 
-function Step({ title, description, icon: Icon, isCompleted, href, actionLabel }: StepProps) {
+function Step({ title, description, icon: Icon, isCompleted, href, actionLabel, ownerId }: StepProps) {
+    const finalHref = ownerId ? `${href}${href.includes('?') ? '&' : '?'}ownerId=${ownerId}` : href
+
     return (
         <div className={`p-6 rounded-[24px] border transition-all duration-300 ${
             isCompleted 
             ? "bg-emerald-500/5 border-emerald-500/20 dark:bg-emerald-500/5 dark:border-emerald-500/20" 
             : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/50 shadow-sm"
         }`}>
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
                         isCompleted ? "bg-emerald-500 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500"
@@ -39,8 +42,8 @@ function Step({ title, description, icon: Icon, isCompleted, href, actionLabel }
                 </div>
                 {!isCompleted && (
                     <Link 
-                        href={href}
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-indigo-700 transition-all active:scale-95 shadow-lg shadow-indigo-600/20"
+                        href={finalHref}
+                        className="flex items-center justify-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all active:scale-95 shadow-lg shadow-indigo-600/20 min-w-[160px] whitespace-nowrap"
                     >
                         {actionLabel} <ArrowRight size={14} />
                     </Link>
@@ -53,11 +56,13 @@ function Step({ title, description, icon: Icon, isCompleted, href, actionLabel }
 export default function SetupGuide({ 
     storeName, 
     hasProducts, 
-    hasPayment 
+    hasPayment,
+    ownerId
 }: { 
     storeName: string, 
     hasProducts: boolean, 
-    hasPayment: boolean 
+    hasPayment: boolean,
+    ownerId?: string
 }) {
     const { t } = useDashboardStore()
     const steps = [
@@ -74,7 +79,7 @@ export default function SetupGuide({
             description: t("addFirstProductDesc"),
             icon: Package,
             isCompleted: hasProducts,
-            href: "/dashboard/products",
+            href: "/dashboard/products/new",
             actionLabel: t("addProduct")
         },
         {
@@ -137,7 +142,7 @@ export default function SetupGuide({
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
                     >
-                        <Step {...step} />
+                        <Step {...step} ownerId={ownerId} />
                     </Motion.div>
                 ))}
             </div>

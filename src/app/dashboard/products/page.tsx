@@ -6,6 +6,8 @@ import DeleteConfirmationModal from "@/components/dashboard/DeleteConfirmationMo
 import { useRouter } from "next/navigation"
 import { useDashboardStore } from "@/components/DashboardStoreProvider"
 import { motion } from "framer-motion"
+import { KpiCardSkeleton, TableSkeleton } from "@/components/dashboard/DashboardSkeletons"
+import PremiumButton from "@/components/dashboard/PremiumButton"
 
 interface Product {
     id: string
@@ -148,9 +150,8 @@ export default function ProductsPage() {
     const totalPages = Math.ceil(filtered.length / itemsPerPage)
     const paginatedProducts = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
     
-    const isNormalPlan = !subscription || subscription.plan === "Normal"
-    const maxProducts = subscription?.maxProducts || 50
-    const isAtLimit = isNormalPlan && products.length >= maxProducts
+    const isNormalPlan = true 
+    const isAtLimit = false
 
     // KPI Calculations
     const totalProducts = products.length
@@ -265,18 +266,12 @@ export default function ProductsPage() {
                     >
                         <Download size={18} /> {t("export")}
                     </button>
-                    <button 
-                        onClick={() => {
-                            if (isAtLimit) {
-                                alert(`You have reached the product limit (${maxProducts}) for your Normal plan. Please upgrade to Pro to add more.`);
-                                return;
-                            }
-                            openAdd();
-                        }}
-                        className={`flex-1 sm:flex-none px-8 py-3.5 ${isAtLimit ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-500 cursor-not-allowed" : "bg-indigo-600 dark:bg-white text-white dark:text-black hover:opacity-90 active:scale-95"} rounded-2xl text-[10px] font-bold capitalize flex items-center justify-center gap-2 shadow-xl transition-all shadow-indigo-500/10`}
+                    <PremiumButton 
+                        onClick={() => openAdd()}
+                        icon={Package}
                     >
-                        <Package size={18} /> + {t("addProduct")} {isAtLimit && "🔒"}
-                    </button>
+                        {t("addProduct")}
+                    </PremiumButton>
                 </div>
             </div>
 
@@ -287,48 +282,54 @@ export default function ProductsPage() {
                 animate="visible"
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
             >
-                <motion.div variants={itemVariants} className="p-6 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[32px] shadow-sm hover:shadow-md transition-shadow group">
-                    <div className="flex items-center justify-between mb-4">
-                        <p className="text-[10px] font-bold text-zinc-400 capitalize">{t("totalProducts")}</p>
-                        <div className="p-2 bg-blue-50 dark:bg-blue-500/10 rounded-xl group-hover:scale-110 transition-transform">
-                            <Package size={16} className="text-blue-500" />
-                        </div>
-                    </div>
-                    <p className="text-3xl font-black text-black dark:text-white">{totalProducts}</p>
-                    <p className="text-[10px] font-bold text-zinc-400 mt-1 capitalize">{t("allProducts")}</p>
-                </motion.div>
-                <motion.div variants={itemVariants} className="p-6 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[32px] shadow-sm hover:shadow-md transition-shadow group">
-                    <div className="flex items-center justify-between mb-4">
-                        <p className="text-[10px] font-bold text-zinc-400 capitalize">{t("activeProducts")}</p>
-                        <div className="p-2 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl group-hover:scale-110 transition-transform">
-                            <Check size={16} className="text-emerald-500" />
-                        </div>
-                    </div>
-                    <p className="text-3xl font-black text-black dark:text-white">{activeProducts}</p>
-                    <p className="text-[10px] font-bold text-zinc-400 mt-1 capitalize">{activeRate}% active rate</p>
-                </motion.div>
-                <motion.div variants={itemVariants} className="p-6 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[32px] shadow-sm hover:shadow-md transition-shadow group">
-                    <div className="flex items-center justify-between mb-4">
-                        <p className="text-[10px] font-bold text-zinc-400 capitalize">{t("lowStock")}</p>
-                        <div className="p-2 bg-amber-50 dark:bg-amber-500/10 rounded-xl group-hover:scale-110 transition-transform">
-                            <AlertCircle size={16} className="text-amber-500" />
-                        </div>
-                    </div>
-                    <p className="text-3xl font-black text-black dark:text-white">{lowStockProducts}</p>
-                    <p className="text-[10px] font-bold text-zinc-400 mt-1 capitalize">{t("needRestocking")}</p>
-                </motion.div>
-                <motion.div variants={itemVariants} className="p-6 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[32px] shadow-sm hover:shadow-md transition-shadow group">
-                    <div className="flex items-center justify-between mb-4">
-                        <p className="text-[10px] font-bold text-zinc-400 capitalize">{t("totalValue")}</p>
-                        <div className="p-2 bg-purple-50 dark:bg-purple-500/10 rounded-xl group-hover:scale-110 transition-transform">
-                            <Zap size={16} className="text-purple-500" />
-                        </div>
-                    </div>
-                    <p className="text-3xl font-black text-black dark:text-white">
-                        {currency === "MYR" ? "RM" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "₹"}{totalInventoryValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
-                    <p className="text-[10px] font-bold text-zinc-400 mt-1 capitalize">{t("inventoryValue")}</p>
-                </motion.div>
+                {loading ? (
+                    [...Array(4)].map((_, i) => <KpiCardSkeleton key={i} />)
+                ) : (
+                    <>
+                        <motion.div variants={itemVariants} className="p-6 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[32px] shadow-sm hover:shadow-md transition-shadow group">
+                            <div className="flex items-center justify-between mb-4">
+                                <p className="text-[10px] font-bold text-zinc-400 capitalize">{t("totalProducts")}</p>
+                                <div className="p-2 bg-blue-50 dark:bg-blue-500/10 rounded-xl group-hover:scale-110 transition-transform">
+                                    <Package size={16} className="text-blue-500" />
+                                </div>
+                            </div>
+                            <p className="text-3xl font-black text-black dark:text-white">{totalProducts}</p>
+                            <p className="text-[10px] font-bold text-zinc-400 mt-1 capitalize">{t("allProducts")}</p>
+                        </motion.div>
+                        <motion.div variants={itemVariants} className="p-6 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[32px] shadow-sm hover:shadow-md transition-shadow group">
+                            <div className="flex items-center justify-between mb-4">
+                                <p className="text-[10px] font-bold text-zinc-400 capitalize">{t("activeProducts")}</p>
+                                <div className="p-2 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl group-hover:scale-110 transition-transform">
+                                    <Check size={16} className="text-emerald-500" />
+                                </div>
+                            </div>
+                            <p className="text-3xl font-black text-black dark:text-white">{activeProducts}</p>
+                            <p className="text-[10px] font-bold text-zinc-400 mt-1 capitalize">{activeRate}% active rate</p>
+                        </motion.div>
+                        <motion.div variants={itemVariants} className="p-6 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[32px] shadow-sm hover:shadow-md transition-shadow group">
+                            <div className="flex items-center justify-between mb-4">
+                                <p className="text-[10px] font-bold text-zinc-400 capitalize">{t("lowStock")}</p>
+                                <div className="p-2 bg-amber-50 dark:bg-amber-500/10 rounded-xl group-hover:scale-110 transition-transform">
+                                    <AlertCircle size={16} className="text-amber-500" />
+                                </div>
+                            </div>
+                            <p className="text-3xl font-black text-black dark:text-white">{lowStockProducts}</p>
+                            <p className="text-[10px] font-bold text-zinc-400 mt-1 capitalize">{t("needRestocking")}</p>
+                        </motion.div>
+                        <motion.div variants={itemVariants} className="p-6 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[32px] shadow-sm hover:shadow-md transition-shadow group">
+                            <div className="flex items-center justify-between mb-4">
+                                <p className="text-[10px] font-bold text-zinc-400 capitalize">{t("totalValue")}</p>
+                                <div className="p-2 bg-purple-50 dark:bg-purple-500/10 rounded-xl group-hover:scale-110 transition-transform">
+                                    <Zap size={16} className="text-purple-500" />
+                                </div>
+                            </div>
+                            <p className="text-3xl font-black text-black dark:text-white">
+                                {currency === "MYR" ? "RM" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "₹"}{totalInventoryValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </p>
+                            <p className="text-[10px] font-bold text-zinc-400 mt-1 capitalize">{t("inventoryValue")}</p>
+                        </motion.div>
+                    </>
+                )}
             </motion.div>
             <div className="relative group w-full sm:w-auto">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
@@ -340,10 +341,11 @@ export default function ProductsPage() {
                 />
             </div>
 
-            {/* Products Table */}
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-sm pb-10">
                 {loading ? (
-                    <div className="py-24 text-center text-zinc-400 font-medium">{t("fetchingProducts")}</div>
+                    <div className="p-4">
+                        <TableSkeleton />
+                    </div>
                 ) : filtered.length === 0 ? (
                     <div className="py-32 text-center">
                         <div className="w-24 h-24 bg-zinc-50 dark:bg-zinc-800 rounded-[32px] flex items-center justify-center mx-auto mb-8 border border-zinc-100 dark:border-zinc-700 shadow-xl">
@@ -421,7 +423,7 @@ export default function ProductsPage() {
                         {totalPages > 1 && (
                             <div className="px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-950/30">
                                 <div className="text-xs font-bold text-zinc-500">
-                                    {t("showing")} <span className="text-black dark:text-white font-black">{(currentPage - 1) * itemsPerPage + 1}</span> {t("to")} <span className="text-black dark:text-white font-black">{Math.min(currentPage * itemsPerPage, filtered.length)}</span> {t("of")} <span className="text-black dark:text-white font-black">{filtered.length}</span> {t("products")}
+                                    {t("showing")} <span className="text-black dark:text-white font-bold">{(currentPage - 1) * itemsPerPage + 1}</span> {t("to")} <span className="text-black dark:text-white font-bold">{Math.min(currentPage * itemsPerPage, filtered.length)}</span> {t("of")} <span className="text-black dark:text-white font-bold">{filtered.length}</span> {t("products")}
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button 
@@ -445,7 +447,7 @@ export default function ProductsPage() {
                                                     <button 
                                                         key={pageNum}
                                                         onClick={() => setCurrentPage(pageNum)}
-                                                        className={`w-9 h-9 rounded-xl flex items-center justify-center text-[10px] font-black transition-all ${currentPage === pageNum ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 scale-110" : "bg-white dark:bg-zinc-900 text-zinc-500 border border-zinc-200 dark:border-zinc-800 hover:border-indigo-500"}`}
+                                                        className={`w-9 h-9 rounded-xl flex items-center justify-center text-[10px] font-bold transition-all ${currentPage === pageNum ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 scale-110" : "bg-white dark:bg-zinc-900 text-zinc-500 border border-zinc-200 dark:border-zinc-800 hover:border-indigo-500"}`}
                                                     >
                                                         {pageNum}
                                                     </button>

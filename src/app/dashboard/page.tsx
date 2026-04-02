@@ -141,6 +141,7 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
                 storeName={store.name} 
                 hasProducts={hasProducts} 
                 hasPayment={hasPayment} 
+                ownerId={impersonateId}
             />
         )
     }
@@ -153,9 +154,9 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
             className="max-w-7xl mx-auto space-y-10 pb-20"
         >
             {/* Premium Header section */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                 <div>
-                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize italic">{t("dashboard")}</h2>
+                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize">{t("dashboard")}</h2>
                     <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">Your store performance and activity at a glance.</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">

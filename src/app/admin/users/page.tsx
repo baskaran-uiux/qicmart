@@ -6,6 +6,11 @@ import { UserCard } from "@/components/admin/UserCard"
 
 export default async function AdminUsersPage() {
     const allUsers = await prisma.user.findMany({
+        where: {
+            role: {
+                in: ["STORE_OWNER", "SUPER_ADMIN", "STAFF"]
+            }
+        },
         orderBy: { createdAt: "desc" },
         include: { ownedStores: true }
     })

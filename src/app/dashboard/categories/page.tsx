@@ -5,6 +5,8 @@ import { Plus, Pencil, Trash2, FolderOpen, X, Check, Upload, Image as ImageIcon,
 import DeleteConfirmationModal from "@/components/dashboard/DeleteConfirmationModal"
 import { MediaLibraryModal } from "@/components/MediaLibraryModal"
 import { useDashboardStore } from "@/components/DashboardStoreProvider"
+import { TableSkeleton } from "@/components/dashboard/DashboardSkeletons"
+import PremiumButton from "@/components/dashboard/PremiumButton"
 
 interface Category {
     id: string
@@ -253,12 +255,12 @@ export default function CategoriesPage() {
                     <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize">{t('categories')}</h2>
                     <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">{t('categoriesDesc')}</p>
                 </div>
-                <button
+                <PremiumButton
                     onClick={openAdd}
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-indigo-600 dark:bg-white text-white dark:text-black rounded-2xl text-[12px] font-semibold capitalize hover:opacity-90 transition-all shadow-xl shadow-indigo-500/10 active:scale-95"
+                    icon={Plus}
                 >
-                    <Plus size={18} /> {t('createCategory')}
-                </button>
+                    {t('createCategory')}
+                </PremiumButton>
             </div>
 
             <div className="relative group w-full sm:w-auto">
@@ -342,10 +344,13 @@ export default function CategoriesPage() {
                                             </div>
                                         ) : null}
                                     </div>
-                                    <button onClick={saveCategory} disabled={saving} className="px-8 py-3 bg-indigo-600 dark:bg-white text-white dark:text-black rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2 shadow-xl shadow-indigo-500/10 disabled:opacity-50">
-                                        {saving ? <Loader2 className="animate-spin" size={14} /> : <Check size={14} />}
+                                    <PremiumButton 
+                                        onClick={saveCategory} 
+                                        isLoading={saving}
+                                        icon={saving ? Loader2 : Check}
+                                    >
                                         {editingId ? t('done') : t('create')}
-                                    </button>
+                                    </PremiumButton>
                                 </div>
                                 {error && (
                                     <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest text-center animate-shake bg-rose-500/5 py-2 rounded-lg">{error}</p>
@@ -356,14 +361,15 @@ export default function CategoriesPage() {
                 </div>
             )}
 
-            {/* Categories Table */}
             <div className="space-y-4">
                 {loading ? (
-                    <div className="py-24 text-center text-zinc-400 font-semibold italic capitalize tracking-wide">{t('scanningCategoryTree')}</div>
+                    <div className="p-4">
+                        <TableSkeleton />
+                    </div>
                 ) : categories.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-96 bg-zinc-50 dark:bg-zinc-950 rounded-[40px] border border-zinc-100 dark:border-zinc-800">
                         <FolderOpen size={64} className="text-zinc-200 dark:text-zinc-800 mb-6" />
-                        <p className="font-bold text-zinc-300 capitalize italic">{t('noCategoriesYet')}</p>
+                        <p className="font-bold text-zinc-300 capitalize">{t('noCategoriesYet')}</p>
                     </div>
                 ) : (
                     <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[32px] overflow-hidden shadow-sm">

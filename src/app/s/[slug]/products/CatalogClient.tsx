@@ -55,12 +55,17 @@ export default function CatalogClient({
     categories,
     slug,
     currency = "INR",
+    themeConfig: themeConfigRaw,
 }: {
     products: Product[]
     categories: Category[]
     slug: string
     currency?: string
+    themeConfig?: string | null
 }) {
+    const themeConfig = themeConfigRaw ? JSON.parse(themeConfigRaw) : {}
+    const storeTheme = themeConfig.storeTheme || "modern"
+    const layoutStyle = storeTheme === 'nextgen' ? 'nextgen' : (themeConfig.layoutStyle || "default")
     const searchParams = useSearchParams()
     const router = useRouter()
     const pathname = usePathname()
@@ -73,6 +78,7 @@ export default function CatalogClient({
     const [priceRange, setPriceRange] = useState({ min: 0, max: 10000 })
     const [currentRange, setCurrentRange] = useState({ min: 0, max: 5000 })
     const [sort, setSort] = useState("newest")
+    const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
 
     const gridVariants = {
         hidden: { opacity: 0 },
@@ -194,10 +200,11 @@ export default function CatalogClient({
             </div>
 
             {/* Categories */}
+            {/* Categories */}
             {categories.length > 0 && (
-                <div>
-                    <h3 className="text-sm font-semibold text-zinc-900 mb-3 uppercase tracking-wider text-[11px]">Categories</h3>
-                    <div className="space-y-2">
+                <div className="bg-zinc-50/50 rounded-3xl p-6 border border-zinc-100">
+                    <h3 className="text-[10px] font-black text-zinc-400 mb-6 uppercase tracking-[0.2em]">Categories</h3>
+                    <div className="space-y-3">
                         {(() => {
                             const buildTree = (items: Category[]) => {
                                 const map = new Map<string, any>()
@@ -224,20 +231,23 @@ export default function CatalogClient({
                             return flattenTree(buildTree(categories)).map((cat) => (
                                 <label 
                                     key={cat.id} 
-                                    className="flex items-center gap-2 cursor-pointer group"
-                                    style={{ marginLeft: `${cat.depth * 16}px` }}
+                                    className="flex items-center gap-3 cursor-pointer group/item"
+                                    style={{ marginLeft: `${cat.depth * 12}px` }}
                                 >
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedCategories.includes(cat.name)}
-                                        onChange={() => setSelectedCategories(prev => 
-                                            prev.includes(cat.name) 
-                                            ? prev.filter(c => c !== cat.name) 
-                                            : [...prev, cat.name]
-                                        )}
-                                        className="w-4 h-4 rounded border-zinc-300 text-[var(--primary-color)] focus:ring-[var(--primary-color)]"
-                                    />
-                                    <span className={`text-sm transition-colors ${selectedCategories.includes(cat.name) ? "text-[var(--primary-color)] font-bold" : "text-zinc-600 group-hover:text-zinc-900"}`}>
+                                    <div className="relative flex items-center justify-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedCategories.includes(cat.name)}
+                                            onChange={() => setSelectedCategories(prev => 
+                                                prev.includes(cat.name) 
+                                                ? prev.filter(c => c !== cat.name) 
+                                                : [...prev, cat.name]
+                                            )}
+                                            className="peer w-5 h-5 rounded-lg border-zinc-200 text-black focus:ring-black transition-all appearance-none bg-white checked:bg-black checked:border-black"
+                                        />
+                                        <svg className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="20 6 9 17 4 12"/></svg>
+                                    </div>
+                                    <span className={`text-[13px] transition-all ${selectedCategories.includes(cat.name) ? "text-black font-bold" : "text-zinc-500 group-hover/item:text-zinc-900 group-hover/item:translate-x-1"}`}>
                                         {cat.name}
                                     </span>
                                 </label>
@@ -248,20 +258,35 @@ export default function CatalogClient({
             )}
 
             {/* Price Range Slider UI */}
-            <div>
-                <h3 className="text-sm font-semibold text-zinc-900 mb-3 uppercase tracking-wider text-[11px]">Price Range ({currency})</h3>
-                <div className="space-y-4">
-                    <input 
-                        type="range"
-                        min={priceRange.min}
-                        max={priceRange.max}
-                        value={currentRange.max}
-                        onChange={(e) => setCurrentRange(prev => ({ ...prev, max: parseInt(e.target.value) }))}
-                        className="w-full h-1.5 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-[var(--primary-color)]"
-                    />
-                    <div className="flex items-center justify-between text-xs font-bold text-zinc-500">
-                        <span>{formatPrice(priceRange.min, currency)}</span>
-                        <span className="bg-[var(--primary-color)]/10 text-[var(--primary-color)] px-2 py-1 rounded-md">Up to {formatPrice(currentRange.max, currency)}</span>
+            <div className="bg-zinc-50/50 rounded-3xl p-6 border border-zinc-100">
+                <h3 className="text-[10px] font-black text-zinc-400 mb-6 uppercase tracking-[0.2em]">Price Range ({currency})</h3>
+                <div className="space-y-6">
+                    <div className="relative h-1 bg-zinc-200 rounded-full">
+                        <div 
+                            className="absolute h-full bg-black rounded-full"
+                            style={{ 
+                                left: `${((currentRange.min - priceRange.min) / (priceRange.max - priceRange.min)) * 100}%`,
+                                right: `${100 - ((currentRange.max - priceRange.min) / (priceRange.max - priceRange.min)) * 100}%`
+                            }}
+                        />
+                        <input 
+                            type="range"
+                            min={priceRange.min}
+                            max={priceRange.max}
+                            value={currentRange.max}
+                            onChange={(e) => setCurrentRange(prev => ({ ...prev, max: parseInt(e.target.value) }))}
+                            className="absolute inset-0 w-full h-1 bg-black/0 appearance-none cursor-pointer accent-black pointer-events-auto"
+                        />
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                            <span className="text-[9px] font-black text-zinc-400 uppercase">Min</span>
+                            <span className="text-[12px] font-bold text-black">{formatPrice(priceRange.min, currency)}</span>
+                        </div>
+                        <div className="flex flex-col items-end">
+                            <span className="text-[9px] font-black text-zinc-400 uppercase">Max</span>
+                            <span className="text-[12px] font-bold text-black">{formatPrice(currentRange.max, currency)}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -294,7 +319,8 @@ export default function CatalogClient({
                         {/* Sort Bar */}
                         <div className="flex items-center justify-between mb-6">
                             <button
-                                className="lg:hidden flex items-center gap-2 px-4 py-2 border border-zinc-300 rounded-lg text-sm font-medium text-zinc-700 hover:border-[var(--primary-color)]/50"
+                                onClick={() => setIsMobileFilterOpen(true)}
+                                className="lg:hidden flex items-center gap-2 px-4 py-2 border border-zinc-300 rounded-lg text-sm font-medium text-zinc-700 hover:border-[var(--primary-color)]/50 transition-all active:scale-95"
                             >
                                 <SlidersHorizontal className="w-4 h-4" /> Filters {hasActiveFilters && `(${selectedCategories.length + (currentRange.max < priceRange.max ? 1 : 0)})`}
                             </button>
@@ -336,6 +362,8 @@ export default function CatalogClient({
                                                 product={product} 
                                                 slug={slug} 
                                                 currency={currency} 
+                                                storeTheme={storeTheme}
+                                                layoutStyle={layoutStyle}
                                             />
                                         </motion.div>
                                     ))}
@@ -345,6 +373,46 @@ export default function CatalogClient({
                     </div>
                 </div>
             </div>
+
+            {/* Mobile Filter Drawer */}
+            <AnimatePresence>
+                {isMobileFilterOpen && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsMobileFilterOpen(false)}
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] lg:hidden"
+                        />
+                        <motion.div
+                            initial={{ y: "100%" }}
+                            animate={{ y: 0 }}
+                            exit={{ y: "100%" }}
+                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                            className="fixed inset-x-0 bottom-0 bg-white rounded-t-[32px] z-[100] lg:hidden max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
+                        >
+                            <div className="p-4 border-b border-zinc-100 flex items-center justify-between shrink-0">
+                                <h3 className="font-bold text-lg">Filters</h3>
+                                <button onClick={() => setIsMobileFilterOpen(false)} className="p-2 hover:bg-zinc-100 rounded-full transition-all">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                                {filters}
+                            </div>
+                            <div className="p-4 bg-zinc-50 border-t border-zinc-100 shrink-0 pb-8 sm:pb-4">
+                                <button 
+                                    onClick={() => setIsMobileFilterOpen(false)}
+                                    className="w-full py-4 bg-zinc-900 text-white rounded-2xl font-bold hover:bg-zinc-800 transition-all shadow-xl"
+                                >
+                                    Apply Filters
+                                </button>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
         </div>
     )
 }

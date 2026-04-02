@@ -8,6 +8,7 @@ import {
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useDashboardStore } from "@/components/DashboardStoreProvider"
+import { NewsletterSkeleton, KpiCardSkeleton } from "@/components/dashboard/DashboardSkeletons"
 
 interface Subscriber {
     id: string
@@ -93,7 +94,7 @@ export default function NewsletterPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                 <div>
-                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize italic">{t('newsletterTitle')}</h2>
+                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize">{t('newsletterTitle')}</h2>
                     <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">{t('newsletterSummary')}</p>
                 </div>
                 <button 
@@ -107,34 +108,41 @@ export default function NewsletterPage() {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[
-                    { label: t('totalSubscribers'), value: stats.total, icon: Users, color: "text-indigo-500", bg: "bg-indigo-500/10", suffix: t('activeLeads') },
-                    { label: t('newThisMonth'), value: stats.newThisMonth, icon: TrendingUp, color: "text-emerald-500", bg: "bg-emerald-500/10", suffix: t('growth') },
-                ].map((stat, i) => (
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                        key={stat.label}
-                        className="p-8 bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 shadow-sm relative overflow-hidden group"
-                    >
-                        <div className="relative z-10">
-                            <div className="flex items-center justify-between mb-4">
-                                <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{stat.label}</span>
-                                <div className={`p-3 ${stat.bg} ${stat.color} rounded-2xl`}>
-                                    <stat.icon size={20} />
+                {loading ? (
+                    <>
+                        <KpiCardSkeleton />
+                        <KpiCardSkeleton />
+                    </>
+                ) : (
+                    [
+                        { label: t('totalSubscribers'), value: stats.total, icon: Users, color: "text-indigo-500", bg: "bg-indigo-500/10", suffix: t('activeLeads') },
+                        { label: t('newThisMonth'), value: stats.newThisMonth, icon: TrendingUp, color: "text-emerald-500", bg: "bg-emerald-500/10", suffix: t('growth') },
+                    ].map((stat, i) => (
+                        <motion.div 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            key={stat.label}
+                            className="p-8 bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 shadow-sm relative overflow-hidden group"
+                        >
+                            <div className="relative z-10">
+                                <div className="flex items-center justify-between mb-4">
+                                    <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{stat.label}</span>
+                                    <div className={`p-3 ${stat.bg} ${stat.color} rounded-2xl`}>
+                                        <stat.icon size={20} />
+                                    </div>
+                                </div>
+                                <div className="flex items-baseline gap-2">
+                                    <p className="text-4xl font-bold text-black dark:text-white">{stat.value}</p>
+                                    <span className="text-[10px] font-bold uppercase text-zinc-400 tracking-tighter">{stat.suffix}</span>
                                 </div>
                             </div>
-                            <div className="flex items-baseline gap-2">
-                                <p className="text-4xl font-black text-black dark:text-white italic">{stat.value}</p>
-                                <span className="text-[10px] font-black uppercase text-zinc-400 tracking-tighter">{stat.suffix}</span>
+                            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity translate-x-1/4 -translate-y-1/4">
+                                <stat.icon size={120} />
                             </div>
-                        </div>
-                        <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity translate-x-1/4 -translate-y-1/4">
-                            <stat.icon size={120} />
-                        </div>
-                    </motion.div>
-                ))}
+                        </motion.div>
+                    ))
+                )}
             </div>
 
             {/* Main Table Content */}
@@ -154,10 +162,7 @@ export default function NewsletterPage() {
 
                 <div className="overflow-x-auto">
                     {loading ? (
-                        <div className="py-24 text-center">
-                            <Loader2 className="animate-spin mx-auto text-zinc-400 mb-4" size={32} />
-                            <p className="text-zinc-500 font-medium">{t('loadingSubscribers')}</p>
-                        </div>
+                        <NewsletterSkeleton />
                     ) : filtered.length === 0 ? (
                         <div className="py-24 text-center">
                             <div className="w-20 h-20 bg-zinc-50 dark:bg-zinc-800/50 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -168,7 +173,7 @@ export default function NewsletterPage() {
                         </div>
                     ) : (
                         <table className="w-full text-left">
-                            <thead className="text-[11px] font-black uppercase tracking-widest text-zinc-400 bg-zinc-50 dark:bg-zinc-950/50 border-b border-zinc-100 dark:border-zinc-800">
+                            <thead className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 bg-zinc-50 dark:bg-zinc-950/50 border-b border-zinc-100 dark:border-zinc-800">
                                 <tr>
                                     <th className="px-10 py-5">{t('emailAddress') || "Email Address"}</th>
                                     <th className="px-10 py-5">{t('subscriptionDate')}</th>
@@ -194,7 +199,7 @@ export default function NewsletterPage() {
                                             </div>
                                         </td>
                                         <td className="px-10 py-6">
-                                            <span className="px-3 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                                            <span className="px-3 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-full text-[10px] font-bold uppercase tracking-widest text-zinc-500">
                                                 {t('storefrontFooter')}
                                             </span>
                                         </td>
@@ -225,7 +230,7 @@ export default function NewsletterPage() {
                         <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-0.5">{t('campaignReadyDesc')}</p>
                     </div>
                 </div>
-                <button className="px-6 py-3 bg-indigo-600 text-white rounded-2xl text-[12px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all flex items-center gap-2">
+                <button className="px-6 py-3 bg-indigo-600 text-white rounded-2xl text-[12px] font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all flex items-center gap-2">
                     {t('connectMarketingTools')} <ExternalLink size={14} />
                 </button>
             </div>

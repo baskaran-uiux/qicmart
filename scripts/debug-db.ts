@@ -10,9 +10,14 @@ async function main() {
     const users = await prisma.user.findMany()
     console.log(JSON.stringify(users, null, 2))
 
-    console.log("\n--- CUSTOMERS ---")
-    const customers = await prisma.customer.findMany()
-    console.log(JSON.stringify(customers, null, 2))
+    console.log("\n--- ORDERS ---")
+    const orders = await prisma.order.findMany({
+        include: {
+            customer: true,
+            items: true
+        }
+    })
+    console.log(JSON.stringify(orders, null, 2))
 }
 
 main()

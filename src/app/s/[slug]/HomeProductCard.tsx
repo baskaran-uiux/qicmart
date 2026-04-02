@@ -29,10 +29,14 @@ export default function HomeProductCard({
     product,
     slug,
     currency = "INR",
+    layoutStyle = "default",
+    storeTheme = "modern",
 }: {
     product: Product
     slug: string
     currency?: string
+    layoutStyle?: string
+    storeTheme?: string
 }) {
     const { data: session } = useSession()
     const { addItem, isInCart } = useCart()
@@ -124,15 +128,20 @@ export default function HomeProductCard({
             y: 0,
             transition: {
                 duration: 0.8,
-                ease: "circOut"
+                ease: [0.16, 1, 0.3, 1]
             }
         }
     }
 
+    const isNextgen = layoutStyle === 'nextgen'
+    const isAura = storeTheme === "aura"
+    const isGlass = storeTheme === "glass"
+    const isSports = storeTheme === "sports" || layoutStyle === 'sports'
+
     return (
         <motion.div
             variants={cardVariants as any}
-            className="h-full"
+            className="h-full group/card"
         >
             <style jsx global>{`
                 @keyframes shine {
@@ -147,72 +156,100 @@ export default function HomeProductCard({
                     animation: shine 0.8s ease-in-out forwards;
                     width: 100%;
                 }
+                .premium-orange-action {
+                    background: var(--primary-color) !important;
+                    color: white !important;
+                    box-shadow: 0 10px 20px rgba(var(--primary-rgb), 0.2);
+                }
             `}</style>
-            <Link href={`/s/${slug}/products/${product.slug}`} className="group relative bg-white dark:bg-zinc-900 rounded-[32px] overflow-hidden border border-zinc-100 dark:border-white/5 hover:shadow-2xl hover:shadow-[var(--primary-color)]/5 transition-all duration-700 flex flex-col h-full">
+            
+            <Link 
+                href={`/s/${slug}/products/${product.slug}`} 
+                className={`group relative overflow-hidden border transition-all duration-700 flex flex-col h-full
+                    ${isSports ? 'bg-white border-zinc-100 hover:border-[var(--primary-color)] shadow-sm hover:shadow-[var(--primary-color)]/10' : isAura ? 'bg-zinc-900 border-white/5 shadow-none hover:bg-zinc-800' : isGlass ? 'bg-white/40 backdrop-blur-3xl border-white/40 shadow-xl' : 'bg-white dark:bg-zinc-900 border-zinc-100 dark:border-white/5 hover:shadow-xl hover:shadow-black/5'}
+                    ${isNextgen || isSports ? 'rounded-[40px] sm:rounded-[56px] p-2 sm:p-4 pb-3 sm:pb-4' : 'rounded-[32px]'}`}
+            >
                 {/* Image Container */}
-                <div className="relative aspect-square bg-white overflow-hidden">
-                    <div className="block w-full h-full relative z-0">
-                        {image ? (
-                                <div className="w-full h-full relative">
-                                    <OptimizedImage
-                                        src={image}
-                                        alt={product.name}
-                                        fill
-                                        className="object-cover transition-transform duration-800 ease-[0.16,1,0.3,1] group-hover:scale-110"
-                                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                                    />
-                                </div>
-                        ) : (
+                <div className={`relative aspect-square overflow-hidden transition-all duration-700
+                    ${isAura ? 'bg-zinc-950' : isSports ? 'bg-zinc-50' : 'bg-zinc-50 dark:bg-zinc-800/50'} 
+                    ${isNextgen || isSports ? 'rounded-[36px] sm:rounded-[48px]' : ''}`}>
+                    
+                    {/* Sports Mesh Background Pattern */}
+                    {isSports && (
+                        <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-0" 
+                             style={{ 
+                                backgroundImage: `radial-gradient(circle at 2px 2px, black 1px, transparent 0)`,
+                                backgroundSize: '16px 16px' 
+                             }} />
+                    )}
 
-                            <div className="w-full h-full flex items-center justify-center text-4xl text-zinc-100 font-bold bg-zinc-50 dark:bg-zinc-800 rounded-3xl">
-                                {product.name.charAt(0)}
+                    <div className="block w-full h-full relative z-[1]">
+                        {image ? (
+                            <div className="w-full h-full relative">
+                                <OptimizedImage
+                                    src={image}
+                                    alt={product.name}
+                                    fill
+                                    className="object-cover transition-transform duration-[1.2s] ease-[0.16,1,0.3,1] group-hover:scale-110"
+                                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                                />
+                            </div>
+                        ) : (
+                            <div className={`w-full h-full flex items-center justify-center text-5xl font-black italic rounded-3xl overflow-hidden relative group/placeholder
+                                ${isSports ? 'bg-zinc-100 text-zinc-300' : isAura ? 'bg-zinc-900 text-zinc-800' : 'bg-zinc-50 dark:bg-zinc-800 text-zinc-200'}`}>
+                                <span className="relative z-10">{product.name.charAt(0)}</span>
+                                {isSports && (
+                                    <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,var(--primary-color)_0%,transparent_70%)]" />
+                                )}
                             </div>
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                     </div>
-
-                    {product.isBestSeller && (
-                        <div className="absolute top-4 left-4 z-10">
-                            <div className="relative px-3 py-1 bg-amber-500 text-white text-[10px] font-bold rounded-full shadow-lg shadow-amber-500/20 flex items-center gap-1 border border-amber-400/20 overflow-hidden group/badge">
-                                <Star className="w-3 h-3 fill-current" />
+7
+                    {/* Badges */}
+                    <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+                        {product.isBestSeller && (
+                            <div className={`relative px-3 py-1.5 ${isSports ? 'bg-[var(--primary-color)] text-white' : 'bg-[var(--primary-color)] text-white'} text-[9px] font-semibold rounded-full shadow-lg flex items-center gap-1.5 border border-white/20 overflow-hidden group/badge`} style={{ boxShadow: `0 10px 20px rgba(var(--primary-rgb), 0.2)` }}>
+                                <Star className="w-2.5 h-2.5 fill-current" />
                                 <span className="relative z-10">Best seller</span>
-                                
-                                {/* Shine Effect */}
                                 <div className="absolute inset-0 -translate-x-full group-hover/badge:animate-shine-once pointer-events-none bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-[-20deg]" />
                                 <div className="absolute inset-0 animate-shine pointer-events-none bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-[-20deg]" />
                             </div>
-                        </div>
-                    )}
+                        )}
+                        {(isNextgen || isSports) && !product.isBestSeller && (
+                            <div className={`px-3 py-1.5 ${isSports ? 'bg-white text-black' : 'bg-white/90 backdrop-blur-xl text-black'} text-[9px] font-semibold rounded-full shadow-sm flex items-center gap-2 border border-zinc-100`}>
+                                <span className="w-1.5 h-1.5 bg-[var(--primary-color)] rounded-full animate-pulse"></span>
+                                New
+                            </div>
+                        )}
+                    </div>
                     
-                    {/* Rating Pill - Inside Image Box */}
-                    <div className="absolute bottom-4 left-4 z-10 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-                        <div className="flex items-center gap-1 py-1.5 px-3 bg-white/90 dark:bg-black/60 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-xl shadow-lg">
-                            <span className="text-[12px] font-bold text-zinc-900 dark:text-white">{avgRating > 0 ? avgRating.toFixed(1) : "5.0"}</span>
-                            <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400 mb-0.5" />
-                            <span className="text-[10px] font-semibold text-zinc-400 ml-0.5">{reviewCount > 0 ? `(${reviewCount})` : "New"}</span>
+                    {/* Rating Overlay */}
+                    <div className="absolute bottom-4 left-4 z-10 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-700 delay-75">
+                        <div className={`flex items-center gap-1.5 py-2 px-3.5 backdrop-blur-2xl border rounded-2xl shadow-2xl ${isAura ? 'bg-black/60 border-white/10' : 'bg-white/90 dark:bg-black/60 border-white/20 dark:border-white/10'}`}>
+                            <span className={`text-[11px] font-black ${isAura ? 'text-white' : 'text-zinc-900 dark:text-white'}`}>{avgRating > 0 ? avgRating.toFixed(1) : "5.0"}</span>
+                            <Star className="w-3 h-3 fill-amber-400 text-amber-400 mb-0.5" />
                         </div>
                     </div>
 
-                    {/* Floating Actions - Top Right */}
-                    <div className="absolute right-4 top-4 flex flex-col gap-2.5 z-10 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-500">
+                    {/* Quick Action - Circular Side Actions */}
+                    <div className="absolute right-4 top-4 flex flex-col gap-2.5 z-10 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-700">
                         <button
                             onClick={(e) => {
                                 e.preventDefault()
                                 e.stopPropagation()
                                 setIsQuickViewOpen(true)
                             }}
-                            className="w-11 h-11 rounded-2xl bg-white/90 dark:bg-black/60 backdrop-blur-xl text-zinc-900 dark:text-white flex items-center justify-center hover:bg-[var(--primary-color)] hover:text-white transition-all shadow-xl border border-white/20 dark:border-white/10"
-                            title="Quick View"
+                            className={`w-11 h-11 rounded-2xl backdrop-blur-2xl flex items-center justify-center transition-all shadow-2xl border ${isAura ? 'bg-black/80 text-white border-white/10 hover:bg-white hover:text-black' : 'bg-white/90 dark:bg-black/80 text-zinc-900 dark:text-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black border-white/20 dark:border-white/10'}`}
                         >
                             <Eye className="w-5 h-5" />
                         </button>
                         <button
                             onClick={handleWishlist}
-                            className={`w-11 h-11 rounded-2xl backdrop-blur-xl flex items-center justify-center transition-all shadow-xl border ${wishlisted
+                            className={`w-11 h-11 rounded-2xl backdrop-blur-2xl flex items-center justify-center transition-all shadow-2xl border ${wishlisted
                                     ? "bg-rose-500 text-white border-rose-400"
-                                    : "bg-white/90 dark:bg-black/60 text-zinc-900 dark:text-white hover:bg-rose-500 hover:text-white border-white/20 dark:border-white/10"
+                                    : isAura ? "bg-black/80 text-white border-white/10 hover:bg-rose-500 hover:text-white" : "bg-white/90 dark:bg-black/80 text-zinc-900 dark:text-white hover:bg-rose-500 hover:text-white border-white/20 dark:border-white/10"
                                 }`}
-                            title="Wishlist"
                         >
                             <Heart className={`w-5 h-5 ${wishlisted ? "fill-current" : ""}`} />
                         </button>
@@ -220,32 +257,44 @@ export default function HomeProductCard({
                 </div>
 
                 {/* Content Section */}
-                <div className="px-5 sm:px-8 pb-6 sm:pb-8 pt-2 flex flex-col flex-grow">
-                    {/* Title */}
-                    <div className="block mb-2">
-                        <motion.h3 
-                            className="text-sm sm:text-[16px] font-bold text-zinc-900 dark:text-zinc-100 tracking-tight leading-snug group-hover:text-[var(--primary-color)] transition-colors line-clamp-2 uppercase italic"
-                        >
+                <div className={`flex flex-col flex-grow ${isNextgen || isSports ? 'px-4 pb-4 pt-6 sm:pb-5' : 'px-6 pb-8 pt-4'}`}>
+                    <div className="mb-2 overflow-hidden relative">
+                        <div className="flex items-center justify-between gap-2 mb-1.5 translate-y-1 group-hover:translate-y-0 transition-transform duration-700">
+                             {(isNextgen || isSports) && (
+                                <p className={`text-[10px] font-medium ${isSports ? 'text-zinc-400' : 'text-zinc-500'}`}>{isSports ? 'Pro performance' : 'Limited edition'}</p>
+                            )}
+                            {!isSports && (
+                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                                    <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+                                    <span className="text-[10px] font-black text-zinc-400">{avgRating > 0 ? avgRating.toFixed(1) : "5.0"}</span>
+                                </div>
+                            )}
+                        </div>
+                        <p className={`leading-tight group-hover:text-[var(--primary-color)] transition-all duration-500 line-clamp-2
+                            ${isSports ? 'text-zinc-900 font-medium tracking-tight' : isAura ? 'text-zinc-100 font-medium tracking-wide' : 'text-zinc-900 dark:text-zinc-100 font-medium tracking-wide'}
+                            ${isNextgen || isSports ? 'text-[13px] sm:text-[14px]' : 'text-sm'}`}>
                             {product.name}
-                        </motion.h3>
+                        </p>
                     </div>
 
                     {/* Price & Action Row */}
                     <div className="mt-auto flex items-center justify-between gap-4">
-                        <div className="flex flex-col min-w-0">
+                        <div className="flex flex-col min-w-0 transition-transform duration-500 group-hover:-translate-y-1">
                             {product.compareAtPrice && product.compareAtPrice > product.price && (
                                 <div className="flex items-center gap-2 mb-0.5">
-                                    <span className="text-[13px] font-semibold text-zinc-400 line-through">
+                                    <span className={`text-[11px] font-medium line-through opacity-70 ${isAura ? 'text-zinc-500' : 'text-zinc-400'}`}>
                                         {formatPrice(product.compareAtPrice, currency)}
                                     </span>
                                     {discount && (
-                                        <span className="px-1.5 py-0.5 bg-[var(--primary-color)]/10 text-[var(--primary-color)] text-[9px] font-bold rounded-md">
+                                        <span className={`text-[10px] font-bold tracking-wider ${isSports ? 'text-emerald-600' : 'text-[var(--primary-color)]'}`}>
                                             -{discount}%
                                         </span>
                                     )}
                                 </div>
                             )}
-                            <span className="text-lg sm:text-xl font-bold text-zinc-900 leading-none truncate block">
+                            <span className={`leading-none tracking-tighter block 
+                                ${isSports ? 'text-zinc-900 font-medium' : isAura ? 'text-white font-medium' : 'text-zinc-900 dark:text-white font-medium'}
+                                ${isNextgen || isSports ? 'text-lg' : 'text-base'}`}>
                                 {formatPrice(product.price, currency)}
                             </span>
                         </div>
@@ -253,13 +302,15 @@ export default function HomeProductCard({
                         <button
                             onClick={handleAddToCart}
                             disabled={product.stock === 0}
-                            className={`group/btn w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all shadow-md active:scale-90 flex-shrink-0 ${addedFeedback
+                            className={`group/btn w-10 h-10 flex items-center justify-center transition-all shadow-xl active:scale-95 flex-shrink-0 ${addedFeedback
                                     ? "bg-emerald-500 text-white"
-                                    : "bg-[var(--primary-color)] text-white hover:opacity-90 hover:shadow-[var(--primary-color)]/20"
-                                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                    : isSports ? "bg-[var(--primary-color)] text-white hover:bg-black hover:text-white hover:rotate-6 sm:hover:rotate-12 shadow-[var(--primary-color)]/30 hover:shadow-black/20" : "premium-orange-action text-white hover:scale-110"
+                                } ${isNextgen || isSports ? 'rounded-xl sm:rounded-[20px]' : 'rounded-2xl'} disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                             {addedFeedback ? (
-                                <svg className="w-5 h-5 sm:w-6 sm:h-6 animate-in zoom-in duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                                    <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                </motion.div>
                             ) : (
                                 <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
                             )}

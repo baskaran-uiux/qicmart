@@ -8,9 +8,9 @@ async function main() {
   const storeOwner = await prisma.user.upsert({ where: { email: 'owner@store.com' }, update: { password: hashedPassword }, create: { email: 'owner@store.com', name: 'John Store Owner', password: hashedPassword, role: 'STORE_OWNER' } })
 
   const plansData = [
-    { name: 'Normal', priceMonthly: 29.0, priceYearly: 290.0, maxProducts: 50, maxStaff: 2, maxStorageMB: 1024, maxOrdersPerMo: 500 },
-    { name: 'Pro', priceMonthly: 79.0, priceYearly: 790.0, maxProducts: 1000, maxStaff: 10, maxStorageMB: 5120, maxOrdersPerMo: 5000 },
-    { name: 'Enterprise', priceMonthly: 299.0, priceYearly: 2990.0, maxProducts: 100000, maxStaff: 100, maxStorageMB: 51200, maxOrdersPerMo: 100000 },
+    { name: 'Standard', priceMonthly: 399.0, priceYearly: 2999.0, maxProducts: 100, maxStaff: 2, maxStorageMB: 1024, maxOrdersPerMo: 500 },
+    { name: 'Pro', priceMonthly: 999.0, priceYearly: 9999.0, maxProducts: 1000, maxStaff: 10, maxStorageMB: 5120, maxOrdersPerMo: 5000 },
+    { name: 'Enterprise', priceMonthly: 2999.0, priceYearly: 29990.0, maxProducts: 100000, maxStaff: 100, maxStorageMB: 51200, maxOrdersPerMo: 100000 },
   ]
   let planId = ''
   for (const p of plansData) {
@@ -22,7 +22,7 @@ async function main() {
   const store = await prisma.store.upsert({
     where: { slug: 'demo' },
     update: { logo: 'https://images.unsplash.com/photo-1620288627223-53302f4e8c74?w=200&fit=crop', description: 'The best products tailored for you.' },
-    create: { name: 'Demo SaaS Store', slug: 'demo', ownerId: storeOwner.id, currency: 'USD', description: 'The best products tailored for you.', logo: 'https://images.unsplash.com/photo-1620288627223-53302f4e8c74?w=200&fit=crop' }
+    create: { name: 'Demo SaaS Store', slug: 'demo', ownerId: storeOwner.id, currency: 'INR', description: 'The best products tailored for you.', logo: 'https://images.unsplash.com/photo-1620288627223-53302f4e8c74?w=200&fit=crop' }
   })
 
   if (planId) {

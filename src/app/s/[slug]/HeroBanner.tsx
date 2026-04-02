@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import OptimizedImage from "@/components/common/OptimizedImage"
 
 
 interface Banner {
     id: string
+    type?: "image" | "video"
     image: string
     title: string
     subtitle: string
@@ -25,11 +26,13 @@ interface Banner {
 interface Props {
     slug: string
     banners?: Banner[]
+    layoutStyle?: string
 }
 
-const defaultSlides = [
+const defaultSlides: Banner[] = [
     {
         id: "default-1",
+        type: "image",
         title: "New Season",
         subtitle: "Discover the latest trends — curated just for you",
         buttonText: "Shop Now",
@@ -44,6 +47,7 @@ const defaultSlides = [
     },
     {
         id: "default-2",
+        type: "image",
         title: "Up to 50% Off",
         subtitle: "Flash sale on premium products — limited time only",
         buttonText: "Shop Sale",
@@ -58,7 +62,7 @@ const defaultSlides = [
     },
 ]
 
-export default function HeroBanner({ slug, banners = [] }: Props) {
+export default function HeroBanner({ slug, banners = [], layoutStyle = "default" }: Props) {
     const [current, setCurrent] = useState(0)
     const [paused, setPaused] = useState(false)
 
@@ -76,145 +80,236 @@ export default function HeroBanner({ slug, banners = [] }: Props) {
         return () => clearInterval(timer)
     }, [next, paused, activeSlides.length])
 
+    const isNextgen = layoutStyle === 'nextgen'
+    const isSports = layoutStyle === 'sports'
+
     return (
         <div
-            className="relative h-[380px] sm:h-[700px] overflow-hidden bg-zinc-950"
+            className={`relative transition-all duration-700 ${isSports ? 'bg-zinc-950 overflow-hidden' : isNextgen ? 'bg-white dark:bg-zinc-950 px-4 sm:px-8 py-2 sm:py-6' : 'bg-zinc-950'}`}
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
         >
-            <style jsx>{`
-                @keyframes zoomOut {
-                    from { transform: scale(1.15); }
-                    to { transform: scale(1); }
-                }
-                .animate-zoom-banner {
-                    animation: zoomOut 8s ease-out forwards;
-                }
-            `}</style>
+            <div className={`relative overflow-hidden transition-all duration-700 
+                ${isSports ? 'h-[550px] sm:h-[850px] w-full' : isNextgen ? 'h-[420px] sm:h-[680px] rounded-[32px] sm:rounded-[64px] shadow-2xl' : 
+                  'h-[380px] sm:h-[700px]'}`}>
+                <style jsx>{`
+                    @keyframes zoomOut {
+                        from { transform: scale(1.15); }
+                        to { transform: scale(1); }
+                    }
+                    .animate-zoom-banner {
+                        animation: zoomOut 8s ease-out forwards;
+                    }
+                    .premium-orange-btn {
+                        background-color: var(--primary-color, #f97316);
+                        color: white !important;
+                        box-shadow: 0 20px 40px rgba(var(--primary-rgb, 249, 115, 22), 0.3);
+                        border: none;
+                        position: relative;
+                        overflow: hidden;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 12px;
+                        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+                    }
+                    .premium-orange-btn:hover {
+                        transform: translateY(-4px) scale(1.02);
+                        box-shadow: 0 25px 50px rgba(var(--primary-rgb, 249, 115, 22), 0.4);
+                        background-color: var(--primary-color, #f97316) !important;
+                    }
+                    .premium-custom-btn:hover {
+                        filter: brightness(1.1);
+                        transform: translateY(-4px) scale(1.02);
+                    }
+                    .premium-orange-btn::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: -100%;
+                        width: 100%;
+                        height: 100%;
+                        background: linear-gradient(
+                            90deg,
+                            transparent,
+                            rgba(255, 255, 255, 0.2),
+                            transparent
+                        );
+                        transition: 0.5s;
+                    }
+                    .premium-orange-btn:hover::before {
+                        left: 100%;
+                    }
+                    .sports-neon-btn {
+                        background-color: #000000;
+                        color: white !important;
+                        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+                        border: none;
+                        transform: skewX(-12deg);
+                        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+                    }
+                    .sports-neon-btn:hover {
+                        background-color: #222222 !important;
+                        transform: skewX(-12deg) translateY(-4px) scale(1.05);
+                        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+                    }
+                    .sports-neon-btn span {
+                        transform: skewX(12deg);
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 12px;
+                    }
+                `}</style>
 
-            <AnimatePresence mode="wait">
-                <motion.div
-                    key={current}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    onPanEnd={(_, info) => {
-                        if (info.offset.x > 100) prev()
-                        else if (info.offset.x < -100) next()
-                    }}
-                    transition={{ duration: 0.5, ease: "easeInOut" }}
-                    className="absolute inset-0 cursor-grab active:cursor-grabbing touch-pan-y"
-                >
-                    {activeSlides.map((s: any) => {
-                        const currentIdx = activeSlides.indexOf(s);
-                        if (currentIdx !== current) return null;
-                        const isDefault = (s as any).bg !== undefined;
-                        return (
-                            <div key={s.id} className="absolute inset-0">
-                                {s.showOverlay !== false && (
-                                    <>
-                                        {isDefault ? (
-                                            <div className={`absolute inset-0 bg-gradient-to-r ${(s as any).bg} opacity-90`} />
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={current}
+                        initial={{ opacity: 0, scale: 1.05 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        onPanEnd={(_, info) => {
+                            if (info.offset.x > 100) prev()
+                            else if (info.offset.x < -100) next()
+                        }}
+                        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                        className="absolute inset-0 cursor-grab active:cursor-grabbing touch-pan-y"
+                    >
+                        {activeSlides.map((s: Banner) => {
+                            const currentIdx = activeSlides.indexOf(s);
+                            if (currentIdx !== current) return null;
+                            const isDefault = (s as any).bg !== undefined;
+                            const isVideo = s.type === 'video' || s.image.match(/\.(mp4|webm|ogg|mov)$/i);
+                            
+                            return (
+                                <div key={s.id} className="absolute inset-0">
+                                    {(s.showOverlay !== false && (s.title || s.subtitle || s.buttonText)) && (
+                                        <>
+                                            {isDefault ? (
+                                                <div className={`absolute inset-0 bg-gradient-to-r ${(s as any).bg} opacity-90`} />
+                                            ) : (
+                                                <div className={`absolute inset-0 z-10 ${isSports ? 'bg-gradient-to-t from-black/80 via-black/20 to-black/20' : 'bg-black/40'}`} />
+                                            )}
+                                        </>
+                                    )}
+                                    
+                                    <div className={`absolute inset-0 z-0 bg-zinc-900`}>
+                                        {s.image ? (
+                                            isVideo ? (
+                                                <video 
+                                                    src={s.image} 
+                                                    autoPlay 
+                                                    loop 
+                                                    muted 
+                                                    playsInline
+                                                    className="w-full h-full object-cover" 
+                                                />
+                                            ) : (
+                                                <div className={`w-full h-full relative flex items-center justify-center`}>
+                                                    <img
+                                                        src={s.image}
+                                                        alt={s.title}
+                                                        className={`w-full h-full object-cover animate-zoom-banner`}
+                                                        loading="eager"
+                                                    />
+                                                </div>
+                                            )
                                         ) : (
-                                            <div className="absolute inset-0 bg-black/70 z-10" />
+                                            <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900" />
                                         )}
-                                    </>
-                                )}
-                                
-                                <div className="absolute inset-0 z-0">
-                                    <OptimizedImage
-                                        src={s.image}
-                                        alt={s.title}
-                                        fill
-                                        priority={current === 0}
-                                        className="object-cover animate-zoom-banner"
-                                        sizes="100vw"
-                                    />
-                                </div>
+                                    </div>
 
- 
-                                <div className={`relative z-20 h-full flex flex-col justify-center px-6 sm:px-20 lg:px-32 text-white
-                                    ${s.textAlign === 'left' ? 'items-start text-left' : 
-                                      s.textAlign === 'right' ? 'items-end text-right' : 
-                                      'items-center text-center'}`}>
-                                    
-                                    {s.title && (
-                                        <motion.h2 
-                                            initial={{ opacity: 0, y: 30 }}
-                                            animate={{ opacity: 0.9, y: 0 }}
-                                            transition={{ delay: 0.4 }}
-                                            className="text-2xl sm:text-6xl font-bold tracking-tight mb-3 sm:mb-6 drop-shadow-2xl"
-                                            style={{ color: s.titleColor || '#ffffff' }}
-                                        >
-                                            {s.title}
-                                        </motion.h2>
-                                    )}
-                                    
-                                    {s.subtitle && (
-                                        <motion.p 
-                                            initial={{ opacity: 0, y: 30 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: 0.6 }}
-                                            className="text-[10px] sm:text-base text-white/80 max-w-xl mb-6 sm:mb-10 font-medium leading-relaxed line-clamp-2"
-                                            style={{ color: s.subtitleColor || 'rgba(255,255,255,0.8)' }}
-                                        >
-                                            {s.subtitle}
-                                        </motion.p>
-                                    )}
-                                    
-                                    {s.buttonText && (
-                                        <motion.div
-                                            initial={{ opacity: 0, scale: 0.8 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            transition={{ delay: 0.8 }}
-                                        >
-                                            <Link
-                                                href={s.buttonLink.startsWith('/') ? `/s/${slug}${s.buttonLink}` : `/s/${slug}/${s.buttonLink}`}
-                                                className="inline-flex items-center gap-2 sm:gap-4 px-6 sm:px-14 py-3 sm:py-5 font-bold rounded-lg sm:rounded-2xl transition-all shadow-2xl hover:scale-105 active:scale-95 text-[11px] sm:text-[14px] group"
-                                                style={{ 
-                                                    backgroundColor: s.btnColor || '#ffffff',
-                                                    color: s.btnTextColor || '#000000'
-                                                }}
+                                    <div className={`relative z-20 h-full flex flex-col justify-center px-8 sm:px-24 lg:px-40 text-white
+                                        ${s.textAlign === 'left' ? 'items-start text-left' : 
+                                          s.textAlign === 'right' ? 'items-end text-right' : 
+                                          'items-center text-center'}`}>
+                                        
+                                        {s.title && (
+                                            <motion.h2 
+                                                initial={{ opacity: 0, x: -30 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ delay: 0.2, duration: 0.8 }}
+                                                className={`text-4xl sm:text-5xl lg:text-7xl font-black italic tracking-tighter mb-2 sm:mb-4 leading-[0.9] max-w-4xl drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] uppercase`}
+                                                style={{ color: isSports ? '#ffffff' : s.titleColor || '#ffffff' }}
                                             >
-                                                {s.buttonText} <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
-                                            </Link>
-                                        </motion.div>
-                                    )}
+                                                {s.title}
+                                            </motion.h2>
+                                        )}
+                                        
+                                        {s.subtitle && (
+                                            <motion.p 
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ delay: 0.4, duration: 0.8 }}
+                                                className={`text-[12px] sm:text-[14px] max-w-xl mb-4 sm:mb-10 font-black italic uppercase tracking-widest opacity-90 leading-6 sm:leading-7 text-white`}
+                                                style={{ color: isSports ? '#ffffff' : s.subtitleColor || 'rgba(255,255,255,0.9)' }}
+                                            >
+                                                {s.subtitle}
+                                            </motion.p>
+                                        )}
+                                        
+                                        {s.buttonText && (
+                                            <motion.div
+                                                initial={{ opacity: 0, scale: 0.8 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                transition={{ delay: 0.6, duration: 0.8 }}
+                                            >
+                                                <Link
+                                                    href={s.buttonLink.startsWith('/s/') ? s.buttonLink : `/s/${slug}${s.buttonLink.startsWith('/') ? s.buttonLink : `/${s.buttonLink}`}`}
+                                                    className={`inline-flex items-center gap-2 sm:gap-4 px-8 sm:px-12 py-3.5 sm:py-5 font-black italic rounded-full transition-all shadow-xl hover:scale-105 active:scale-95 text-[11px] sm:text-[13px] group uppercase tracking-[0.2em] 
+                                                        ${isSports ? 'sports-neon-btn' : isNextgen ? (s.btnColor && s.btnColor !== '#ffffff' ? 'premium-custom-btn' : 'premium-orange-btn') : ''}`}
+                                                    style={!isSports && isNextgen && (!s.btnColor || s.btnColor === '#ffffff') ? { 
+                                                        backgroundColor: 'var(--primary-color)',
+                                                        color: '#ffffff'
+                                                    } : !isSports ? { 
+                                                        backgroundColor: s.btnColor || '#ffffff',
+                                                        color: s.btnTextColor || '#000000'
+                                                    } : {}}
+                                                >
+                                                    <span>
+                                                        {s.buttonText} 
+                                                        <ArrowRight className="w-4 h-4 sm:w-5 h-5 group-hover:translate-x-1.5 transition-transform shrink-0" />
+                                                    </span>
+                                                </Link>
+                                            </motion.div>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        )
-                    })}
-                </motion.div>
-            </AnimatePresence>
+                            )
+                        })}
+                    </motion.div>
+                </AnimatePresence>
 
-            {/* Arrows */}
-            {activeSlides.length > 1 && (
-                <>
-                    <button
-                        onClick={prev}
-                        className="hidden sm:flex absolute left-8 top-1/2 -translate-y-1/2 z-30 w-16 h-16 rounded-3xl glass text-zinc-900 border border-white/40 hover:bg-white hover:text-zinc-950 transition-all items-center justify-center group shadow-2xl"
-                    >
-                        <span className="text-2xl group-hover:-translate-x-1 transition-transform font-light">‹</span>
-                    </button>
-                    <button
-                        onClick={next}
-                        className="hidden sm:flex absolute right-8 top-1/2 -translate-y-1/2 z-30 w-16 h-16 rounded-3xl glass text-zinc-900 border border-white/40 hover:bg-white hover:text-zinc-950 transition-all items-center justify-center group shadow-2xl"
-                    >
-                        <span className="text-2xl group-hover:translate-x-1 transition-transform font-light">›</span>
-                    </button>
-                    
-                    {/* Dots */}
-                    <div className="absolute bottom-6 sm:bottom-12 left-1/2 -translate-x-1/2 z-30 flex gap-4">
-                        {activeSlides.map((_, i) => (
-                            <button
-                                key={i}
-                                onClick={() => setCurrent(i)}
-                                className={`h-1.5 rounded-full transition-all duration-700 ${i === current ? "w-10 bg-white shadow-xl" : "w-1.5 bg-white/30 hover:bg-white/50"}`}
-                            />
-                        ))}
-                    </div>
-                </>
-            )}
+                {/* Arrows */}
+                {activeSlides.length > 1 && (
+                    <>
+                        <button
+                            onClick={prev}
+                            className="hidden sm:flex absolute left-8 top-1/2 -translate-y-1/2 z-30 w-16 h-16 rounded-full bg-white/5 backdrop-blur-3xl text-white border border-white/20 hover:bg-white hover:text-black transition-all items-center justify-center group shadow-2xl"
+                        >
+                            <ChevronLeft size={28} className="group-hover:-translate-x-0.5 transition-transform" />
+                        </button>
+                        <button
+                            onClick={next}
+                            className="hidden sm:flex absolute right-8 top-1/2 -translate-y-1/2 z-30 w-16 h-16 rounded-full bg-white/5 backdrop-blur-3xl text-white border border-white/20 hover:bg-white hover:text-black transition-all items-center justify-center group shadow-2xl"
+                        >
+                            <ChevronRight size={28} className="group-hover:translate-x-0.5 transition-transform" />
+                        </button>
+                        
+                        {/* Pagination Progress */}
+                        <div className="absolute bottom-10 sm:bottom-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3">
+                            <div className="text-white/40 text-[10px] font-black tracking-widest uppercase mr-4">
+                                {String(current + 1).padStart(2, '0')} <span className="mx-2 text-white/10">/</span> {String(activeSlides.length).padStart(2, '0')}
+                            </div>
+                            {activeSlides.map((_, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => setCurrent(i)}
+                                    className={`h-1 rounded-full transition-all duration-700 ${i === current ? "w-12 bg-white" : "w-2 bg-white/20 hover:bg-white/40"}`}
+                                />
+                            ))}
+                        </div>
+                    </>
+                )}
+            </div>
         </div>
     )
 }

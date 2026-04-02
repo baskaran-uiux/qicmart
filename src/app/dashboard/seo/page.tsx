@@ -19,6 +19,7 @@ import {
     ShieldCheck
 } from "lucide-react";
 import { toast } from "sonner";
+import { SEOSkeleton } from "@/components/dashboard/DashboardSkeletons";
 
 export default function SEOManagerPage() {
     const [activeTab, setActiveTab] = useState("global");
@@ -132,7 +133,7 @@ export default function SEOManagerPage() {
 
             <div className="grid grid-cols-1 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {loading ? (
-                    <div className="py-20 text-center text-zinc-400 font-bold">Analyzing your store SEO...</div>
+                    <SEOSkeleton />
                 ) : (
                     <>
                         {activeTab === "global" && (
@@ -225,7 +226,7 @@ function GlobalSEOSettings({ settings, setSettings, handleSave, saving }: { sett
                                     <p className="text-zinc-900 dark:text-white text-[14px] font-bold mt-1">{settings.seoTitle || "Qicmart Premium Store"}</p>
                                     <p className="text-zinc-500 text-[12px] mt-1 line-clamp-2">{settings.seoDescription || "The best place to buy premium SaaS products online..."}</p>
                                 </div>
-                                <p className="text-[10px] text-zinc-400 italic font-medium leading-relaxed">
+                                <p className="text-[10px] text-zinc-400 font-medium leading-relaxed">
                                     *Recommended size: 1200x630px for optimal social sharing visibility.
                                 </p>
                             </div>
@@ -248,7 +249,7 @@ function GlobalSEOSettings({ settings, setSettings, handleSave, saving }: { sett
                                 Replace
                             </button>
                         </div>
-                        <p className="text-[10px] text-zinc-400 italic">Visible in browser tabs.</p>
+                        <p className="text-[10px] text-zinc-400">Visible in browser tabs.</p>
                     </div>
 
                     <button 
@@ -324,7 +325,7 @@ function SearchAnalytics({ data }: { data: any }) {
                             ))}
                             {keywords.length === 0 && (
                                 <tr>
-                                    <td colSpan={4} className="px-8 py-10 text-center text-zinc-400 font-bold italic">No keywords data available yet.</td>
+                                    <td colSpan={4} className="px-8 py-10 text-center text-zinc-400 font-bold">No keywords data available yet.</td>
                                 </tr>
                             )}
                         </tbody>
@@ -379,7 +380,7 @@ function SitemapSettings({ data }: { data: any }) {
                     <p>Disallow: /api/</p>
                     <p className="mt-4 text-emerald-500">Sitemap: {data?.sitemapUrl || "https://yourstore.com/sitemap.xml"}</p>
                 </div>
-                <p className="text-[10px] text-zinc-400 italic font-medium leading-relaxed">
+                <p className="text-[10px] text-zinc-400 font-medium leading-relaxed">
                     *Automatically updated based on your store's configuration and security settings.
                 </p>
             </div>

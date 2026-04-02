@@ -3,7 +3,8 @@
 import { ReactNode, useState, useEffect, useCallback, use } from "react"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { ShoppingCart, Heart, User, Menu, X, Search, ChevronDown, Home, ShoppingBag, Loader2, Instagram, Facebook, Twitter, Linkedin, Youtube } from "lucide-react"
+import Script from "next/script"
+import { ShoppingCart, Heart, User, Menu, X, Search, ChevronDown, Home, ShoppingBag, Loader2, Instagram, Facebook, Twitter, Linkedin, Youtube, Lock } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { motion, AnimatePresence } from "framer-motion"
 import { CartProvider, useCart } from "@/context/CartContext"
@@ -47,22 +48,47 @@ function Header({ storeInfo, slug, categories, version }: { storeInfo: StoreInfo
     const [openMobileSub, setOpenMobileSub] = useState<string | null>(null)
 
     const themeConfig = storeInfo.themeConfig ? JSON.parse(storeInfo.themeConfig) : {}
+    const storeTheme = themeConfig.storeTheme || "modern"
     const menuAlignment = themeConfig.menuAlignment || "left"
     const headerStyle = themeConfig.headerStyle || "flat"
+    const layoutStyle = storeTheme === 'nextgen' ? 'nextgen' : (themeConfig.layoutStyle || "default")
+    const menuType = themeConfig.menuType || "top"
     const menuItems = themeConfig.menuItems || []
     const visibleItems = menuItems.filter((i: any) => i.isVisible)
+    const [isMenuOpen, setIsMenuOpen] = useState(false)
+    const [scrolled, setScrolled] = useState(false)
+    const [isMobile, setIsMobile] = useState(false)
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 1024)
+        }
+        handleResize()
+        window.addEventListener("resize", handleResize)
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 10)
+        }
+        window.addEventListener("scroll", handleScroll)
+        return () => {
+            window.removeEventListener("resize", handleResize)
+            window.removeEventListener("scroll", handleScroll)
+        }
+    }, [])
 
     const formatHref = (href: string) => {
         if (!href) return "#"
         if (href.startsWith("http") || href.startsWith("mailto:") || href.startsWith("tel:")) return href
         if (href.startsWith("/s/")) return href
+        // If we're already on a subdomain matching the slug, we could potentially use relative paths,
+        // but for robustness across localhost/s/[slug] and subdomains, we'll keep the /s/[slug] prefix
+        // as the middleware is configured to handle it correctly.
         return `/s/${slug}${href.startsWith("/") ? href : `/${href}`}`
     }
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault()
         if (searchQuery.trim()) {
-            router.push(`/products?q=${encodeURIComponent(searchQuery.trim())}`)
+            router.push(formatHref(`/products?q=${encodeURIComponent(searchQuery.trim())}`))
             setSearchOpen(false)
             setSearchQuery("")
         }
@@ -96,6 +122,36 @@ function Header({ storeInfo, slug, categories, version }: { storeInfo: StoreInfo
     const [searchResults, setSearchResults] = useState<any[]>([])
     const [isSearching, setIsSearching] = useState(false)
 
+    // Animated Placeholder Logic (Flipkart-style)
+    const [animatedPlaceholder, setAnimatedPlaceholder] = useState("")
+    const placeholders = ["Search for shoes...", "Search for premium watches...", "Search for stylish bags...", "Search for latest shirts...", "Search for electronics..."]
+    const [placeholderIndex, setPlaceholderIndex] = useState(0)
+    const [charIndex, setCharIndex] = useState(0)
+    const [isDeleting, setIsDeleting] = useState(false)
+
+    useEffect(() => {
+        const currentWord = placeholders[placeholderIndex]
+        const typingSpeed = isDeleting ? 50 : 100
+        const pauseTime = isDeleting ? 50 : 2000
+
+        const timeout = setTimeout(() => {
+            if (!isDeleting && charIndex < currentWord.length) {
+                setAnimatedPlaceholder(currentWord.substring(0, charIndex + 1))
+                setCharIndex(prev => prev + 1)
+            } else if (isDeleting && charIndex > 0) {
+                setAnimatedPlaceholder(currentWord.substring(0, charIndex - 1))
+                setCharIndex(prev => prev - 1)
+            } else if (!isDeleting && charIndex === currentWord.length) {
+                setTimeout(() => setIsDeleting(true), pauseTime)
+            } else if (isDeleting && charIndex === 0) {
+                setIsDeleting(false)
+                setPlaceholderIndex((prev) => (prev + 1) % placeholders.length)
+            }
+        }, typingSpeed)
+
+        return () => clearTimeout(timeout)
+    }, [charIndex, isDeleting, placeholderIndex])
+
     useEffect(() => {
         const timer = setTimeout(() => {
             if (searchQuery.trim().length >= 2) {
@@ -117,275 +173,626 @@ function Header({ storeInfo, slug, categories, version }: { storeInfo: StoreInfo
         return () => clearTimeout(timer)
     }, [searchQuery, storeInfo.id])
 
+    const isGlass = storeTheme === 'glass'
+    const isAura = storeTheme === 'aura'
+    const isSports = storeTheme === 'sports'
+    const isHomePage = pathname === `/s/${slug}` || pathname === `/s/${slug}/`
+    const shouldFloat = isSports
+
     return (
-        <header className="sticky top-0 z-50 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl border-b border-zinc-100 dark:border-white/5 transition-all duration-500">
-            <nav className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
-                <div className="flex-shrink-0">
-                    <Link href={`/s/${slug}`} className="group flex items-center">
-                        <div className="h-10 sm:h-12 w-auto flex items-center justify-center group-hover:scale-105 transition-transform duration-500 overflow-hidden">
-                            {storeInfo?.logo ? (
-                                <img src={`${storeInfo.logo}${storeInfo.logo.includes('?') ? '&' : '?'}v=${version}`} alt={storeInfo.name} className="h-full w-auto object-contain" />
-                            ) : (
-                                <span className="text-xl font-bold tracking-tight text-zinc-900 italic">{storeInfo?.name || "Store"}</span>
-                            )}
-                        </div>
-                    </Link>
-                </div>
-
-                {/* Desktop Navigation */}
-                <div className={`hidden lg:flex items-center gap-10 flex-1 px-4 ${menuAlignment === 'center' ? 'justify-center' :
-                        menuAlignment === 'right' ? 'justify-end' : 'justify-start'
-                    }`}>
-                    {visibleItems.length > 0 ? (
-                        visibleItems.map((item: any) => (
-                            <div key={item.id} className="group py-2">
-                                <Link
-                                    href={formatHref(item.href)}
-                                    className="text-[13px] font-semibold text-zinc-900 hover:text-black transition-colors relative flex items-center gap-1"
-                                >
-                                    {item.label}
-                                    {item.children && item.children.some((c: any) => c.isVisible) && (
-                                        <ChevronDown className="w-3.5 h-3.5 group-hover:rotate-180 transition-transform opacity-50" />
+        <motion.header 
+            initial={false}
+            animate={{
+                width: shouldFloat ? (scrolled ? (isMobile ? "92%" : "85%") : "100%") : "100%",
+                y: shouldFloat && scrolled ? (isMobile ? 12 : 16) : 0,
+                borderRadius: shouldFloat && scrolled ? (isMobile ? 24 : 40) : 0,
+                backgroundColor: isSports 
+                    ? (scrolled ? "rgba(255,255,255,0.8)" : (isHomePage ? "rgba(255,255,255,0)" : "rgba(255,255,255,1)"))
+                    : (scrolled ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,1)"),
+                backdropFilter: (isSports && (scrolled || !isHomePage)) ? "blur(24px)" : (scrolled ? "blur(24px)" : "blur(0px)"),
+                borderWidth: shouldFloat && scrolled ? 1 : 0,
+                borderColor: isSports ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.1)",
+                boxShadow: scrolled ? "0 20px 50px rgba(0,0,0,0.3)" : "none",
+                left: "50%",
+                x: "-50%"
+            }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className={`fixed top-0 z-50 transition-all duration-700 
+            ${!isSports && scrolled 
+                ? (isAura ? 'bg-zinc-950 border-white/5 shadow-2xl' : 'bg-white/90 backdrop-blur-xl dark:bg-zinc-950 border-b border-zinc-100 shadow-xl') 
+                : (!isSports && !scrolled ? (isAura ? 'bg-transparent' : 'bg-white shadow-none') : '')
+            }`}>
+                <nav className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        {menuType === 'side' && (
+                            <button onClick={() => setIsMenuOpen(true)} className={`p-2 transition-colors lg:flex items-center ${isAura ? 'text-white hover:text-white/80' : isSports ? (isHomePage && !scrolled ? 'text-white hover:text-white/80' : 'text-zinc-900 hover:text-black') : 'text-zinc-500 hover:text-black'}`}>
+                                <Menu className="w-6 h-6" />
+                            </button>
+                        )}
+                        <div className="flex-shrink-0">
+                            <Link href={`/s/${slug}`} className="group flex items-center">
+                                <div className={`h-10 sm:h-12 w-auto flex items-center justify-center group-hover:scale-105 transition-transform duration-500 overflow-hidden ${layoutStyle === 'nextgen' ? 'lg:absolute lg:left-1/2 lg:-translate-x-1/2' : ''}`}>
+                                    {storeInfo?.logo ? (
+                                        <img src={`${storeInfo.logo}${storeInfo.logo.includes('?') ? '&' : '?'}v=${version}`} alt={storeInfo.name} className={`h-full w-auto object-contain ${isAura ? 'brightness-0 invert' : ''}`} />
+                                    ) : (
+                                        <span className={`text-xl font-black tracking-tighter italic uppercase ${isAura ? 'text-white' : isSports ? (isHomePage && !scrolled ? 'text-white' : 'text-zinc-900') : 'text-zinc-900'}`}>{storeInfo?.name || "Store"}</span>
                                     )}
-                                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[var(--primary-color)] transition-all group-hover:w-full rounded-full"></span>
-                                </Link>
-
-                                {item.children && item.children.some((c: any) => c.isVisible) && (
-                                    <div className="absolute top-full left-0 mt-2 w-full bg-white border border-zinc-100 rounded-[48px] shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 p-16 z-50 overflow-hidden">
-                                        <div className="absolute top-0 left-0 w-full h-px bg-zinc-100"></div>
-                                        
-                                        <div className="max-w-7xl mx-auto grid grid-cols-12 gap-16">
-                                            <div className="col-span-9 max-h-[60vh] overflow-y-auto pr-8 custom-scrollbar">
-                                                <DesktopMenuRecursive items={item.children} />
-                                            </div>
-                                            <div className="col-span-3">
-                                                {item.bannerImage || item.image ? (
-                                                    <Link href={formatHref(item.bannerLink) || "#"} className="relative block aspect-[3/4] rounded-[32px] overflow-hidden group/img">
-                                                        <img 
-                                                            src={item.bannerImage || item.image} 
-                                                            className="absolute inset-0 w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-700" 
-                                                            alt={item.bannerTitle || item.label} 
-                                                        />
-                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-8 text-center sm:text-left">
-                                                            <p className="text-white text-[16px] font-bold italic mb-1 leading-tight">{item.bannerTitle || item.label}</p>
-                                                            <p className="text-zinc-400 text-[10px] font-bold">New collection →</p>
-                                                        </div>
-                                                    </Link>
-                                                ) : (
-                                                    <div className="bg-zinc-50 aspect-[3/4] rounded-[32px] flex items-center justify-center border border-zinc-100 p-12 shadow-inner italic">
-                                                        <div className="text-center">
-                                                            <p className="text-[12px] font-bold text-black">{item.label}</p>
-                                                            <p className="text-zinc-400 text-[9px] font-medium mt-1">Discover store</p>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        ))
-                    ) : (
-                        <>
-                            <Link href={`/s/${slug}`} className="text-[13px] font-semibold text-zinc-700 hover:text-black transition-colors relative group py-2">
-                                {t("home")}
-                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-black transition-all group-hover:w-full rounded-full"></span>
+                                </div>
                             </Link>
+                        </div>
+                    </div>
 
-                            <div className="group relative py-2">
-                                <Link
-                                    href={`/s/${slug}/products`}
-                                    className="text-[13px] font-semibold text-zinc-700 hover:text-black transition-colors relative flex items-center gap-1"
-                                >
-                                    {t("shop")}
-                                    <ChevronDown className="w-3.5 h-3.5 group-hover:rotate-180 transition-transform opacity-50" />
-                                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-black transition-all group-hover:w-full rounded-full"></span>
-                                </Link>
+                    {/* Desktop Navigation */}
+                    <div className={`hidden lg:flex items-center gap-10 flex-1 px-4 ${menuType === 'side' ? 'pointer-events-none opacity-0' :
+                            menuAlignment === 'center' ? (isSports && !scrolled ? 'justify-end' : 'justify-center') :
+                            menuAlignment === 'right' ? 'justify-end' : 'justify-start'
+                        }`}>
+                        {visibleItems.length > 0 ? (
+                            visibleItems.map((item: any) => (
+                                <div key={item.id} className="group py-2">
+                                    <Link
+                                        href={formatHref(item.href)}
+                                        className={`text-[13px] font-bold uppercase transition-colors relative flex items-center gap-1 ${isAura || isSports ? '!text-white hover:opacity-80' : 'text-zinc-900 hover:text-black'}`}
+                                    >
+                                        {item.label}
+                                        {item.children && item.children.some((c: any) => c.isVisible) && (
+                                            <ChevronDown className={`w-3.5 h-3.5 group-hover:rotate-180 transition-transform ${isAura || isSports ? 'text-white/50' : 'opacity-50'}`} />
+                                        )}
+                                        <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[var(--primary-color)] transition-all group-hover:w-full rounded-full"></span>
+                                    </Link>
 
-                                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[480px] bg-white border border-zinc-100 rounded-[32px] shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 p-8 z-50">
-                                    <div className="grid grid-cols-2 gap-8">
-                                        <div className="space-y-4">
-                                            <p className="text-[10px] font-bold text-zinc-400 border-b border-zinc-100 pb-2">Collections</p>
-                                            <div className="grid grid-cols-1 gap-1">
-                                                {categories.map((cat: any) => (
-                                                    <Link
-                                                        key={cat.id}
-                                                        href={`/s/${slug}/products?category=${encodeURIComponent(cat.name)}`}
-                                                        className="px-4 py-2 text-[10px] font-bold text-zinc-700 hover:text-black hover:bg-zinc-50 rounded-lg transition-all"
-                                                    >
-                                                        {cat.name}
-                                                    </Link>
-                                                ))}
+                                    {item.children && item.children.some((c: any) => c.isVisible) && (
+                                        <div className="absolute top-full left-0 mt-2 w-full bg-white border border-zinc-100 rounded-[48px] shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 p-16 z-50 overflow-hidden">
+                                            <div className="absolute top-0 left-0 w-full h-px bg-zinc-100"></div>
+                                            
+                                            <div className="max-w-7xl mx-auto grid grid-cols-12 gap-16">
+                                                <div className="col-span-9 max-h-[60vh] overflow-y-auto pr-8 custom-scrollbar">
+                                                    <DesktopMenuRecursive items={item.children} />
+                                                </div>
+                                                <div className="col-span-3">
+                                                    {item.bannerImage || item.image ? (
+                                                        <Link href={formatHref(item.bannerLink) || "#"} className="relative block aspect-[3/4] rounded-[32px] overflow-hidden group/img">
+                                                            <img 
+                                                                src={item.bannerImage || item.image} 
+                                                                className="absolute inset-0 w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-700" 
+                                                                alt={item.bannerTitle || item.label} 
+                                                            />
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-8 text-center sm:text-left">
+                                                                <p className="text-white text-[16px] font-bold italic mb-1 leading-tight">{item.bannerTitle || item.label}</p>
+                                                                <p className="text-zinc-400 text-[10px] font-bold">New collection →</p>
+                                                            </div>
+                                                        </Link>
+                                                    ) : (
+                                                        <div className="bg-zinc-50 aspect-[3/4] rounded-[32px] flex items-center justify-center border border-zinc-100 p-12 shadow-inner italic">
+                                                            <div className="text-center">
+                                                                <p className="text-[12px] font-bold text-black">{item.label}</p>
+                                                                <p className="text-zinc-400 text-[9px] font-medium mt-1">Discover store</p>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="bg-zinc-950 rounded-[24px] p-6 flex flex-col justify-end min-h-[160px] relative overflow-hidden group/banner">
-                                            <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary-color)]/20 to-[var(--primary-color)]/40 group-hover/banner:scale-110 transition-transform duration-700"></div>
-                                            <div className="relative">
-                                                <p className="text-white text-[12px] font-bold italic">New arrivals</p>
-                                                <Link href={`/s/${slug}/products`} className="text-zinc-400 text-[9px] font-bold mt-2 block hover:text-white transition-colors">See all →</Link>
+                                    )}
+                                </div>
+                            ))
+                        ) : (
+                            <>
+                                <Link href={`/s/${slug}`} className={`text-[13px] font-semibold transition-colors relative group py-2 ${isAura ? '!text-white hover:opacity-80' : isSports ? (isHomePage && !scrolled ? '!text-white hover:opacity-80' : '!text-zinc-900 hover:opacity-80') : 'text-zinc-700 hover:text-black'}`}>
+                                    {t("home")}
+                                    <span className={`absolute -bottom-1 left-0 w-0 h-0.5 transition-all group-hover:w-full rounded-full ${isAura ? 'bg-white' : isSports ? (isHomePage && !scrolled ? 'bg-white' : 'bg-black') : 'bg-black'}`}></span>
+                                </Link>
+
+                                <div className="group relative py-2">
+                                    <Link
+                                        href={`/s/${slug}/products`}
+                                        className={`text-[13px] font-semibold transition-colors relative flex items-center gap-1 ${isAura ? '!text-white hover:opacity-80' : isSports ? (isHomePage && !scrolled ? '!text-white hover:opacity-80' : '!text-zinc-900 hover:opacity-80') : 'text-zinc-700 hover:text-black'}`}
+                                    >
+                                        {t("shop")}
+                                        <ChevronDown className={`w-3.5 h-3.5 group-hover:rotate-180 transition-transform ${isAura ? 'text-white' : isSports ? (isHomePage && !scrolled ? 'text-white' : 'text-zinc-900') : 'opacity-50'}`} />
+                                        <span className={`absolute -bottom-1 left-0 w-0 h-0.5 transition-all group-hover:w-full rounded-full ${isAura ? 'bg-white' : isSports ? (isHomePage && !scrolled ? 'bg-white' : 'bg-black') : 'bg-black'}`}></span>
+                                    </Link>
+
+                                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[480px] bg-white border border-zinc-100 rounded-[32px] shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 p-8 z-50">
+                                        <div className="grid grid-cols-2 gap-8">
+                                            <div className="space-y-4">
+                                                <p className="text-[10px] font-bold text-zinc-400 border-b border-zinc-100 pb-2">Collections</p>
+                                                <div className="grid grid-cols-1 gap-1">
+                                                    {categories.map((cat: any) => (
+                                                        <Link
+                                                            key={cat.id}
+                                                            href={`/s/${slug}/products?category=${encodeURIComponent(cat.name)}`}
+                                                            className="px-4 py-2 text-[10px] font-bold text-zinc-700 hover:text-black hover:bg-zinc-50 rounded-lg transition-all"
+                                                        >
+                                                            {cat.name}
+                                                        </Link>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div className="bg-zinc-950 rounded-[24px] p-6 flex flex-col justify-end min-h-[160px] relative overflow-hidden group/banner">
+                                                <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary-color)]/20 to-[var(--primary-color)]/40 group-hover/banner:scale-110 transition-transform duration-700"></div>
+                                                <div className="relative">
+                                                    <p className="text-white text-[12px] font-bold italic">New arrivals</p>
+                                                    <Link href={`/s/${slug}/products`} className="text-zinc-400 text-[9px] font-bold mt-2 block hover:text-white transition-colors">See all →</Link>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </>
-                    )}
-                </div>
-
-                {/* Right Side Icons */}
-                <div className="flex items-center gap-1 sm:gap-2">
-                    {/* Search Trigger */}
-                    <div className="relative flex items-center">
-                        {searchOpen ? (
-                            <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center z-50">
-                                <motion.form
-                                    initial={{ opacity: 0, x: 20, width: 0 }}
-                                    animate={{ opacity: 1, x: 0, width: "auto" }}
-                                    exit={{ opacity: 0, x: 20, width: 0 }}
-                                    onSubmit={handleSearch}
-                                    className="relative flex items-center"
-                                >
-                                    <input
-                                        autoFocus
-                                        type="text"
-                                        placeholder="Search products..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-48 sm:w-80 px-6 py-3 bg-zinc-100 border border-zinc-200 rounded-full text-[11px] font-bold focus:outline-none focus:ring-4 focus:ring-black/5 transition-all outline-none"
-                                    />
-                                    {isSearching ? (
-                                        <Loader2 className="absolute right-12 w-3 h-3 animate-spin text-zinc-400" />
-                                    ) : searchQuery && (
-                                        <button type="button" onClick={() => setSearchQuery("")} className="absolute right-12 text-zinc-400 hover:text-black transition-colors">
-                                            <X className="w-3 h-3" />
-                                        </button>
-                                    )}
-                                    <button type="button" onClick={() => setSearchOpen(false)} className="ml-2 p-2 bg-white border border-zinc-100 rounded-full shadow-sm hover:bg-zinc-50 transition-colors">
-                                        <X className="w-4 h-4 text-zinc-400" />
-                                    </button>
-                                </motion.form>
-
-                                {/* Live Search Results Dropdown */}
-                                <AnimatePresence>
-                                    {searchQuery.trim().length >= 2 && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                            className="absolute top-full right-0 mt-4 w-[320px] sm:w-[450px] bg-white border border-zinc-100 rounded-[32px] shadow-2xl overflow-hidden z-[60] p-2"
-                                        >
-                                            <div className="p-4 border-b border-zinc-50">
-                                                <p className="text-[10px] font-bold text-zinc-400">Search results</p>
-                                            </div>
-                                            
-                                            <div className="max-h-[400px] overflow-y-auto custom-scrollbar p-2 space-y-1">
-                                                {isSearching ? (
-                                                    <div className="py-12 flex flex-col items-center justify-center text-zinc-400 gap-3">
-                                                        <Loader2 className="w-6 h-6 animate-spin" />
-                                                        <p className="text-[10px] font-bold">Searching products...</p>
-                                                    </div>
-                                                ) : searchResults.length > 0 ? (
-                                                    <>
-                                                        {searchResults.map((product) => (
-                                                            <Link 
-                                                                key={product.id}
-                                                                href={`/s/${slug}/products/${product.slug}`}
-                                                                onClick={() => setSearchOpen(false)}
-                                                                className="flex items-center gap-4 p-3 hover:bg-zinc-50 rounded-2xl transition-all group"
-                                                            >
-                                                                <div className="w-16 h-16 rounded-xl overflow-hidden bg-zinc-100 shrink-0 border border-zinc-100">
-                                                                    <img 
-                                                                        src={JSON.parse(product.images)[0] || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&h=200&fit=crop'} 
-                                                                        alt={product.name} 
-                                                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                                                    />
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <p className="text-[11px] font-bold text-zinc-900 tracking-tight truncate">{product.name}</p>
-                                                                    <p className="text-[10px] font-medium text-zinc-400 mt-0.5">{formatPrice(product.price, storeInfo.currency)}</p>
-                                                                </div>
-                                                                <div className="p-2 bg-zinc-100 text-zinc-400 rounded-lg group-hover:bg-black group-hover:text-white transition-all">
-                                                                    <ChevronDown className="w-3 h-3 -rotate-90" />
-                                                                </div>
-                                                            </Link>
-                                                        ))}
-                                                        <Link 
-                                                            href={`/s/${slug}/products?q=${encodeURIComponent(searchQuery)}`}
-                                                            onClick={() => setSearchOpen(false)}
-                                                            className="block py-4 text-center text-[10px] font-bold text-zinc-400 hover:text-[var(--primary-color)] transition-colors border-t border-zinc-50 mt-2"
-                                                        >
-                                                            View all results →
-                                                        </Link>
-                                                    </>
-                                                ) : (
-                                                    <div className="py-12 text-center">
-                                                        <div className="w-12 h-12 bg-zinc-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                                                            <Search className="w-5 h-5 text-zinc-300" />
-                                                        </div>
-                                                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">No products found for "{searchQuery}"</p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-                        ) : (
-                            <button onClick={() => setSearchOpen(true)} className="p-2 text-zinc-500 hover:text-black transition-colors">
-                                <Search className="w-5 h-5" />
-                            </button>
+                            </>
                         )}
                     </div>
 
-                    <Link href={`/s/${slug}/wishlist`} className="p-2 text-zinc-500 hover:text-rose-500 transition-colors relative">
-                        <Heart className="w-5 h-5" />
-                        <AnimatePresence>
-                            {wishlistCount > 0 && (
-                                <motion.span
-                                    key={wishlistCount}
-                                    initial={{ scale: 0.5, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    className="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center pointer-events-none"
+                    {/* Right Side Icons */}
+                    <div className="flex items-center gap-1 sm:gap-2">
+                        {/* Search Trigger */}
+                        {(layoutStyle !== 'nextgen' || isSports) && (
+                            <div className={`relative items-center ${isSports ? 'flex' : 'hidden lg:flex'}`}>
+                                {searchOpen ? (
+                                    <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center z-50">
+                                        <motion.form
+                                            initial={{ opacity: 0, x: 20, width: 0 }}
+                                            animate={{ opacity: 1, x: 0, width: "auto" }}
+                                            exit={{ opacity: 0, x: 20, width: 0 }}
+                                            onSubmit={handleSearch}
+                                            className="relative flex items-center"
+                                        >
+                                            <input
+                                                autoFocus={!isSports}
+                                                type="text"
+                                                placeholder={animatedPlaceholder}
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                className={`w-32 sm:w-48 lg:w-80 px-4 sm:px-6 py-2 sm:py-3 border rounded-full text-[10px] sm:text-[11px] font-bold focus:outline-none focus:ring-4 focus:ring-[var(--primary-color)]/20 transition-all outline-none ${isAura ? 'bg-zinc-900 border-zinc-800 text-white placeholder:text-white/40' : isSports ? (isHomePage && !scrolled ? 'bg-white/10 border-white/20 text-white placeholder:text-white/60' : 'bg-zinc-100 border-zinc-200 text-zinc-900') : 'bg-zinc-100 border-zinc-200 text-zinc-900'}`}
+                                            />
+                                            {isSearching ? (
+                                                <Loader2 className="absolute right-4 w-3 h-3 animate-spin text-zinc-400" />
+                                            ) : searchQuery && (
+                                                <button type="button" onClick={() => setSearchQuery("")} className="absolute right-4 text-zinc-400 hover:text-black transition-colors">
+                                                    <X className="w-3 h-3" />
+                                                </button>
+                                            )}
+                                            {!isSports && (
+                                                <button type="button" onClick={() => setSearchOpen(false)} className={`ml-2 p-2 border rounded-full shadow-sm transition-colors ${isAura ? 'bg-zinc-900 border-zinc-800 text-white/40 hover:text-white' : isSports ? (isHomePage && !scrolled ? 'bg-zinc-900 border-zinc-800 text-white/40 hover:text-white' : 'bg-zinc-100 border-zinc-200 text-zinc-400 hover:text-black hover:bg-zinc-200') : 'bg-white border-zinc-100 text-zinc-400 hover:bg-zinc-50'}`}>
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            )}
+                                        </motion.form>
+
+                                        {/* Live Search Results Dropdown */}
+                                        <AnimatePresence>
+                                            {searchQuery.trim().length >= 2 && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                    className="absolute top-full right-0 mt-4 w-[280px] sm:w-[450px] bg-white border border-zinc-100 rounded-[32px] shadow-2xl overflow-hidden z-[60] p-2"
+                                                >
+                                                    <div className="p-4 border-b border-zinc-50">
+                                                        <p className="text-[10px] font-bold text-zinc-400">Search results</p>
+                                                    </div>
+                                                    
+                                                    <div className="max-h-[400px] overflow-y-auto custom-scrollbar p-2 space-y-1">
+                                                        {isSearching ? (
+                                                            <div className="py-12 flex flex-col items-center justify-center text-zinc-400 Perk gap-3">
+                                                                <Loader2 className="w-6 h-6 animate-spin" />
+                                                                <p className="text-[10px] font-bold">Searching products...</p>
+                                                            </div>
+                                                        ) : searchResults.length > 0 ? (
+                                                            <>
+                                                                {searchResults.map((product) => (
+                                                                    <Link 
+                                                                        key={product.id}
+                                                                        href={`/s/${slug}/products/${product.slug}`}
+                                                                        onClick={() => setSearchOpen(false)}
+                                                                        className="flex items-center gap-4 p-3 hover:bg-zinc-50 rounded-2xl transition-all group"
+                                                                    >
+                                                                        <div className="w-16 h-16 rounded-xl overflow-hidden bg-zinc-100 shrink-0 border border-zinc-100">
+                                                                            <img 
+                                                                                src={JSON.parse(product.images)[0] || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&h=200&fit=crop'} 
+                                                                                alt={product.name} 
+                                                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                                            />
+                                                                        </div>
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <p className="text-[11px] font-bold text-zinc-900 tracking-tight truncate">{product.name}</p>
+                                                                            <p className="text-[10px] font-medium text-zinc-400 mt-0.5">{formatPrice(product.price, storeInfo.currency)}</p>
+                                                                        </div>
+                                                                        <div className="p-2 bg-zinc-100 text-zinc-400 rounded-lg group-hover:bg-black group-hover:text-white transition-all">
+                                                                            <ChevronDown className="w-3 h-3 -rotate-90" />
+                                                                        </div>
+                                                                    </Link>
+                                                                ))}
+                                                                <Link 
+                                                                    href={`/s/${slug}/products?q=${encodeURIComponent(searchQuery)}`}
+                                                                    onClick={() => setSearchOpen(false)}
+                                                                    className="block py-4 text-center text-[10px] font-bold text-zinc-400 hover:text-[var(--primary-color)] transition-colors border-t border-zinc-50 mt-2"
+                                                                >
+                                                                    View all results →
+                                                                </Link>
+                                                            </>
+                                                        ) : (
+                                                            <div className="py-12 text-center">
+                                                                <div className="w-12 h-12 bg-zinc-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                                                                    <Search className="w-5 h-5 text-zinc-300" />
+                                                                </div>
+                                                                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">No products found for "{searchQuery}"</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+                                ) : (
+                                    <button onClick={() => setSearchOpen(true)} className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isAura ? 'text-white hover:bg-white/10' : isSports ? (isHomePage && !scrolled ? 'text-white hover:bg-white/10' : 'text-zinc-900 hover:bg-zinc-100') : 'text-zinc-500 hover:text-black hover:bg-zinc-50'}`}>
+                                        <Search className="w-5 h-5" />
+                                    </button>
+                                )}
+                            </div>
+                        )}
+
+                        <Link href={`/s/${slug}/wishlist`} className={`w-10 h-10 rounded-full flex items-center justify-center transition-all relative ${isAura ? 'text-white hover:bg-white/10' : isSports ? (isHomePage && !scrolled ? 'text-white hover:bg-white/10' : 'text-zinc-900 hover:bg-zinc-100') : 'text-zinc-500 hover:text-rose-500 hover:bg-zinc-50'}`}>
+                            <Heart className="w-5 h-5" />
+                            <AnimatePresence>
+                                {wishlistCount > 0 && (
+                                    <motion.span
+                                        key={wishlistCount}
+                                        initial={{ scale: 0.5, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center pointer-events-none ring-2 ring-white"
+                                    >
+                                        {wishlistCount}
+                                    </motion.span>
+                                )}
+                            </AnimatePresence>
+                        </Link>
+                        <Link href={`/s/${slug}/cart`} className={`hidden lg:flex w-10 h-10 rounded-full items-center justify-center transition-all relative ${isAura ? 'text-white hover:bg-white/10' : isSports ? (isHomePage && !scrolled ? 'text-white hover:bg-white/10' : 'text-zinc-900 hover:bg-zinc-100') : 'text-zinc-500 hover:text-black hover:bg-zinc-50'}`}>
+                            <ShoppingCart className="w-5 h-5" />
+                            <AnimatePresence>
+                                {totalItems > 0 && (
+                                    <motion.span
+                                        key={totalItems}
+                                        initial={{ scale: 0.5, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[var(--primary-color)] text-white text-[9px] font-bold rounded-full flex items-center justify-center pointer-events-none ring-2 ring-white"
+                                    >
+                                        {totalItems}
+                                    </motion.span>
+                                )}
+                            </AnimatePresence>
+                        </Link>
+                        <Link href={`/s/${slug}/profile`} className={`hidden lg:flex w-10 h-10 rounded-full items-center justify-center transition-all relative ${isAura ? 'text-white hover:bg-white/10' : isSports ? (isHomePage && !scrolled ? 'text-white hover:bg-white/10' : 'text-zinc-900 hover:bg-zinc-100') : 'text-zinc-500 hover:text-[var(--primary-color)] hover:bg-zinc-50'}`}>
+                            <User className="w-5 h-5" />
+                        </Link>
+                    </div>
+                </nav>
+
+            {/* Nextgen / Sports Secondary Bar */}
+            {(layoutStyle === 'nextgen' || layoutStyle === 'sports') && (
+                <motion.div 
+                    animate={{
+                        width: shouldFloat ? (scrolled ? "80%" : "100%") : "100%",
+                        y: shouldFloat && scrolled ? 24 : 0,
+                        borderRadius: shouldFloat && scrolled ? 40 : 0,
+                        backgroundColor: isSports 
+                            ? (isHomePage && scrolled ? "rgba(255,255,255,0.8)" : (isHomePage ? "rgba(255,255,255,0)" : "rgba(255,255,255,1)")) 
+                            : "rgba(255,255,255,1)",
+                        backdropFilter: isSports && (isHomePage ? scrolled : true) ? "blur(12px)" : "blur(0px)",
+                        left: isMobile ? "0%" : "50%",
+                        x: isMobile ? "0%" : "-50%",
+                        boxShadow: shouldFloat && scrolled ? "0 10px 30px rgba(0,0,0,0.2)" : "none"
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    className={`${isSports ? 'fixed z-40' : 'relative'} hidden lg:block transition-all duration-500`}>
+                    <div className="max-w-7xl mx-auto px-8 h-16 flex items-center gap-8">
+
+
+                        {/* Search Input Bar */}
+                        {!isSports && (
+                            <div className="flex-1 max-w-2xl relative">
+                            <form onSubmit={handleSearch} className="relative group">
+                                <input 
+                                    type="text" 
+                                    placeholder={animatedPlaceholder}
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className={`w-full pl-12 pr-6 py-2.5 ${isSports ? (isHomePage && !scrolled ? 'bg-white/10 border-white/20 text-white placeholder:text-white/60' : 'bg-zinc-100 border-zinc-200 text-zinc-900 hover:bg-zinc-200 shadow-sm') : 'bg-zinc-100 border-zinc-200 text-zinc-900'} rounded-full text-[11px] font-semibold focus:ring-4 focus:ring-black/5 transition-all outline-none`}
+                                />
+                                <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${isAura ? 'text-white/60 group-focus-within:text-white' : isSports ? (isHomePage && !scrolled ? 'text-white/60 group-focus-within:text-white' : 'text-zinc-500 group-focus-within:text-black') : 'text-zinc-400 group-focus-within:text-black'}`} />
+                            </form>
+                            
+                            {/* In-bar Search Results */}
+                            <AnimatePresence>
+                                {searchQuery.trim().length >= 2 && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        className="absolute top-full left-0 right-0 mt-3 bg-white border border-zinc-100 rounded-[32px] shadow-2xl overflow-hidden z-[101] p-2"
+                                    >
+                                        <div className="p-4 border-b border-zinc-50">
+                                            <p className="text-[10px] font-bold text-zinc-400">Search results</p>
+                                        </div>
+                                        <div className="max-h-[350px] overflow-y-auto custom-scrollbar p-1">
+                                            {isSearching ? (
+                                                <div className="py-12 flex flex-col items-center justify-center text-zinc-400 gap-3">
+                                                    <Loader2 className="w-6 h-6 animate-spin text-zinc-200" />
+                                                    <p className="text-[10px] font-bold italic">Looking for products...</p>
+                                                </div>
+                                            ) : searchResults.length > 0 ? (
+                                                <>
+                                                    {searchResults.map((p) => (
+                                                        <Link 
+                                                            key={p.id} 
+                                                            href={`/s/${slug}/products/${p.slug}`} 
+                                                            onClick={() => setSearchQuery("")}
+                                                            className="flex items-center gap-4 p-3 hover:bg-zinc-50 rounded-2xl group transition-all"
+                                                        >
+                                                            <div className="w-14 h-14 rounded-xl bg-zinc-100 overflow-hidden shrink-0 border border-zinc-100">
+                                                                <img 
+                                                                    src={JSON.parse(p.images)[0] || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&h=200&fit=crop'} 
+                                                                    className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500" 
+                                                                />
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="text-[11px] font-bold text-zinc-900 truncate tracking-tight">{p.name}</p>
+                                                                <p className="text-[10px] font-medium text-zinc-400 mt-0.5">{formatPrice(p.price, storeInfo.currency)}</p>
+                                                            </div>
+                                                            <div className="p-2 bg-zinc-100 text-zinc-400 rounded-lg group-hover:bg-black group-hover:text-white transition-all">
+                                                                <ChevronDown className="w-3 h-3 -rotate-90" />
+                                                            </div>
+                                                        </Link>
+                                                    ))}
+                                                    <Link 
+                                                        href={`/s/${slug}/products?q=${encodeURIComponent(searchQuery)}`}
+                                                        onClick={() => setSearchQuery("")}
+                                                        className="block py-4 text-center text-[10px] font-bold text-zinc-400 hover:text-[var(--primary-color)] transition-colors border-t border-zinc-50 mt-2"
+                                                    >
+                                                        View all results →
+                                                    </Link>
+                                                </>
+                                            ) : (
+                                                <div className="py-12 text-center">
+                                                    <div className="w-12 h-12 bg-zinc-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                                                        <Search className="w-5 h-5 text-zinc-300" />
+                                                    </div>
+                                                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">No products found for "{searchQuery}"</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                        )}
+
+                        {/* Category Pills (Horizontal Scroll) */}
+                        <div className="flex-1 overflow-x-auto no-scrollbar flex items-center gap-3">
+                            {categories.slice(0, 5).map((cat) => (
+                                <Link 
+                                    key={cat.id} 
+                                    href={formatHref(`/products?category=${encodeURIComponent(cat.name)}`)}
+                                    className={`whitespace-nowrap px-4 py-2 border rounded-full text-[10px] font-bold transition-all ${isSports ? (isHomePage && !scrolled ? 'bg-white/5 border-white/10 text-white/70 hover:text-white hover:border-white' : 'bg-white border-zinc-200 text-zinc-900 hover:bg-zinc-50 hover:border-zinc-300 shadow-sm') : 'bg-zinc-50 border-zinc-100 text-zinc-500 hover:text-[var(--primary-color)] hover:border-[var(--primary-color)]'}`}
                                 >
-                                    {wishlistCount}
-                                </motion.span>
-                            )}
-                        </AnimatePresence>
-                    </Link>
-                    <Link href={`/s/${slug}/cart`} className="hidden lg:flex p-2 text-zinc-500 hover:text-black transition-colors relative">
-                        <ShoppingCart className="w-5 h-5" />
-                        <AnimatePresence>
-                            {totalItems > 0 && (
-                                <motion.span
-                                    key={totalItems}
-                                    initial={{ scale: 0.5, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    className="absolute top-1 right-1 w-4 h-4 bg-[var(--primary-color)] text-white text-[9px] font-bold rounded-full flex items-center justify-center pointer-events-none"
-                                >
-                                    {totalItems}
-                                </motion.span>
-                            )}
-                        </AnimatePresence>
-                    </Link>
-                    <Link href={`/s/${slug}/profile`} className="hidden lg:flex p-2 text-zinc-500 hover:text-[var(--primary-color)] transition-colors relative text-center items-center justify-center">
-                        <User className="w-5 h-5" />
-                    </Link>
+                                    {cat.name}
+                                </Link>
+                            ))}
+                        </div>
+
+                        {/* New Products Link */}
+                        <Link 
+                            href={formatHref("/products?sort=newest")}
+                            className={`shrink-0 flex items-center gap-2 text-[10px] font-black uppercase tracking-tighter hover:opacity-80 transition-opacity ${isSports ? (isHomePage && !scrolled ? 'text-white' : 'text-zinc-900') : 'text-[var(--primary-color)]'}`}
+                        >
+                            <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${isSports ? (isHomePage && !scrolled ? 'bg-white' : 'bg-black') : 'bg-[var(--primary-color)]'}`}></span>
+                            New Season arrivals
+                        </Link>
+                    </div>
+                </motion.div>
+            )}
+
+            {/* Side Menu Drawer */}
+            <AnimatePresence>
+                {isMenuOpen && (
+                    <>
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsMenuOpen(false)}
+                            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
+                        />
+                        <motion.div 
+                            initial={{ x: "-100%" }}
+                            animate={{ x: 0 }}
+                            exit={{ x: "-100%" }}
+                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                            className="fixed top-0 left-0 bottom-0 w-80 bg-white shadow-2xl z-[101] flex flex-col p-8"
+                        >
+                            <div className="flex items-center justify-between mb-12">
+                                <Link href={`/s/${slug}`} onClick={() => setIsMenuOpen(false)}>
+                                    {storeInfo?.logo ? (
+                                        <img src={`${storeInfo.logo}?v=${version}`} className="h-10 w-auto" alt="Logo" />
+                                    ) : (
+                                        <span className="text-xl font-bold italic">{storeInfo.name}</span>
+                                    )}
+                                </Link>
+                                <button onClick={() => setIsMenuOpen(false)} className="p-2 hover:bg-zinc-100 rounded-full transition-colors">
+                                    <X className="w-5 h-5 text-zinc-400" />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto custom-scrollbar space-y-8">
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-4 mb-4">Store navigation</p>
+                                    <Link href={formatHref("/")} onClick={() => setIsMenuOpen(false)} className="flex items-center gap-4 px-4 py-3 text-sm font-bold text-zinc-900 hover:bg-zinc-50 rounded-2xl transition-all group">
+                                        <div className="w-10 h-10 bg-zinc-50 rounded-xl flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
+                                            <Home className="w-5 h-5" />
+                                        </div>
+                                        Home
+                                    </Link>
+                                    <Link href={formatHref("/products")} onClick={() => setIsMenuOpen(false)} className="flex items-center gap-4 px-4 py-3 text-sm font-bold text-zinc-900 hover:bg-zinc-50 rounded-2xl transition-all group">
+                                        <div className="w-10 h-10 bg-zinc-50 rounded-xl flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
+                                            <ShoppingBag className="w-5 h-5" />
+                                        </div>
+                                        Products
+                                    </Link>
+                                    {visibleItems.map((item: any) => (
+                                         <Link key={item.id} href={formatHref(item.href)} onClick={() => setIsMenuOpen(false)} className="flex items-center gap-4 px-4 py-3 text-sm font-bold text-zinc-900 hover:bg-zinc-50 rounded-2xl transition-all group">
+                                            <div className="w-10 h-10 bg-zinc-50 rounded-xl flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all capitalize">
+                                                {item.label.charAt(0)}
+                                            </div>
+                                            {item.label}
+                                        </Link>
+                                    ))}
+                                </div>
+
+                                <div className="space-y-1 pt-8 border-t border-zinc-100">
+                                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-4 mb-4">Categories</p>
+                                    <div className="grid grid-cols-2 gap-2 px-2">
+                                        {categories.map((cat) => (
+                                            <Link 
+                                                key={cat.id} 
+                                                href={formatHref(`/products?category=${encodeURIComponent(cat.name)}`)}
+                                                onClick={() => setIsMenuOpen(false)}
+                                                className="px-4 py-3 text-[10px] font-bold text-zinc-600 bg-zinc-50 hover:bg-black hover:text-white rounded-xl transition-all text-center"
+                                            >
+                                                {cat.name}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-auto pt-8 border-t border-zinc-100">
+                                <div className="flex items-center gap-4 mb-6">
+                                    <Link href={formatHref("/profile")} onClick={() => setIsMenuOpen(false)} className="flex-1 flex items-center gap-3 p-3 bg-zinc-50 rounded-2xl hover:bg-zinc-100 transition-all">
+                                        <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                                            <User className="w-5 h-5 text-zinc-400" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-bold text-zinc-900">My Profile</p>
+                                            <p className="text-[9px] font-medium text-zinc-400">Manage orders</p>
+                                        </div>
+                                    </Link>
+                                    <Link href={formatHref("/cart")} onClick={() => setIsMenuOpen(false)} className="p-4 bg-zinc-950 text-white rounded-2xl hover:bg-zinc-800 transition-all shadow-lg shadow-black/10">
+                                        <ShoppingCart className="w-6 h-6" />
+                                    </Link>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+            {/* Large Mobile Search Bar */}
+            <div className={`lg:hidden px-4 pb-4 ${isAura ? 'bg-zinc-950' : 'bg-white'} transition-all duration-300 ${isSports ? 'hidden' : 'border-b border-zinc-100 shadow-sm'}`}>
+                <div className="relative max-w-2xl mx-auto">
+                    <form onSubmit={handleSearch} className="relative group">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                            <Search className="w-5 h-5 text-zinc-400 group-focus-within:text-black transition-colors" />
+                        </div>
+                        <input 
+                            type="text" 
+                            placeholder={animatedPlaceholder}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className={`w-full pl-12 pr-12 py-3.5 ${isAura ? 'bg-zinc-900 border-white/5 text-white' : 'bg-white border-zinc-200 text-zinc-900'} rounded-full text-[13px] font-bold placeholder:text-zinc-400 focus:ring-4 focus:ring-black/5 transition-all outline-none shadow-sm`}
+                        />
+                        {searchQuery && (
+                            <button 
+                                type="button" 
+                                onClick={() => setSearchQuery("")}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-lg text-zinc-500 hover:text-black transition-all"
+                            >
+                                <X className="w-3.5 h-3.5" />
+                            </button>
+                        )}
+                    </form>
+
+                    {/* Mobile Live Search Results */}
+                    <AnimatePresence>
+                        {searchQuery.trim().length >= 2 && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                className="absolute top-full left-0 right-0 mt-3 bg-white border border-zinc-100 rounded-[32px] shadow-2xl overflow-hidden z-[101] p-2"
+                            >
+                                <div className="p-4 border-b border-zinc-50">
+                                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Search results</p>
+                                </div>
+                                <div className="max-h-[60vh] overflow-y-auto custom-scrollbar p-1">
+                                    {isSearching ? (
+                                        <div className="py-12 flex flex-col items-center justify-center text-zinc-400 gap-3">
+                                            <Loader2 className="w-6 h-6 animate-spin text-zinc-200" />
+                                            <p className="text-[10px] font-bold italic">Looking for products...</p>
+                                        </div>
+                                    ) : searchResults.length > 0 ? (
+                                        <>
+                                            {searchResults.map((p) => (
+                                                <Link 
+                                                    key={p.id} 
+                                                    href={`/s/${slug}/products/${p.slug}`} 
+                                                    onClick={() => setSearchQuery("")}
+                                                    className="flex items-center gap-4 p-3 hover:bg-zinc-50 rounded-2xl group transition-all"
+                                                >
+                                                    <div className="w-14 h-14 rounded-xl bg-zinc-100 overflow-hidden shrink-0 border border-zinc-100">
+                                                        <img 
+                                                            src={JSON.parse(p.images)[0] || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&h=200&fit=crop'} 
+                                                            className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500" 
+                                                            alt={p.name}
+                                                        />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-[11px] font-bold text-zinc-900 truncate tracking-tight">{p.name}</p>
+                                                        <p className="text-[10px] font-medium text-zinc-400 mt-0.5">{formatPrice(p.price, storeInfo.currency)}</p>
+                                                    </div>
+                                                    <div className="p-2 bg-zinc-100 text-zinc-400 rounded-lg group-hover:bg-black group-hover:text-white transition-all">
+                                                        <ChevronDown className="w-3 h-3 -rotate-90" />
+                                                    </div>
+                                                </Link>
+                                            ))}
+                                            <Link 
+                                                href={`/s/${slug}/products?q=${encodeURIComponent(searchQuery)}`}
+                                                onClick={() => setSearchQuery("")}
+                                                className="block py-4 text-center text-[10px] font-bold text-zinc-400 hover:text-[var(--primary-color)] transition-colors border-t border-zinc-50 mt-2"
+                                            >
+                                                View all results →
+                                            </Link>
+                                        </>
+                                    ) : (
+                                        <div className="py-12 text-center">
+                                            <div className="w-12 h-12 bg-zinc-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                                                <Search className="w-5 h-5 text-zinc-300" />
+                                            </div>
+                                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">No products found</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
-            </nav>
-        </header>
+            </div>
+        </motion.header>
     )
 }
 
 // ─── Footer ──────────────────────────────────────────────────────────────────
-function Footer({ storeInfo, slug, categories, pages }: { storeInfo: StoreInfo; slug: string; categories: StoreCategory[]; pages: CustomPage[] }) {
+function Footer({ storeInfo, slug, categories, pages, storeTheme, version }: { storeInfo: StoreInfo; slug: string; categories: StoreCategory[]; pages: CustomPage[]; storeTheme?: string; version: number }) {
     const { t } = useLanguage()
+    const isAura = storeTheme === "aura"
+    const isGlass = storeTheme === "glass"
+    const isSports = storeTheme === "sports"
+
     return (
-        <footer className="bg-zinc-950 text-white py-12 mt-auto">
+        <footer className={`${isSports ? 'bg-black text-white border-t border-white/5' : isAura ? 'bg-black border-t border-white/5 text-white' : isGlass ? 'bg-white/20 backdrop-blur-3xl border-t border-white/20 text-white' : 'bg-zinc-950 text-white'} py-12 mt-auto`}>
             <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-12">
                 <div className="col-span-2 md:col-span-1 flex flex-col items-center md:items-start text-center md:text-left">
                     <div className="mb-6">
                         {storeInfo.logo ? (
-                            <img src={`${storeInfo.logo}${storeInfo.logo.includes('?') ? '&' : '?'}v=${Date.now()}`} alt={storeInfo.name} className="h-10 w-auto object-contain" />
+                            <img src={`${storeInfo.logo}${storeInfo.logo.includes('?') ? '&' : '?'}v=${version}`} alt={storeInfo.name} className="h-10 w-auto object-contain" />
                         ) : (
                                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--primary-color)] to-[var(--primary-color)] flex items-center justify-center text-white font-bold text-xl italic mx-auto md:mx-0">
                                 {storeInfo.name.charAt(0)}
@@ -428,13 +835,13 @@ function Footer({ storeInfo, slug, categories, pages }: { storeInfo: StoreInfo; 
                 </div>
 
                 <div className="flex flex-col items-center md:items-start text-center md:text-left">
-                    <h4 className="text-[13px] font-black uppercase tracking-wider mb-8 text-white/40">Collections</h4>
+                    <h4 className={`text-[13px] font-black uppercase tracking-wider mb-8 ${isSports ? 'text-white/40' : 'text-white/40'}`}>Collections</h4>
                     <ul className="space-y-4">
                         {categories.slice(0, 5).map((cat) => (
                             <li key={cat.id}>
                                 <Link 
                                     href={`/s/${slug}/products?category=${encodeURIComponent(cat.name || 'All')}`} 
-                                    className="text-zinc-400 hover:text-white transition-all text-[12px] font-medium hover:translate-x-1 inline-block"
+                                    className={`${isSports ? 'text-zinc-400 hover:text-white' : 'text-zinc-400 hover:text-white'} transition-all text-[12px] font-medium hover:translate-x-1 inline-block`}
                                 >
                                     {cat.name || 'Uncategorized'}
                                 </Link>
@@ -444,23 +851,23 @@ function Footer({ storeInfo, slug, categories, pages }: { storeInfo: StoreInfo; 
                 </div>
 
                 <div className="flex flex-col items-center md:items-start text-center md:text-left">
-                    <h4 className="text-[13px] font-black uppercase tracking-wider mb-8 text-white/40">Quick Links</h4>
+                    <h4 className={`text-[13px] font-black uppercase tracking-wider mb-8 ${isSports ? 'text-white/40' : 'text-white/40'}`}>Quick Links</h4>
                     <ul className="space-y-4">
-                        <li><Link href={`/s/${slug}/profile`} className="text-zinc-400 hover:text-white transition-all text-[12px] font-medium hover:translate-x-1 inline-block">My account</Link></li>
-                        <li><Link href={`/s/${slug}/wishlist`} className="text-zinc-400 hover:text-white transition-all text-[12px] font-medium hover:translate-x-1 inline-block">Wishlist</Link></li>
-                        <li><Link href={`/s/${slug}/cart`} className="text-zinc-400 hover:text-white transition-all text-[12px] font-medium hover:translate-x-1 inline-block">Shopping bag</Link></li>
+                        <li><Link href={`/s/${slug}/profile`} className={`${isSports ? 'text-zinc-400 hover:text-white' : 'text-zinc-400 hover:text-white'} transition-all text-[12px] font-medium hover:translate-x-1 inline-block`}>My account</Link></li>
+                        <li><Link href={`/s/${slug}/wishlist`} className={`${isSports ? 'text-zinc-400 hover:text-white' : 'text-zinc-400 hover:text-white'} transition-all text-[12px] font-medium hover:translate-x-1 inline-block`}>Wishlist</Link></li>
+                        <li><Link href={`/s/${slug}/cart`} className={`${isSports ? 'text-zinc-400 hover:text-white' : 'text-zinc-400 hover:text-white'} transition-all text-[12px] font-medium hover:translate-x-1 inline-block`}>Shopping bag</Link></li>
                     </ul>
                 </div>
 
                 {pages.length > 0 && (
                     <div className="flex flex-col items-center md:items-start text-center md:text-left">
-                        <h4 className="text-[13px] font-black uppercase tracking-wider mb-8 text-white/40">Pages</h4>
+                        <h4 className={`text-[13px] font-black uppercase tracking-wider mb-8 ${isSports ? 'text-white/40' : 'text-white/40'}`}>Pages</h4>
                         <ul className="space-y-4">
                             {pages.map((page) => (
                                 <li key={page.id}>
                                     <Link 
                                         href={`/s/${slug}/page/${page.slug}`} 
-                                        className="text-zinc-400 hover:text-white transition-all text-[12px] font-medium hover:translate-x-1 inline-block"
+                                        className={`${isSports ? 'text-zinc-400 hover:text-white' : 'text-zinc-400 hover:text-white'} transition-all text-[12px] font-medium hover:translate-x-1 inline-block`}
                                     >
                                         {page.title}
                                     </Link>
@@ -471,19 +878,19 @@ function Footer({ storeInfo, slug, categories, pages }: { storeInfo: StoreInfo; 
                 )}
 
                 <div className="col-span-2 md:col-span-1 flex flex-col items-center md:items-start text-center md:text-left">
-                    <h4 className="text-[13px] font-black uppercase tracking-wider mb-8 text-white/40">Newsletter</h4>
+                    <h4 className={`text-[13px] font-black uppercase tracking-wider mb-8 ${isSports ? 'text-white/40' : 'text-white/40'}`}>Newsletter</h4>
                     <p className="text-zinc-500 text-[12px] font-medium mb-6">Join our newsletter to get weekly updates.</p>
                     <div className="flex w-full group/input">
                         <input 
                             type="email" 
                             placeholder="Email address" 
-                            className="flex-1 min-w-0 bg-zinc-900/50 text-white px-6 py-4 rounded-l-2xl border border-zinc-800 text-[12px] font-medium focus:outline-none focus:border-[var(--primary-color)] transition-all" 
+                            className={`flex-1 min-w-0 ${isSports ? 'bg-zinc-900/50 text-white border-zinc-800' : 'bg-zinc-900/50 text-white border-zinc-800'} px-6 py-4 rounded-l-2xl border text-[12px] font-medium focus:outline-none focus:border-[var(--primary-color)] transition-all`} 
                         />
-                        <button className="bg-white text-black px-8 py-4 rounded-r-2xl text-[12px] font-bold transition-all hover:bg-[var(--primary-color)]/100 hover:text-white active:scale-95">Go</button>
+                        <button className={`${isSports ? 'bg-white text-black hover:bg-[var(--primary-color)]/100 hover:text-white' : 'bg-white text-black hover:bg-[var(--primary-color)]/100 hover:text-white'} px-8 py-4 rounded-r-2xl text-[12px] font-bold transition-all active:scale-95`}>Go</button>
                     </div>
                 </div>
             </div>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 pt-6 border-t border-zinc-800/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] font-medium text-zinc-500">
+            <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 pt-6 border-t ${isSports ? 'border-white/10' : 'border-zinc-800/60'} flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] font-medium ${isSports ? 'text-zinc-500' : 'text-zinc-500'}`}>
                 <span>
                     {(() => {
                         try {
@@ -530,13 +937,25 @@ export default function StoreLayout({
     const slug = resolvedParams.slug
     const pathname = usePathname()
     const searchParams = useSearchParams()
+    const isHomePage = pathname === `/s/${slug}` || pathname === `/s/${slug}/`
     
     const [storeInfo, setStoreInfo] = useState<StoreInfo>({ id: "", name: "Store", currency: "INR" })
     const [categories, setCategories] = useState<StoreCategory[]>([])
     const [pages, setPages] = useState<CustomPage[]>([])
     const [isSuspended, setIsSuspended] = useState(false)
-    const [version] = useState(Date.now())
+    const [version, setVersion] = useState(0)
+    
+    useEffect(() => {
+        setVersion(Date.now())
+    }, [])
     const { data: session } = useSession()
+
+    // 0. RESTRICTION: Redirect Super Admin to Admin Dashboard
+    useEffect(() => {
+        if (session?.user && (session.user as any).role === "SUPER_ADMIN") {
+            window.location.href = "/admin"
+        }
+    }, [session])
 
     // Silent Profile Creation / Sync
     useEffect(() => {
@@ -647,15 +1066,16 @@ export default function StoreLayout({
     }
     const primaryColorHex = COLOR_MAP[config.primaryColor] || COLOR_MAP.purple
 
+    const hexToRgb = (hex: string) => {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+        return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : "99, 102, 241"
+    }
+    const primaryColorRgb = hexToRgb(primaryColorHex)
+
     const ownerId = searchParams.get("ownerId")?.trim()
     const profileHref = `/s/${slug}/profile`
 
-    const isVisiblePage = [
-        `/s/${slug}`,
-        `/s/${slug}/products`,
-        `/s/${slug}/cart`,
-        `/s/${slug}/profile`
-    ].some(path => pathname === path)
+    const isVisiblePage = !pathname.includes('/checkout')
 
     const MobileBottomNav = () => {
         const { totalItems } = useCart()
@@ -670,8 +1090,8 @@ export default function StoreLayout({
         if (!isVisiblePage) return null
 
         return (
-            <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[70] w-[90%] max-w-sm">
-                <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-[24px] shadow-2xl shadow-black/10 flex items-center justify-around p-3">
+            <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[70] w-[92%] max-w-sm">
+                <div className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-3xl border border-white/20 dark:border-white/10 rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex items-center justify-between p-2 gap-1">
                     {navItems.map((item) => {
                         const isActive = pathname === item.href
                         const Icon = item.icon
@@ -680,24 +1100,24 @@ export default function StoreLayout({
                             <Link
                                 key={item.label}
                                 href={item.href}
-                                className="relative flex items-center justify-center py-3 focus:outline-none flex-1 min-w-0"
+                                className="relative flex items-center justify-center focus:outline-none flex-1 min-w-0"
                             >
                                 <AnimatePresence mode="wait">
                                     {isActive && (
                                         <motion.span 
                                             layoutId="activeTab"
-                                            className="absolute -inset-2 bg-[var(--primary-color)]/10 rounded-xl -z-10"
-                                            initial={{ opacity: 0, scale: 0.8 }}
+                                            className="absolute inset-0 bg-[var(--primary-color)] rounded-[20px] shadow-lg shadow-[var(--primary-color)]/20"
+                                            initial={{ opacity: 0, scale: 0.9 }}
                                             animate={{ opacity: 1, scale: 1 }}
-                                            exit={{ opacity: 0, scale: 0.8 }}
-                                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                            exit={{ opacity: 0, scale: 0.9 }}
+                                            transition={{ type: "spring", stiffness: 400, damping: 30 }}
                                         />
                                     )}
                                 </AnimatePresence>
 
-                                <div className="relative z-10 flex items-center justify-center gap-1.5 px-3 h-full">
+                                <div className="relative z-10 flex items-center justify-center gap-2 px-4 py-3 h-full">
                                     <Icon 
-                                        className={`w-5 h-5 transition-colors duration-300 ${isActive ? "text-black" : "text-zinc-400"}`} 
+                                        className={`w-5 h-5 transition-all duration-300 ${isActive ? "text-white" : "text-zinc-400 group-hover:text-zinc-600"}`} 
                                         strokeWidth={isActive ? 2.5 : 2} 
                                     />
                                     
@@ -707,7 +1127,7 @@ export default function StoreLayout({
                                                 initial={{ opacity: 0, x: -10, width: 0 }}
                                                 animate={{ opacity: 1, x: 0, width: "auto" }}
                                                 exit={{ opacity: 0, x: -10, width: 0 }}
-                                                className="text-[12px] font-bold text-black tracking-tight whitespace-nowrap overflow-hidden"
+                                                className="text-[12px] font-bold text-white tracking-tight whitespace-nowrap overflow-hidden"
                                             >
                                                 {item.label}
                                             </motion.span>
@@ -715,7 +1135,7 @@ export default function StoreLayout({
                                     </AnimatePresence>
 
                                     {item.count !== undefined && item.count > 0 && (
-                                        <span className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold border-2 border-white shadow-sm transition-colors duration-300 ${isActive ? "bg-[var(--primary-color)] text-white" : "bg-[var(--primary-color)] shadow-lg shadow-[var(--primary-color)]/20 text-white"}`}>
+                                        <span className={`absolute -top-1 -right-1 w-4.5 h-4.5 rounded-full flex items-center justify-center text-[9px] font-bold border-2 shadow-sm transition-all duration-300 ${isActive ? "bg-white text-[var(--primary-color)] border-[var(--primary-color)]" : "bg-[var(--primary-color)] text-white border-white"}`}>
                                             {item.count}
                                         </span>
                                     )}
@@ -785,15 +1205,53 @@ export default function StoreLayout({
         )
     }
 
+    const storeTheme = config.storeTheme || "modern"
+    const isAura = storeTheme === "aura"
+    const isSports = storeTheme === "sports"
+
     return (
         <Providers>
             <LanguageProvider>
                 <CartProvider>
                     <WishlistProvider>
-                        <div className={`min-h-screen bg-white flex flex-col storefront-fonts ${isVisiblePage ? "pb-24 lg:pb-0" : ""}`} style={{ '--font-heading': heading, '--font-body': body, '--primary-color': primaryColorHex } as any}>
+                        <div className={`min-h-screen flex flex-col storefront-fonts ${isAura ? "bg-zinc-950 text-white" : "bg-white"} ${isVisiblePage ? "pb-24 lg:pb-0" : ""}`} style={{ '--font-heading': heading, '--font-body': body, '--primary-color': primaryColorHex, '--primary-rgb': primaryColorRgb } as any}>
                             {slug && <Header storeInfo={storeInfo} slug={slug} categories={categories} version={version} />}
+                            
+                            {/* Plugin Third-Party Scripts */}
+                            {config.isGoogleAnalyticsEnabled && config.googleAnalyticsId && (
+                                <>
+                                    <Script src={`https://www.googletagmanager.com/gtag/js?id=${config.googleAnalyticsId}`} strategy="afterInteractive" />
+                                    <Script id="google-analytics" strategy="afterInteractive">
+                                        {`
+                                            window.dataLayer = window.dataLayer || [];
+                                            function gtag(){dataLayer.push(arguments);}
+                                            gtag('js', new Date());
+                                            gtag('config', '${config.googleAnalyticsId}', {
+                                                page_path: window.location.pathname,
+                                            });
+                                        `}
+                                    </Script>
+                                </>
+                            )}
+                            {config.isFacebookPixelEnabled && config.facebookPixelId && (
+                                <Script id="facebook-pixel" strategy="afterInteractive">
+                                    {`
+                                        !function(f,b,e,v,n,t,s)
+                                        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                                        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                                        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                                        n.queue=[];t=b.createElement(e);t.async=!0;
+                                        t.src=v;s=b.getElementsByTagName(e)[0];
+                                        s.parentNode.insertBefore(t,s)}(window, document,'script',
+                                        'https://connect.facebook.net/en_US/fbevents.js');
+                                        fbq('init', '${config.facebookPixelId}');
+                                        fbq('track', 'PageView');
+                                    `}
+                                </Script>
+                            )}
+
                             <CouponPopup storeId={storeInfo.id} currency={storeInfo.currency} />
-                            <main className="relative flex-1">
+                            <main className={`relative flex-1 ${isSports && !isHomePage ? 'pt-24 lg:pt-40' : ''}`}>
                                 {/* Ambient Glows */}
                                 <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
                                     <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[var(--primary-color)]/5 blur-[120px] rounded-full animate-pulse" />
@@ -801,7 +1259,7 @@ export default function StoreLayout({
                                 </div>
                                 {children}
                             </main>
-                            {slug && <Footer storeInfo={storeInfo} slug={slug} categories={categories} pages={pages} />}
+                            {slug && <Footer storeInfo={storeInfo} slug={slug} categories={categories} pages={pages} storeTheme={storeTheme} version={version} />}
                             {slug && <MobileBottomNav />}
                             {slug && <WhatsAppButton />}
                         </div>

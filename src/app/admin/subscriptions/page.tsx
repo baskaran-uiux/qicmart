@@ -74,8 +74,10 @@ export default async function AdminSubscriptionsPage() {
                                     </td>
                                     <td className="px-8 py-6">
                                         <div className="flex flex-col">
-                                            <span className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-tight">{sub.plan.name}</span>
-                                            <span className="text-xs text-zinc-500 font-bold italic">
+                                            <span className="text-sm font-black text-indigo-600 dark:text-indigo-400 font-poppins uppercase tracking-tight italic">
+                                                {sub.plan.name === 'Normal' ? 'Standard' : sub.plan.name}
+                                            </span>
+                                            <span className="text-[10px] text-zinc-500 font-bold italic tracking-wider mt-0.5">
                                                 ₹{sub.billingCycle === 'YEARLY' ? sub.plan.priceYearly : sub.plan.priceMonthly}/mo
                                             </span>
                                         </div>

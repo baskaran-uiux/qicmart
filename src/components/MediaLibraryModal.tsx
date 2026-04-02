@@ -152,11 +152,19 @@ export function MediaLibraryModal({ isOpen, onClose, onSelect, title = "Select M
                                         selectedUrl === item.url ? "border-indigo-600 dark:border-purple-500 ring-4 ring-indigo-500/20" : "border-transparent bg-zinc-100 dark:bg-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700"
                                     }`}
                                 >
-                                    <img 
-                                        src={item.url} 
-                                        alt={item.name} 
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                                    />
+                                    {item.url.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+                                        <video
+                                            src={item.url} 
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                            muted
+                                        />
+                                    ) : (
+                                        <img 
+                                            src={item.url} 
+                                            alt={item.name} 
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                                        />
+                                    )}
                                     <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${
                                         selectedUrl === item.url ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                                     }`}>

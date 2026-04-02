@@ -10,7 +10,8 @@ export async function PUT(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }
 
-        const { firstName, lastName, gender, phone, address, area, landmark, city, state, pincode, storeId } = await req.json()
+        const { firstName, lastName, gender, phone, address, area, landmark, city, state, pincode, storeId, 
+            emailNotif, smsNotif, orderUpdates } = await req.json()
         
         const userId = (session.user as any).id
 
@@ -24,6 +25,9 @@ export async function PUT(req: Request) {
                 phone: phone,
                 address: address, // Main address field
                 gender: gender,
+                emailNotif,
+                smsNotif,
+                orderUpdates,
             }
         })
 
@@ -88,6 +92,9 @@ export async function GET(req: Request) {
                 address: true,
                 image: true,
                 gender: true,
+                emailNotif: true,
+                smsNotif: true,
+                orderUpdates: true,
             }
         })
 
@@ -97,12 +104,24 @@ export async function GET(req: Request) {
 
         // Check if Customer record exists for this store
         if (storeId) {
+            // Check if Customer record exists for this store (by userId OR email)
             let customer = await prisma.customer.findFirst({
                 where: {
-                    userId: user.id,
-                    storeId: storeId
+                    storeId: storeId,
+                    OR: [
+                        { userId: user.id },
+                        { email: user.email }
+                    ]
                 }
             })
+
+            if (customer && !customer.userId) {
+                // Auto-link guest customer record to this user
+                customer = await prisma.customer.update({
+                    where: { id: customer.id },
+                    data: { userId: user.id }
+                })
+            }
 
             if (!customer) {
                 // Auto-create customer record if it doesn't exist
@@ -110,7 +129,7 @@ export async function GET(req: Request) {
                 customer = await prisma.customer.create({
                     data: {
                         userId: user.id,
-                        storeId: storeId,
+                        storeId: storeId as string,
                         email: user.email!,
                         firstName: nameParts[0] || "Customer",
                         lastName: nameParts.slice(1).join(" "),
@@ -141,6 +160,9 @@ export async function GET(req: Request) {
             pincode: customerData.pincode,
             gender: customerData.gender || user.gender,
             image: user.image,
+            emailNotif: user.emailNotif,
+            smsNotif: user.smsNotif,
+            orderUpdates: user.orderUpdates,
         })
     } catch (error) {
         console.error("Profile GET Error:", error)

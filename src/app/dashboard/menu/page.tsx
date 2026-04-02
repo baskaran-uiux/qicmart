@@ -9,6 +9,7 @@ import {
 
 import DeleteConfirmationModal from "@/components/dashboard/DeleteConfirmationModal"
 import { MediaLibraryModal } from "@/components/MediaLibraryModal"
+import PremiumButton from "@/components/dashboard/PremiumButton"
 
 import {
     DndContext,
@@ -216,7 +217,7 @@ export default function MenuManagerPage() {
                     setMenuItems(settings.menuItems)
                     setInitialMenuItems(settings.menuItems)
                 } else {
-                    const defaultItems = [
+                    const defaultItems: MenuItem[] = [
                         { id: "1", label: "Home", href: "/", type: "PAGE", isVisible: true, children: [] },
                         { id: "2", label: "Shop", href: "/products", type: "PAGE", isVisible: true, children: [] }
                     ]
@@ -500,8 +501,8 @@ export default function MenuManagerPage() {
         <div className="max-w-6xl mx-auto space-y-8 animate-fade-in pb-20 px-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                 <div>
-                    <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-black dark:text-white capitalize">Menu Manager</h2>
-                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-xs sm:text-sm font-medium tracking-normal">Customize your store's navigation menu & mega menu.</p>
+                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize">Menu Manager</h2>
+                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">Customize your store's navigation menu & mega menu.</p>
                 </div>
                 <div className="flex items-center gap-6 w-full sm:w-auto">
                     <div className="hidden sm:flex flex-col items-end mr-2">
@@ -522,14 +523,15 @@ export default function MenuManagerPage() {
                             </div>
                         ) : null}
                     </div>
-                    <button 
+                    <PremiumButton 
                         onClick={handleSave}
-                        disabled={saving}
-                        className={`flex-1 sm:flex-none flex items-center justify-center gap-3 px-8 py-3.5 ${saved ? "bg-emerald-500 text-white" : "bg-indigo-600 dark:bg-white text-white dark:text-black"} rounded-2xl text-[10px] font-semibold capitalize tracking-wide hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-indigo-500/10 disabled:opacity-50`}
+                        isLoading={saving}
+                        isSaved={saved}
+                        icon={saved ? Check : isDirty ? RefreshCw : Save}
+                        loadingText="Saving..."
                     >
-                        {saving ? <Loader2 className="animate-spin" size={16} /> : isDirty ? <RefreshCw size={16} className="animate-spin-slow" /> : <Save size={16} />}
-                        {saving ? "Saving..." : isDirty ? "Sync Now" : "Published"}
-                    </button>
+                        {isDirty ? "Sync Now" : "Published"}
+                    </PremiumButton>
                 </div>
             </div>
 
@@ -537,7 +539,7 @@ export default function MenuManagerPage() {
                 <div className="lg:col-span-2 space-y-6">
                     <div className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[40px] p-8">
                         <div className="flex items-center justify-between mb-8">
-                            <h3 className="text-xs font-semibold text-black dark:text-white capitalize tracking-wide italic">Menu Structure</h3>
+                            <h3 className="text-xs font-semibold text-black dark:text-white capitalize tracking-wide">Menu Structure</h3>
                             <button 
                                 onClick={() => { setEditingItemId(null); setNewItem({ label: "", href: "", type: "CUSTOM", isVisible: true }); setShowAddItem(true); }}
                                 className="p-3 bg-white dark:bg-zinc-800 text-black dark:text-white rounded-2xl border border-zinc-100 dark:border-zinc-700 shadow-sm hover:scale-105 active:scale-95 transition-all"
@@ -609,10 +611,10 @@ export default function MenuManagerPage() {
 
                 <div className="space-y-6">
                     <div className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[40px] p-8">
-                        <h3 className="text-xs font-semibold text-black dark:text-white capitalize tracking-wide italic">Quick Add</h3>
+                        <h3 className="text-xs font-semibold text-black dark:text-white capitalize tracking-wide">Quick Add</h3>
                          <div className="grid grid-cols-1 gap-4">
                             <button 
-                                onClick={() => setMenuItems(prev => [...prev, { id: `${Date.now()}-${Math.random()}`, label: "Shop", href: "/products", type: "PAGE", isVisible: true, children: [] }])}
+                                onClick={() => setMenuItems(prev => [...prev, { id: `${Date.now()}-${Math.random()}`, label: "Shop", href: "/products", type: "PAGE", isVisible: true, children: [] } as MenuItem])}
                                 className="flex items-center justify-between p-4 bg-white dark:bg-zinc-800 rounded-2xl border border-zinc-100 dark:border-zinc-700 hover:shadow-md transition-all text-left group"
                             >
                                 <div className="flex items-center gap-3">
@@ -646,7 +648,7 @@ export default function MenuManagerPage() {
                 <div className="fixed inset-0 z-[70] bg-black/40 dark:bg-black/90 backdrop-blur-xl flex items-center justify-center p-4">
                     <div className={`bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[40px] p-10 w-full ${isTopLevel ? "max-w-2xl" : "max-w-xl"} shadow-2xl animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto custom-scrollbar`}>
                         <div className="flex items-center justify-between mb-8">
-                            <h3 className="text-2xl font-bold text-black dark:text-white capitalize tracking-tight italic">
+                            <h3 className="text-2xl font-bold text-black dark:text-white capitalize tracking-tight">
                                 {editingItemId ? "Edit Menu Item" : pendingParentId ? "Add Sub-item" : "Add Custom Link"}
                             </h3>
                             <button onClick={() => { setShowAddItem(false); setEditingItemId(null); setPendingParentId(null); }} className="p-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-2xl transition-colors"><X size={24} /></button>
@@ -766,7 +768,12 @@ export default function MenuManagerPage() {
 
                         <div className="grid grid-cols-2 gap-6 mt-12 pt-8 border-t border-zinc-100 dark:border-zinc-800">
                             <button onClick={() => { setShowAddItem(false); setEditingItemId(null); setPendingParentId(null); }} className="py-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 rounded-2xl text-[10px] font-semibold capitalize tracking-wide hover:bg-zinc-200 transition-colors">Cancel</button>
-                            <button onClick={addItem} className="py-4 bg-indigo-600 dark:bg-white text-white dark:text-black rounded-2xl text-[10px] font-semibold capitalize tracking-wide shadow-xl shadow-indigo-500/10 hover:opacity-90 transition-all">{editingItemId ? "Update Item" : "Add to Menu"}</button>
+                            <PremiumButton 
+                                onClick={addItem}
+                                className="py-4"
+                            >
+                                {editingItemId ? "Update Item" : "Add to Menu"}
+                            </PremiumButton>
                         </div>
                     </div>
                 </div>

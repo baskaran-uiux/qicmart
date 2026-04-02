@@ -5,10 +5,12 @@ import { MoreVertical, Mail, Shield, Calendar, Store, ExternalLink, ShieldOff, K
 import { useRouter } from "next/navigation"
 
 import { EditUserModal } from "@/components/admin/EditUserModal"
+import { ResetPasswordModal } from "@/components/admin/ResetPasswordModal"
 
 export function UserCard({ user }: { user: any }) {
     const [showMenu, setShowMenu] = useState(false)
     const [showEditModal, setShowEditModal] = useState(false)
+    const [showResetModal, setShowResetModal] = useState(false)
     const [loading, setLoading] = useState(false)
     const router = useRouter()
     const menuRef = useRef<HTMLDivElement>(null)
@@ -104,7 +106,7 @@ export function UserCard({ user }: { user: any }) {
                                     <Edit2 size={14} /> Edit Details
                                 </button>
                                 <button
-                                    onClick={() => handleAction("RESET_PASSWORD")}
+                                    onClick={() => { setShowResetModal(true); setShowMenu(false); }}
                                     className="flex items-center gap-3 w-full px-4 py-3 text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:bg-amber-500/10 hover:text-amber-600 rounded-2xl transition-colors"
                                 >
                                     <Key size={14} /> Reset Password
@@ -199,6 +201,11 @@ export function UserCard({ user }: { user: any }) {
                 user={user}
                 isOpen={showEditModal}
                 onClose={() => setShowEditModal(false)}
+            />
+            <ResetPasswordModal
+                userId={user.id}
+                isOpen={showResetModal}
+                onClose={() => setShowResetModal(false)}
             />
         </>
     )

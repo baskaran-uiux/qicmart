@@ -11,6 +11,8 @@ import {
 import { useDashboardStore } from "@/components/DashboardStoreProvider"
 import { motion, AnimatePresence } from "framer-motion"
 import { MediaLibraryModal } from "@/components/MediaLibraryModal"
+import { KpiCardSkeleton, GridSkeleton } from "@/components/dashboard/DashboardSkeletons"
+import PremiumButton from "@/components/dashboard/PremiumButton"
 
 interface Blog {
     id: string
@@ -132,40 +134,48 @@ export default function BlogsPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                 <div>
-                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize italic">{t('blogEngineTitle')}</h2>
+                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize">{t('blogEngineTitle')}</h2>
                     <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">{t('blogEngineDesc')}</p>
                 </div>
-                <button 
+                <PremiumButton 
                     onClick={() => setShowModal(true)}
-                    className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl text-[14px] font-bold hover:bg-indigo-700 transition-all active:scale-95 shadow-xl shadow-indigo-600/20"
+                    icon={Plus}
                 >
-                    <Plus size={18} /> {t('newArticle')}
-                </button>
+                    {t('newArticle')}
+                </PremiumButton>
             </div>
 
             {/* Quick Actions / Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                    { label: t('totalArticles'), value: blogs.length, icon: Layout, color: "text-indigo-500", bg: "bg-indigo-500/10" },
-                    { label: t('published'), value: blogs.filter(b => b.published).length, icon: Globe, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-                    { label: t('drafts'), value: blogs.filter(b => !b.published).length, icon: Clock, color: "text-amber-500", bg: "bg-amber-500/10" },
-                ].map((stat, i) => (
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                        key={stat.label}
-                        className="p-8 bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 shadow-sm"
-                    >
-                        <div className="flex items-center justify-between mb-4">
-                            <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{stat.label}</span>
-                            <div className={`p-3 ${stat.bg} ${stat.color} rounded-2xl`}>
-                                <stat.icon size={20} />
+                {loading ? (
+                    <>
+                        <KpiCardSkeleton />
+                        <KpiCardSkeleton />
+                        <KpiCardSkeleton />
+                    </>
+                ) : (
+                    [
+                        { label: t('totalArticles'), value: blogs.length, icon: Layout, color: "text-indigo-500", bg: "bg-indigo-500/10" },
+                        { label: t('published'), value: blogs.filter(b => b.published).length, icon: Globe, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+                        { label: t('drafts'), value: blogs.filter(b => !b.published).length, icon: Clock, color: "text-amber-500", bg: "bg-amber-500/10" },
+                    ].map((stat, i) => (
+                        <motion.div 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            key={stat.label}
+                            className="p-8 bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 shadow-sm"
+                        >
+                            <div className="flex items-center justify-between mb-4">
+                                <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{stat.label}</span>
+                                <div className={`p-3 ${stat.bg} ${stat.color} rounded-2xl`}>
+                                    <stat.icon size={20} />
+                                </div>
                             </div>
-                        </div>
-                        <p className="text-3xl font-black text-black dark:text-white italic">{stat.value}</p>
-                    </motion.div>
-                ))}
+                            <p className="text-3xl font-bold text-black dark:text-white">{stat.value}</p>
+                        </motion.div>
+                    ))
+                )}
             </div>
 
             {/* Articles List */}
@@ -183,9 +193,8 @@ export default function BlogsPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {loading ? (
-                        <div className="col-span-full py-24 text-center">
-                            <Loader2 className="animate-spin mx-auto text-zinc-400 mb-4" size={32} />
-                            <p className="text-zinc-500">{t('loadingArticles')}</p>
+                        <div className="col-span-full">
+                            <GridSkeleton />
                         </div>
                     ) : filtered.length === 0 ? (
                         <div className="col-span-full py-24 text-center bg-white dark:bg-zinc-900 rounded-[40px] border border-dashed border-zinc-200 dark:border-zinc-800">
@@ -211,7 +220,7 @@ export default function BlogsPage() {
                                         </div>
                                     )}
                                     <div className="absolute top-4 left-4">
-                                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest backdrop-blur-md border ${
+                                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest backdrop-blur-md border ${
                                             blog.published 
                                             ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20' 
                                             : 'bg-zinc-500/20 text-zinc-300 border-zinc-500/20'
@@ -377,13 +386,15 @@ export default function BlogsPage() {
                                 </div>
 
                                 <div className="lg:col-span-2 pt-4">
-                                    <button 
+                                    <PremiumButton 
+                                        onClick={() => {}} // Form submission handles it
                                         type="submit"
-                                        disabled={saving}
-                                        className="w-full py-5 bg-indigo-600 text-white rounded-[24px] font-black uppercase text-xs tracking-[0.2em] shadow-2xl hover:bg-indigo-700 transition-all active:scale-[0.98] disabled:opacity-50"
+                                        isLoading={saving}
+                                        className="w-full py-5"
+                                        icon={saving ? Loader2 : editingBlog ? Edit : Globe}
                                     >
                                         {saving ? t('publishing') : editingBlog ? t('updateArticle') : t('publishNow')}
-                                    </button>
+                                    </PremiumButton>
                                 </div>
                             </form>
                         </motion.div>

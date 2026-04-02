@@ -4,9 +4,12 @@ import { useState, useEffect } from "react"
 import { 
     Clock, CheckCircle, Truck, Package, XCircle, Search, 
     MoreVertical, Eye, FileText, Loader2, ArrowRight, TruckIcon, MapPin, Calendar, 
-    ChevronDown, ChevronUp, History as HistoryIcon, ExternalLink, Plus, ChevronLeft, ChevronRight, QrCode
+    ChevronDown, ChevronUp, History as HistoryIcon, ExternalLink, Plus, ChevronLeft, ChevronRight, QrCode, Mail, MessageCircle, Filter
 } from "lucide-react"
 import { useDashboardStore } from "@/components/DashboardStoreProvider"
+import { motion, AnimatePresence } from "framer-motion"
+import Link from "next/link"
+import { KpiCardSkeleton, TableSkeleton } from "@/components/dashboard/DashboardSkeletons"
 
 interface OrderItem {
     id: string
@@ -27,48 +30,22 @@ interface Order {
         lastName: string
         email: string
         phone?: string
-        address?: string
-        city?: string
-        state?: string
-        pincode?: string
     } | null
     shippingAddress?: string
-    billingAddress?: string
     items: OrderItem[]
     payments: Array<{
         provider: string
         status: string
-        upiUTR?: string
-        upiProofImage?: string
-    }>
-    trackingNumber?: string
-    carrier?: string
-    trackingUrl?: string
-    activities?: Array<{
-        id: string
-        status: string
-        comment: string | null
-        createdAt: string
     }>
 }
 
 export default function OrdersPage() {
-    const { currency, t } = useDashboardStore()
+    const { currency, t, name: storeName, slug } = useDashboardStore()
     const [orders, setOrders] = useState<Order[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState("")
-    const [updatingId, setUpdatingId] = useState<string | null>(null)
     const [currentPage, setCurrentPage] = useState(1)
-    const itemsPerPage = 20
-    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
-    const [showTrackingModal, setShowTrackingModal] = useState(false)
-    const [showDetailsModal, setShowDetailsModal] = useState(false)
-    const [trackingForm, setTrackingForm] = useState({
-        carrier: "",
-        trackingNumber: "",
-        comment: "",
-        status: ""
-    })
+    const itemsPerPage = 15
 
     const fetchOrders = async () => {
         try {
@@ -77,15 +54,10 @@ export default function OrdersPage() {
             const url = ownerId ? `/api/dashboard/orders?ownerId=${ownerId}` : "/api/dashboard/orders"
             
             const res = await fetch(url)
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
-            
-            const contentType = res.headers.get("content-type")
-            if (!contentType || !contentType.includes("application/json")) {
-                throw new Error("Received non-JSON response from server")
+            if (res.ok) {
+                const data = await res.json()
+                setOrders(Array.isArray(data) ? data : [])
             }
-
-            const data = await res.json()
-            setOrders(Array.isArray(data) ? data : [])
         } catch (error) {
             console.error("Failed to fetch orders:", error)
         } finally {
@@ -101,52 +73,11 @@ export default function OrdersPage() {
         setCurrentPage(1)
     }, [search])
 
-    const updateStatus = async (orderId: string, newStatus: string) => {
-        setUpdatingId(orderId)
-        try {
-            const params = new URLSearchParams(window.location.search)
-            const ownerId = params.get("ownerId")
-            const url = ownerId ? `/api/dashboard/orders?ownerId=${ownerId}` : "/api/dashboard/orders"
-
-            const res = await fetch(url, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ orderId, status: newStatus })
-            })
-            if (res.ok) fetchOrders()
-        } catch (error) {
-            console.error("Update failed:", error)
-        } finally {
-            setUpdatingId(null)
-        }
-    }
-
-    const updateTracking = async () => {
-        if (!selectedOrder) return
-        setUpdatingId(selectedOrder.id)
-        try {
-            const params = new URLSearchParams(window.location.search)
-            const ownerId = params.get("ownerId")
-            const url = ownerId ? `/api/dashboard/orders?ownerId=${ownerId}` : "/api/dashboard/orders"
-
-            const res = await fetch(url, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    orderId: selectedOrder.id, 
-                    ...trackingForm 
-                })
-            })
-            if (res.ok) {
-                fetchOrders()
-                setShowTrackingModal(false)
-                setSelectedOrder(null)
-            }
-        } catch (error) {
-            console.error("Update failed:", error)
-        } finally {
-            setUpdatingId(null)
-        }
+    const stats = {
+        totalOrders: orders.length,
+        pendingOrders: orders.filter(o => o.status === "PENDING").length,
+        totalRevenue: orders.reduce((acc, o) => acc + o.total, 0),
+        avgOrderValue: orders.length > 0 ? (orders.reduce((acc, o) => acc + o.total, 0) / orders.length) : 0
     }
 
     const filtered = (Array.isArray(orders) ? orders : []).filter(o => {
@@ -171,169 +102,158 @@ export default function OrdersPage() {
         }
     }
 
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case "PENDING": return <Clock size={14} />
-            case "PAID": return <CheckCircle size={14} />
-            case "SHIPPED": return <Truck size={14} />
-            case "DELIVERED": return <Package size={14} />
-            case "CANCELLED": return <XCircle size={14} />
-            default: return null
-        }
-    }
-    const renderAddress = (address: string | null | undefined) => {
-        if (!address) return null
-        try {
-            if (address.trim().startsWith('{')) {
-                const p = JSON.parse(address)
-                return (
-                    <div className="space-y-2 not-italic">
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-indigo-500 shadow-lg shadow-indigo-500/20" />
-                            <span className="font-bold text-black dark:text-white capitalize tracking-tight text-xs">{p.firstName} {p.lastName}</span>
-                        </div>
-                        <div className="pl-4 border-l-2 border-zinc-100 dark:border-zinc-800 space-y-1">
-                            <p className="text-zinc-500 dark:text-zinc-400 font-medium">{p.address}</p>
-                            <p className="text-zinc-900 dark:text-zinc-200 font-medium">{p.city}, {p.state} {p.pincode}</p>
-                            {p.phone && (
-                                <p className="text-[10px] font-bold capitalize text-indigo-500 mt-2 inline-flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-500/10 px-2 py-1 rounded-lg">
-                                    <span className="w-1 h-1 rounded-full bg-indigo-500" />
-                                    Tel: {p.phone}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                )
-            }
-        } catch (e) {}
-        return <p className="italic">{address}</p>
-    }
-
     return (
-        <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-7xl mx-auto space-y-10 pb-20 px-4"
+        >
+            {/* Premium Header consistent with Dashboard */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                 <div>
-                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize">{t("orders")}</h2>
-                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">{t("ordersDescription")}</p>
+                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize">Order Management</h2>
+                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">Manage and track your store sales effectively.</p>
                 </div>
-                <div className="relative group w-full sm:w-auto">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
-                    <input 
-                        type="text" 
-                        placeholder={t("searchOrders")} 
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        className="w-full pl-11 pr-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none text-black dark:text-white transition-all shadow-sm md:w-64" 
-                    />
+                <div className="flex flex-wrap items-center gap-2">
+                    <div className="relative group w-full sm:w-auto">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-indigo-500 transition-colors" size={14} />
+                        <input 
+                            type="text" 
+                            placeholder="Search order ID or customer..." 
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            className="w-full sm:w-64 pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-[12px] font-medium focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none transition-all shadow-sm" 
+                        />
+                    </div>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-[12px] font-bold capitalize tracking-wide hover:bg-indigo-700 transition-all active:scale-95 shadow-lg shadow-indigo-600/20">
+                        <Filter size={14} /> {t("filter") || "Filter"}
+                    </button>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-[12px] font-bold capitalize tracking-wide text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95 shadow-sm">
+                        <Download size={14} className="text-emerald-500" /> {t("export") || "Export"}
+                    </button>
                 </div>
             </div>
 
-            {loading ? (
-                <div className="py-24 text-center">
-                    <Loader2 className="animate-spin mx-auto text-zinc-400 mb-4" size={32} />
-                    <p className="text-zinc-500">{t("loadingOrders")}</p>
-                </div>
-            ) : filtered.length === 0 ? (
-                <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-20 text-center shadow-sm">
-                    <div className="w-16 h-16 bg-zinc-50 dark:bg-zinc-800 rounded-xl flex items-center justify-center mx-auto mb-6 border border-zinc-100 dark:border-zinc-700 shadow-sm">
-                        <Package className="w-8 h-8 text-zinc-300 dark:text-zinc-600" />
+            {/* Stats Cards - Refined Style */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {loading ? (
+                    [...Array(4)].map((_, i) => <KpiCardSkeleton key={i} />)
+                ) : (
+                    [
+                        { label: "Total Orders", value: stats.totalOrders.toLocaleString(), last: "Lifetime", icon: Package, color: "bg-zinc-950 text-white", iconColor: "text-zinc-400" },
+                        { label: "Pending", value: stats.pendingOrders.toLocaleString(), last: "Needs attention", icon: Clock, color: "bg-amber-500 text-white", iconColor: "text-amber-200" },
+                        { label: "Revenue", value: `${currency === "INR" ? "₹" : "$"}${stats.totalRevenue.toLocaleString()}`, last: "Net sales", icon: IndianRupee, color: "bg-emerald-500 text-white", iconColor: "text-emerald-200" },
+                        { label: "Avg. Value", value: `${currency === "INR" ? "₹" : "$"}${stats.avgOrderValue.toFixed(2)}`, last: "Per order", icon: TrendingUp, color: "bg-indigo-500 text-white", iconColor: "text-indigo-200" }
+                    ].map((stat, i) => (
+                        <motion.div 
+                            key={stat.label} 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            className="p-7 bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-white/5 rounded-[32px] shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-500 group cursor-default"
+                        >
+                            <div className="flex items-center justify-between mb-8">
+                                <span className="text-[12px] sm:text-[14px] font-semibold text-zinc-400 dark:text-zinc-500 capitalize tracking-wide">{stat.label}</span>
+                                <div className={`w-10 h-10 ${stat.color} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
+                                    <stat.icon size={20} />
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-[28px] sm:text-[32px] font-bold text-zinc-900 dark:text-white tracking-tighter leading-none">{stat.value}</p>
+                                <p className="text-xs font-medium text-zinc-400 italic">{stat.last}</p>
+                            </div>
+                        </motion.div>
+                    ))
+                )}
+            </div>
+
+            {/* Orders Table Container */}
+            <div className="bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-sm flex flex-col hover:shadow-xl transition-all duration-500 group">
+                <div className="p-7 border-b border-zinc-50 dark:border-zinc-800 flex items-center justify-between">
+                    <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight capitalize italic">{t("recentOrders") || "Recent Orders"}</h3>
+                    <div className="text-zinc-400 text-xs font-semibold px-3 py-1 bg-zinc-50 dark:bg-zinc-800 rounded-full italic">
+                        Showing {paginatedOrders.length} of {filtered.length}
                     </div>
-                    <h3 className="text-xl font-bold text-black dark:text-white mb-2">{t("noOrdersFound")}</h3>
-                    <p className="text-zinc-500 text-sm max-w-sm mx-auto">
-                        {search ? t("tryAdjustingSearch") : t("noOrdersFoundDesc")}
-                    </p>
                 </div>
-            ) : (
-                <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-sm">
-                    <div className="overflow-x-auto pb-4 custom-scrollbar">
-                        <table className="w-full text-[12px] sm:text-[14px] text-left">
-                            <thead className="bg-[#F8FAFC] dark:bg-zinc-950 text-[#334155] dark:text-zinc-400 font-bold capitalize border-b border-zinc-100 dark:border-zinc-800">
+
+                <div className="flex-1 overflow-x-auto custom-scrollbar">
+                    {loading ? (
+                        <div className="p-4">
+                            <TableSkeleton />
+                        </div>
+                    ) : paginatedOrders.length === 0 ? (
+                        <div className="py-24 text-center">
+                            <div className="w-16 h-16 bg-zinc-50 dark:bg-zinc-900 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-zinc-100 dark:border-zinc-800 shadow-sm">
+                                <Package className="w-8 h-8 text-zinc-200" />
+                            </div>
+                            <h4 className="text-lg font-bold text-zinc-900 dark:text-white mb-1">Archive Empty</h4>
+                            <p className="text-zinc-400 text-xs font-medium italic">No matches found in the current timeframe.</p>
+                        </div>
+                    ) : (
+                        <table className="w-full text-left min-w-[700px]">
+                            <thead className="text-[12px] sm:text-[14px] text-zinc-400 dark:text-zinc-500 capitalize bg-zinc-50/50 dark:bg-zinc-950/50 font-semibold tracking-wide border-b border-zinc-50 dark:border-zinc-800">
                                 <tr>
-                                    <th className="px-6 py-4 text-left">{t("orderId")}</th>
-                                    <th className="px-6 py-4 text-left">{t("customer")}</th>
-                                    <th className="px-6 py-4 text-left">{t("total")}</th>
-                                    <th className="px-6 py-4 text-left">{t("status")}</th>
-                                    <th className="px-6 py-4 text-left">{t("date")}</th>
-                                    <th className="px-6 py-4 text-right">{t("actions")}</th>
+                                    <th className="px-7 py-4">Transaction</th>
+                                    <th className="px-7 py-4">Customer</th>
+                                    <th className="px-7 py-4">Status</th>
+                                    <th className="px-7 py-4 text-right">Settlement</th>
+                                    <th className="px-7 py-4 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800/50">
                                 {paginatedOrders.map((order) => (
-                                    <tr key={order.id} className="group hover:bg-zinc-50/50 dark:hover:bg-zinc-800/20 transition-all">
-                                        <td className="px-6 py-5">
-                                            <div className="flex items-center gap-2">
-                                                <span className="font-bold text-black dark:text-white uppercase tracking-tight">#{order.id.substring(0, 8)}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-5">
+                                    <tr key={order.id} className="group/row hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-all duration-300">
+                                        <td className="px-7 py-5">
                                             <div className="flex flex-col">
-                                                <span className="font-semibold text-black dark:text-white truncate max-w-[150px]">{order.customer?.firstName} {order.customer?.lastName}</span>
-                                                <span className="text-xs text-zinc-400 truncate max-w-[150px]">{order.customer?.email}</span>
+                                                <span className="font-bold text-zinc-900 dark:text-white text-xs group-hover/row:text-indigo-600 transition-colors uppercase tracking-tight">
+                                                    ORD-{order.id.slice(-8).toUpperCase()}
+                                                </span>
+                                                <div className="flex items-center gap-2 text-[10px] text-zinc-400 font-semibold mt-1 italic">
+                                                    <Calendar size={10} />
+                                                    {new Date(order.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-5">
-                                            <span className="font-semibold text-black dark:text-white">
-                                                {currency === "MYR" ? "RM" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "₹"}{order.total.toFixed(2)}
+                                        <td className="px-7 py-5">
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold text-zinc-900 dark:text-white text-xs">
+                                                    {order.customer?.firstName} {order.customer?.lastName}
+                                                </span>
+                                                <span className="text-[11px] text-zinc-400 font-medium truncate max-w-[150px]">{order.customer?.email || 'Guest Terminal'}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-7 py-5">
+                                            <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-bold capitalize tracking-wide border ${getStatusStyles(order.status)}`}>
+                                                {order.status}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-5">
-                                            <div className="flex items-center gap-2">
-                                                <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border ${getStatusStyles(order.status)}`}>
-                                                    {getStatusIcon(order.status)}
-                                                    {t(order.status.toLowerCase() as any)}
-                                                </span>
-                                                {order.payments[0]?.provider === "UPI" && (
-                                                    <span className="text-[10px] font-bold px-2 py-0.5 bg-indigo-500/10 text-indigo-500 rounded-md border border-indigo-500/20 flex items-center gap-1">
-                                                        <QrCode size={10} /> UPI
-                                                    </span>
-                                                )}
-                                                {order.payments[0]?.provider === "OFFLINE" && (
-                                                    <span className="text-[10px] font-bold px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-400 rounded-md">{t("cod")}</span>
-                                                )}
-                                            </div>
+                                        <td className="px-7 py-5 text-right">
+                                            <p className="font-bold text-zinc-900 dark:text-white text-xs mb-0.5">{currency === "INR" ? "₹" : "$"}{order.total.toLocaleString()}</p>
+                                            <span className="text-[10px] font-bold text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded-lg italic">
+                                                {order.payments[0]?.provider || "COD"}
+                                            </span>
                                         </td>
-                                        <td className="px-6 py-5 text-zinc-500 whitespace-nowrap">
-                                            {new Date(order.createdAt).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-6 py-5 text-right">
+                                        <td className="px-7 py-5 text-right">
                                             <div className="flex items-center justify-end gap-2">
-                                                <select 
-                                                    value={order.status}
-                                                    disabled={updatingId === order.id}
-                                                    onChange={e => updateStatus(order.id, e.target.value)}
-                                                    className="text-xs bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50"
-                                                >
-                                                    <option value="PENDING">{t("pending")}</option>
-                                                    <option value="PAID">{t("paid")}</option>
-                                                    <option value="SHIPPED">{t("shipped")}</option>
-                                                    <option value="DELIVERED">{t("delivered")}</option>
-                                                    <option value="CANCELLED">{t("cancelled")}</option>
-                                                </select>
-                                                <button 
-                                                    onClick={() => {
-                                                        setSelectedOrder(order)
-                                                        setShowDetailsModal(true)
-                                                    }}
-                                                    className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-indigo-600 transition-colors"
-                                                    title={t("viewDetails")}
+                                                <Link 
+                                                    href={`/dashboard/orders/${order.id}${window.location.search}`}
+                                                    className="p-2 bg-zinc-50 dark:bg-zinc-800 rounded-xl hover:bg-white dark:hover:bg-zinc-700 border border-transparent hover:border-zinc-200 dark:hover:border-zinc-600 text-zinc-400 hover:text-indigo-600 transition-all shadow-sm"
+                                                    title="Profile"
                                                 >
                                                     <Eye size={16} />
-                                                </button>
-                                                <button 
-                                                    onClick={() => {
-                                                        setSelectedOrder(order)
-                                                        setTrackingForm({
-                                                            carrier: order.carrier || "",
-                                                            trackingNumber: order.trackingNumber || "",
-                                                            comment: "",
-                                                            status: order.status
-                                                        })
-                                                        setShowTrackingModal(true)
-                                                    }}
-                                                    className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-indigo-600 transition-colors"
-                                                    title={t("manageTracking")}
+                                                </Link>
+                                                <Link 
+                                                    href={`/dashboard/orders/${order.id}/edit${window.location.search}`}
+                                                    className="p-2 bg-zinc-50 dark:bg-zinc-800 rounded-xl hover:bg-white dark:hover:bg-zinc-700 border border-transparent hover:border-zinc-200 dark:hover:border-zinc-600 text-zinc-400 hover:text-emerald-600 transition-all shadow-sm"
+                                                    title="Modify"
                                                 >
-                                                    <TruckIcon size={16} />
+                                                    <FileText size={16} />
+                                                </Link>
+                                                <button 
+                                                    className="p-2 bg-zinc-50 dark:bg-zinc-800 rounded-xl hover:bg-rose-50/50 dark:hover:bg-rose-500/10 border border-transparent hover:border-rose-100 dark:hover:border-rose-500/20 text-zinc-400 hover:text-rose-500 transition-all"
+                                                    title="Purge"
+                                                >
+                                                    <MoreVertical size={16} />
                                                 </button>
                                             </div>
                                         </td>
@@ -341,384 +261,80 @@ export default function OrdersPage() {
                                 ))}
                             </tbody>
                         </table>
-
-                        {/* Pagination Controls */}
-                        {totalPages > 1 && (
-                            <div className="px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-950/30">
-                                <div className="text-xs font-bold text-zinc-500">
-                                    {t("showing")} <span className="text-black dark:text-white font-bold">{(currentPage - 1) * itemsPerPage + 1}</span> {t("to")} <span className="text-black dark:text-white font-bold">{Math.min(currentPage * itemsPerPage, filtered.length)}</span> {t("of")} <span className="text-black dark:text-white font-bold">{filtered.length}</span> {t("orders")}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <button 
-                                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                        disabled={currentPage === 1}
-                                        className="p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                                    >
-                                        <ChevronLeft size={18} />
-                                    </button>
-                                    
-                                    <div className="flex items-center gap-1.5 mx-2">
-                                        {[...Array(totalPages)].map((_, i) => {
-                                            const pageNum = i + 1;
-                                            if (
-                                                pageNum === 1 || 
-                                                pageNum === totalPages || 
-                                                (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
-                                            ) {
-                                                return (
-                                                    <button 
-                                                        key={pageNum}
-                                                        onClick={() => setCurrentPage(pageNum)}
-                                                        className={`w-9 h-9 rounded-xl flex items-center justify-center text-[10px] font-bold transition-all ${currentPage === pageNum ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 scale-110" : "bg-white dark:bg-zinc-900 text-zinc-500 border border-zinc-200 dark:border-zinc-800 hover:border-indigo-500"}`}
-                                                    >
-                                                        {pageNum}
-                                                    </button>
-                                                )
-                                            }
-                                            if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
-                                                return <span key={pageNum} className="text-zinc-400 font-bold px-1">...</span>
-                                            }
-                                            return null
-                                        })}
-                                    </div>
-
-                                    <button 
-                                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                        disabled={currentPage === totalPages}
-                                        className="p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                                    >
-                                        <ChevronRight size={18} />
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                    )}
                 </div>
-            )}
 
-            {/* Tracking Modal */}
-            {showTrackingModal && selectedOrder && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white dark:bg-zinc-900 w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800">
-                        <div className="p-8 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-950/50">
-                            <div>
-                                <h3 className="text-xl font-bold text-black dark:text-white">{t("orderTracking")}</h3>
-                                <p className="text-zinc-500 text-xs mt-1 uppercase font-black tracking-widest italic">#{selectedOrder.id.substring(0, 12)}</p>
-                            </div>
-                            <button onClick={() => setShowTrackingModal(false)} className="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-full transition-colors">
-                                <XCircle size={24} className="text-zinc-400" />
+                {/* Pagination Refined */}
+                {totalPages > 1 && (
+                    <div className="p-7 border-t border-zinc-50 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/30 dark:bg-zinc-950/30">
+                        <p className="text-[11px] font-semibold text-zinc-400 capitalize tracking-wide italic">Manifest page {currentPage} of {totalPages}</p>
+                        <div className="flex gap-2">
+                            <button 
+                                disabled={currentPage === 1}
+                                onClick={() => setCurrentPage(p => p - 1)}
+                                className="p-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-30 transition-all active:scale-95 shadow-sm"
+                            >
+                                <ChevronLeft size={16} />
+                            </button>
+                            <button 
+                                disabled={currentPage === totalPages}
+                                onClick={() => setCurrentPage(p => p + 1)}
+                                className="p-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-30 transition-all active:scale-95 shadow-sm"
+                            >
+                                <ChevronRight size={16} />
                             </button>
                         </div>
-                        
-                        <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
-                            {/* Form */}
-                            <div className="space-y-6">
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t("shippingCarrier")}</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="e.g. FedEx, BlueDart" 
-                                        value={trackingForm.carrier}
-                                        onChange={e => setTrackingForm(f => ({ ...f, carrier: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                                    />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t("trackingNumber")}</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Enter tracking ID" 
-                                        value={trackingForm.trackingNumber}
-                                        onChange={e => setTrackingForm(f => ({ ...f, trackingNumber: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                                    />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t("updateStatus")}</label>
-                                    <select 
-                                        value={trackingForm.status}
-                                        onChange={e => setTrackingForm(f => ({ ...f, status: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm outline-none cursor-pointer"
-                                    >
-                                        <option value="PENDING">{t("pending")}</option>
-                                        <option value="PAID">{t("paid")}</option>
-                                        <option value="SHIPPED">{t("shipped")}</option>
-                                        <option value="DELIVERED">{t("delivered")}</option>
-                                        <option value="CANCELLED">{t("cancelled")}</option>
-                                    </select>
-                                </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t("addComment")}</label>
-                                    <textarea 
-                                        placeholder="Internal note or customer message..." 
-                                        value={trackingForm.comment}
-                                        onChange={e => setTrackingForm(f => ({ ...f, comment: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none min-h-[100px] resize-none"
-                                    />
-                                </div>
-                                <button 
-                                    disabled={updatingId === selectedOrder.id}
-                                    onClick={updateTracking}
-                                    className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all disabled:opacity-50"
-                                >
-                                    {updatingId === selectedOrder.id ? t("updating") : t("saveTrackingInfo")}
-                                </button>
-                            </div>
-
-                            {/* Activity Log */}
-                            <div className="space-y-6">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <HistoryIcon size={16} className="text-zinc-400" />
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t("activityHistory")}</label>
-                                </div>
-                                
-                                <div className="relative space-y-8 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-px before:bg-zinc-100 dark:before:bg-zinc-800">
-                                    {(selectedOrder.activities || []).map((activity, idx) => (
-                                        <div key={activity.id} className="relative pl-10">
-                                            <div className={`absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-white dark:border-zinc-900 shadow-sm flex items-center justify-center ${idx === 0 ? "bg-indigo-500" : "bg-zinc-200 dark:bg-zinc-700"}`}>
-                                                {idx === 0 && <span className="w-1 h-1 bg-white rounded-full animate-ping" />}
-                                            </div>
-                                            <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl border border-zinc-100 dark:border-zinc-800">
-                                                <div className="flex items-center justify-between mb-1">
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600">{activity.status}</span>
-                                                    <span className="text-[10px] text-zinc-400 font-bold">{new Date(activity.createdAt).toLocaleDateString()}</span>
-                                                </div>
-                                                <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 italic">"{activity.comment || "Status updated"}"</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {(!selectedOrder.activities || selectedOrder.activities.length === 0) && (
-                                        <div className="pl-10 text-zinc-400 text-sm font-medium italic">{t("noActivityLogged")}</div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
                     </div>
-                </div>
-            )}
-            {/* Order Details Modal */}
-            {showDetailsModal && selectedOrder && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white dark:bg-zinc-900 w-full max-w-4xl rounded-[32px] shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 flex flex-col max-h-[90vh]">
-                        <div className="p-8 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-950/50">
-                            <div>
-                                <h3 className="text-xl font-bold text-black dark:text-white">{t("orderDetails")}</h3>
-                                <p className="text-zinc-500 text-xs mt-1 uppercase font-black tracking-widest italic">#{selectedOrder.id}</p>
-                            </div>
-                            <button onClick={() => { setShowDetailsModal(false); setSelectedOrder(null); }} className="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-full transition-colors">
-                                <XCircle size={24} className="text-zinc-400" />
-                            </button>
-                        </div>
-                        
-                        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                {/* Left Column: Items & Summary */}
-                                <div className="lg:col-span-2 space-y-8">
-                                    <div className="bg-zinc-50 dark:bg-zinc-800/30 rounded-2xl border border-zinc-100 dark:border-zinc-800 overflow-hidden">
-                                        <div className="px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-100/50 dark:bg-zinc-800/50 flex items-center justify-between">
-                                            <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2">
-                                                <Package size={14} />
-                                                {t("orderItems")}
-                                            </h4>
-                                            <span className="text-[10px] font-bold text-zinc-400 px-2 py-0.5 bg-white dark:bg-zinc-900 rounded-md border border-zinc-200 dark:border-zinc-700">
-                                                {selectedOrder.items.length} {t("items")}
-                                            </span>
-                                        </div>
-                                        <table className="w-full text-sm">
-                                            <thead className="text-[10px] uppercase font-bold text-zinc-400 border-b border-zinc-100 dark:border-zinc-800">
-                                                <tr>
-                                                    <th className="px-6 py-3 text-left">{t("product")}</th>
-                                                    <th className="px-6 py-3 text-center">{t("qty")}</th>
-                                                    <th className="px-6 py-3 text-right">{t("price")}</th>
-                                                    <th className="px-6 py-3 text-right">{t("total")}</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                                                {selectedOrder.items.map((item) => (
-                                                    <tr key={item.id}>
-                                                        <td className="px-6 py-4">
-                                                            <span className="font-medium text-black dark:text-white">{item.product.name}</span>
-                                                        </td>
-                                                        <td className="px-6 py-4 text-center text-zinc-500 font-medium">
-                                                            {item.quantity}
-                                                        </td>
-                                                        <td className="px-6 py-4 text-right text-zinc-500 font-medium">
-                                                            {currency === "MYR" ? "RM" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "₹"}{item.price.toFixed(2)}
-                                                        </td>
-                                                        <td className="px-6 py-4 text-right font-bold text-black dark:text-white">
-                                                            {currency === "MYR" ? "RM" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "₹"}{(item.quantity * item.price).toFixed(2)}
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                            <tfoot className="bg-zinc-100/30 dark:bg-zinc-800/30">
-                                                <tr>
-                                                    <td colSpan={3} className="px-6 py-4 text-right text-xs font-black uppercase tracking-widest text-zinc-500 italic">{t("totalAmount")}</td>
-                                                    <td className="px-6 py-4 text-right text-lg font-black text-indigo-600">
-                                                        {currency === "MYR" ? "RM" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "₹"}{selectedOrder.total.toFixed(2)}
-                                                    </td>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
-                                    </div>
+                )}
+            </div>
+        </motion.div>
+    )
+}
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="p-6 bg-emerald-50/30 dark:bg-emerald-500/5 rounded-2xl border border-emerald-100 dark:border-emerald-500/10">
-                                            <h4 className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-4 flex items-center gap-2 italic">
-                                                <FileText size={14} />
-                                                {t("paymentMethod")}
-                                            </h4>
-                                            <div className="space-y-4">
-                                                <div className="flex items-center justify-between">
-                                                    <p className="text-xl font-bold text-black dark:text-white uppercase tracking-tighter flex items-center gap-2">
-                                                        {selectedOrder.payments[0]?.provider === 'UPI' && <QrCode size={20} className="text-indigo-600" />}
-                                                        {selectedOrder.payments[0]?.provider || "N/A"}
-                                                    </p>
-                                                    <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${selectedOrder.payments[0]?.status === 'COMPLETED' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'}`}>
-                                                        {selectedOrder.payments[0]?.status || "PENDING"}
-                                                    </span>
-                                                </div>
+function Download({ size, className }: { size: number, className?: string }) {
+    return <ArrowDownRight size={size} className={className} />
+}
 
-                                                {selectedOrder.payments[0]?.provider === 'UPI' && (selectedOrder.payments[0]?.upiUTR || selectedOrder.payments[0]?.upiProofImage) && (
-                                                    <div className="pt-4 mt-4 border-t border-emerald-100 dark:border-emerald-500/10 space-y-4">
-                                                        {selectedOrder.payments[0]?.upiUTR && (
-                                                            <div>
-                                                                <p className="text-[10px] font-black uppercase text-zinc-500 mb-1">{t("transactionId")}</p>
-                                                                <p className="text-sm font-bold text-indigo-600 tracking-tight">{selectedOrder.payments[0].upiUTR}</p>
-                                                            </div>
-                                                        )}
-                                                        {selectedOrder.payments[0]?.upiProofImage && (
-                                                            <div>
-                                                                <p className="text-[10px] font-black uppercase text-zinc-500 mb-2">{t("paymentProof")}</p>
-                                                                <a 
-                                                                    href={selectedOrder.payments[0].upiProofImage} 
-                                                                    target="_blank" 
-                                                                    rel="noopener noreferrer"
-                                                                    className="block relative group overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
-                                                                >
-                                                                    <img 
-                                                                        src={selectedOrder.payments[0].upiProofImage} 
-                                                                        alt="Payment Proof" 
-                                                                        className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-500"
-                                                                    />
-                                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                                        <ExternalLink size={20} className="text-white" />
-                                                                    </div>
-                                                                </a>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-                                                
-                                                {selectedOrder.payments[0]?.status !== 'COMPLETED' && (selectedOrder.payments[0]?.provider === 'UPI' || selectedOrder.payments[0]?.provider === 'OFFLINE') && (
-                                                    <button 
-                                                        onClick={() => updateStatus(selectedOrder.id, "PAID")}
-                                                        disabled={updatingId === selectedOrder.id}
-                                                        className="w-full py-3 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/20 hover:bg-emerald-700 transition-all flex items-center justify-center gap-2 mt-4"
-                                                    >
-                                                        <CheckCircle size={14} /> {t("verifyMarkAsPaid")}
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className="p-6 bg-blue-50/30 dark:bg-blue-500/5 rounded-2xl border border-blue-100 dark:border-blue-500/10">
-                                            <h4 className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-4 flex items-center gap-2 italic">
-                                                <Truck size={14} />
-                                                {t("shippingStatus")}
-                                            </h4>
-                                            <div className="space-y-2">
-                                                <p className="text-xl font-bold text-black dark:text-white">{t(selectedOrder.status.toLowerCase() as any)}</p>
-                                                {selectedOrder.trackingNumber && (
-                                                    <p className="text-xs text-zinc-500 font-medium">{t("tracking")}: <span className="text-blue-600">{selectedOrder.trackingNumber}</span> ({selectedOrder.carrier})</p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+function IndianRupee({ size, className }: { size: number, className?: string }) {
+    return <span className={className} style={{ fontSize: size }}>₹</span>
+}
 
-                                {/* Right Column: Customer & Address */}
-                                <div className="space-y-6">
-                                    <div className="p-6 bg-white dark:bg-zinc-800/50 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-6">
-                                        <div>
-                                            <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-4 flex items-center gap-2 italic">
-                                                {t("customerInformation")}
-                                            </h4>
-                                            <div className="space-y-3">
-                                                <div>
-                                                    <label className="text-[10px] text-zinc-400 font-bold uppercase block">{t("name")}</label>
-                                                    <p className="text-sm font-bold text-black dark:text-white">{selectedOrder.customer?.firstName} {selectedOrder.customer?.lastName}</p>
-                                                </div>
-                                                <div>
-                                                    <label className="text-[10px] text-zinc-400 font-bold uppercase block">{t("email")}</label>
-                                                    <p className="text-sm font-medium text-indigo-600">{selectedOrder.customer?.email}</p>
-                                                </div>
-                                                <div>
-                                                    <label className="text-[10px] text-zinc-400 font-bold uppercase block">Phone</label>
-                                                    <p className="text-sm font-medium text-black dark:text-white">{selectedOrder.customer?.phone || "N/A"}</p>
-                                                </div>
-                                            </div>
-                                        </div>
+function TrendingUp({ size, className }: { size: number, className?: string }) {
+    return (
+        <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width={size} 
+            height={size} 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            className={className}
+        >
+            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+            <polyline points="16 7 22 7 22 13" />
+        </svg>
+    )
+}
 
-                                        <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800">
-                                            <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-4 flex items-center gap-2 italic">
-                                                {t("shippingAddress")}
-                                            </h4>
-                                            <div className="flex gap-3 text-zinc-600 dark:text-zinc-400">
-                                                <MapPin className="shrink-0 text-zinc-300" size={18} />
-                                                <div className="text-sm font-medium leading-relaxed italic w-full">
-                                                    {selectedOrder.shippingAddress ? (
-                                                        renderAddress(selectedOrder.shippingAddress)
-                                                    ) : selectedOrder.customer?.address ? (
-                                                        renderAddress(selectedOrder.customer.address)
-                                                    ) : (
-                                                        <p>
-                                                            {(selectedOrder.customer?.city || selectedOrder.customer?.state) && (
-                                                                <>{[selectedOrder.customer?.city, selectedOrder.customer?.state].filter(Boolean).join(", ")}<br /></>
-                                                            )}
-                                                            {selectedOrder.customer?.pincode}
-                                                        </p>
-                                                    )}
-                                                    {!selectedOrder.shippingAddress && !selectedOrder.customer?.address && !selectedOrder.customer?.city && (
-                                                        <span className="text-zinc-400">{t("noAddressProvided")}</span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800">
-                                            <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-4 flex items-center gap-2 italic">
-                                                {t("orderTimeline")}
-                                            </h4>
-                                            <div className="space-y-4">
-                                                {(selectedOrder.activities || []).slice(0, 3).map((activity) => (
-                                                    <div key={activity.id} className="flex gap-3">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1.5 shrink-0" />
-                                                        <div>
-                                                            <p className="text-[10px] font-bold text-black dark:text-white uppercase">{activity.status}</p>
-                                                            <p className="text-[10px] text-zinc-400">{new Date(activity.createdAt).toLocaleDateString()}</p>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <button 
-                                        onClick={() => {
-                                            setShowDetailsModal(false);
-                                            setShowTrackingModal(true);
-                                        }}
-                                        className="w-full py-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-xl hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
-                                    >
-                                        <TruckIcon size={16} />
-                                        {t("manageShipping")}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
+function ArrowDownRight({ size, className }: { size: number, className?: string }) {
+    return (
+        <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width={size} 
+            height={size} 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            className={className}
+        >
+            <line x1="7" y1="7" x2="17" y2="17" />
+            <polyline points="17 7 17 17 7 17" />
+        </svg>
     )
 }

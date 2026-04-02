@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Star, Check, X, Trash2, MessageSquare, Package, User, Search, AlertCircle } from "lucide-react"
 import DeleteConfirmationModal from "@/components/dashboard/DeleteConfirmationModal"
 import { useDashboardStore } from "@/components/DashboardStoreProvider"
+import { TableSkeleton } from "@/components/dashboard/DashboardSkeletons"
 
 interface Review {
     id: string
@@ -107,7 +108,7 @@ export default function ReviewsPage() {
 
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-sm">
                 {loading ? (
-                    <div className="py-24 text-center text-zinc-400 font-medium">Loading reviews...</div>
+                    <TableSkeleton />
                 ) : reviews.length === 0 ? (
                     <div className="py-32 text-center">
                         <div className="w-20 h-20 bg-zinc-50 dark:bg-zinc-800 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-zinc-100 dark:border-zinc-700 shadow-xl">
@@ -159,7 +160,7 @@ export default function ReviewsPage() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <p className="text-zinc-600 dark:text-zinc-400 line-clamp-2 max-w-[250px] font-medium italic">"{r.comment || "No comment"}"</p>
+                                            <p className="text-zinc-600 dark:text-zinc-400 line-clamp-2 max-w-[250px] font-medium">"{r.comment || "No comment"}"</p>
                                             <p className="text-[9px] text-zinc-400 mt-1 capitalize font-semibold tracking-wide">{new Date(r.createdAt).toLocaleDateString()}</p>
                                         </td>
                                         <td className="px-6 py-5">

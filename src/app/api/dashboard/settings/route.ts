@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
+import { revalidatePath } from "next/cache"
 
 import { getStoreForDashboard } from "@/lib/dashboard"
 
@@ -58,7 +59,10 @@ export async function GET(req: Request) {
         menuAlignment: themeConfig.menuAlignment || "left",
         primaryColor: themeConfig.primaryColor || "purple",
         headerStyle: themeConfig.headerStyle || "flat",
+        layoutStyle: themeConfig.layoutStyle || "default",
+        menuType: themeConfig.menuType || "top",
         menuItems: themeConfig.menuItems || [],
+        storeTheme: themeConfig.storeTheme || "modern",
         isAdminPanelDisabled: store.isAdminPanelDisabled,
         // Razorpay settings from themeConfig as fallback if schema fields are not synced
         razorpayKeyId: themeConfig.razorpayKeyId ?? (store as any).razorpayKeyId,
@@ -84,6 +88,22 @@ export async function GET(req: Request) {
         timezone: themeConfig.timezone || "Asia/Kolkata",
         language: themeConfig.language || "English",
         isCodEnabled: themeConfig.isCodEnabled ?? false,
+        isEmailNotificationEnabled: themeConfig.isEmailNotificationEnabled ?? true,
+        isAdminAlertEnabled: themeConfig.isAdminAlertEnabled ?? true,
+        isOrderNotificationEnabled: themeConfig.isOrderNotificationEnabled ?? true,
+        city: (store as any).city || "Chennai",
+        state: (store as any).state || "Tamil Nadu",
+        pincode: (store as any).pincode || "600001",
+        country: (store as any).country || "India",
+        // Plugin Settings
+        googleAnalyticsId: themeConfig.googleAnalyticsId || "",
+        isGoogleAnalyticsEnabled: themeConfig.isGoogleAnalyticsEnabled ?? false,
+        facebookPixelId: themeConfig.facebookPixelId || "",
+        isFacebookPixelEnabled: themeConfig.isFacebookPixelEnabled ?? false,
+        googlePlaceId: themeConfig.googlePlaceId || "",
+        manualReviews: themeConfig.manualReviews || [],
+        isGoogleReviewsEnabled: themeConfig.isGoogleReviewsEnabled ?? false,
+        isSeoEnabled: themeConfig.isSeoEnabled ?? false,
         subscription: (store as any).subscription ? {
             plan: (store as any).subscription.plan.name,
             maxProducts: (store as any).subscription.plan.maxProducts
@@ -109,6 +129,7 @@ export async function PUT(req: Request) {
         if (!store) return NextResponse.json({ error: "Store not found" }, { status: 404 })
 
         const body = await req.json()
+        console.log("Settings PUT Body:", { ...body, razorpayKeySecret: body.razorpayKeySecret ? "HIDDEN" : null })
         
         // Preserve existing themeConfig and merge new values
         let themeConfig: Record<string, any> = {}
@@ -122,7 +143,10 @@ export async function PUT(req: Request) {
         if (body.menuAlignment !== undefined) themeConfig.menuAlignment = body.menuAlignment
         if (body.primaryColor !== undefined) themeConfig.primaryColor = body.primaryColor
         if (body.headerStyle !== undefined) themeConfig.headerStyle = body.headerStyle
+        if (body.layoutStyle !== undefined) themeConfig.layoutStyle = body.layoutStyle
+        if (body.menuType !== undefined) themeConfig.menuType = body.menuType
         if (body.menuItems !== undefined) themeConfig.menuItems = body.menuItems
+        if (body.storeTheme !== undefined) themeConfig.storeTheme = body.storeTheme
         
         // WhatsApp settings
         if (body.whatsappNumber !== undefined) themeConfig.whatsappNumber = body.whatsappNumber
@@ -159,6 +183,23 @@ export async function PUT(req: Request) {
         if (body.timezone !== undefined) themeConfig.timezone = body.timezone
         if (body.language !== undefined) themeConfig.language = body.language
 
+        // Notification settings
+        if (body.isEmailNotificationEnabled !== undefined) themeConfig.isEmailNotificationEnabled = body.isEmailNotificationEnabled
+        if (body.isAdminAlertEnabled !== undefined) themeConfig.isAdminAlertEnabled = body.isAdminAlertEnabled
+        if (body.isOrderNotificationEnabled !== undefined) themeConfig.isOrderNotificationEnabled = body.isOrderNotificationEnabled
+        
+        // Plugin settings
+        if (body.googleAnalyticsId !== undefined) themeConfig.googleAnalyticsId = body.googleAnalyticsId
+        if (body.isGoogleAnalyticsEnabled !== undefined) themeConfig.isGoogleAnalyticsEnabled = body.isGoogleAnalyticsEnabled
+        if (body.facebookPixelId !== undefined) themeConfig.facebookPixelId = body.facebookPixelId
+        if (body.isFacebookPixelEnabled !== undefined) themeConfig.isFacebookPixelEnabled = body.isFacebookPixelEnabled
+        if (body.googlePlaceId !== undefined) themeConfig.googlePlaceId = body.googlePlaceId
+        if (body.manualReviews !== undefined) themeConfig.manualReviews = body.manualReviews
+        if (body.isGoogleReviewsEnabled !== undefined) themeConfig.isGoogleReviewsEnabled = body.isGoogleReviewsEnabled
+        if (body.isSeoEnabled !== undefined) themeConfig.isSeoEnabled = body.isSeoEnabled
+        if (body.seoTitle !== undefined) themeConfig.seoTitle = body.seoTitle // Template override
+        if (body.seoDescription !== undefined) themeConfig.seoDescription = body.seoDescription // Template override
+
         const updated = await prisma.store.update({
             where: { id: store.id },
             data: {
@@ -170,13 +211,24 @@ export async function PUT(req: Request) {
                 upiId: body.upiId ?? (store as any).upiId,
                 upiName: body.upiName ?? (store as any).upiName,
                 isUpiEnabled: body.isUpiEnabled ?? (store as any).isUpiEnabled,
+                city: body.city ?? (store as any).city,
+                state: body.state ?? (store as any).state,
+                pincode: body.pincode ?? (store as any).pincode,
+                country: body.country ?? (store as any).country,
                 themeConfig: JSON.stringify(themeConfig),
             },
         })
 
+        // Revalidate the store page and layout to show updates immediately
+        if (store.slug) {
+            revalidatePath(`/s/${store.slug}`)
+            revalidatePath(`/s/${store.slug}`, "layout")
+        }
+
+        console.log("Settings Update Success for Store:", store.slug)
         return NextResponse.json({ ok: true, store: updated })
     } catch (e: any) {
-        console.error("Settings Update Error:", e)
+        console.error("Settings Update Error Detailed:", e)
         return NextResponse.json({ error: e.message || "Failed to update settings" }, { status: 500 })
     }
 }

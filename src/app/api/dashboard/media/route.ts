@@ -27,14 +27,77 @@ export async function GET(req: Request) {
     }
 
     const dashboardType = searchParams.get("dashboardType") || "1"
-    const store = await getStoreForDashboard(targetUserId, dashboardType)
-    if (!store) return NextResponse.json([])
+    const storeObj = await getStoreForDashboard(targetUserId, dashboardType)
+    if (!storeObj) return NextResponse.json([])
 
-    const media = await prisma.mediaLibrary.findMany({
-        where: { storeId: store.id },
-        orderBy: { createdAt: "desc" }
+    // Fetch products and categories for this specific store
+    const [products, categories, libraryMedia] = await Promise.all([
+        prisma.product.findMany({
+            where: { storeId: storeObj.id },
+            select: { images: true, name: true, updatedAt: true }
+        }),
+        prisma.category.findMany({
+            where: { storeId: storeObj.id },
+            select: { image: true, name: true, updatedAt: true }
+        }),
+        prisma.mediaLibrary.findMany({
+            where: { storeId: storeObj.id },
+            orderBy: { createdAt: "desc" }
+        })
+    ])
+
+    // 2. Aggregate other media sources
+    const seenUrls = new Set(libraryMedia.map(m => m.url))
+    const aggregatedMedia: any[] = [...libraryMedia]
+
+    const addUniqueMedia = (url: string, name: string, type: string = "IMAGE", date?: Date, customId?: string) => {
+        if (!url || seenUrls.has(url) || !url.startsWith("http")) return;
+        seenUrls.add(url);
+        aggregatedMedia.push({
+            id: customId || `v-${Buffer.from(url).toString('base64').substring(0, 16)}`,
+            url,
+            name,
+            type,
+            size: 0,
+            createdAt: date || new Date(),
+            isVirtual: true
+        })
+    }
+
+    // Add Store Branding
+    if (storeObj.logo) addUniqueMedia(storeObj.logo, "Store Logo", "IMAGE", storeObj.updatedAt)
+    if (storeObj.favicon) addUniqueMedia(storeObj.favicon, "Store Favicon", "IMAGE", storeObj.updatedAt)
+    if (storeObj.banner) addUniqueMedia(storeObj.banner, "Store Banner", "IMAGE", storeObj.updatedAt)
+
+    // Add Product Images
+    products.forEach(product => {
+        try {
+            const images = JSON.parse((product as any).images || "[]")
+            if (Array.isArray(images)) {
+                images.forEach((img: string, idx: number) => {
+                    const virtualId = `v-prod:${(product as any).id}:${idx}:${Buffer.from(img).toString('base64').substring(0, 8)}`
+                    addUniqueMedia(img, `${product.name} (${idx + 1})`, "IMAGE", product.updatedAt, virtualId)
+                })
+            }
+        } catch (e) {
+            if (typeof (product as any).images === 'string' && (product as any).images.startsWith('http')) {
+                const img = (product as any).images
+                const virtualId = `v-prod:${(product as any).id}:0:${Buffer.from(img).toString('base64').substring(0, 8)}`
+                addUniqueMedia(img, product.name, "IMAGE", product.updatedAt, virtualId)
+            }
+        }
     })
-    return NextResponse.json(media)
+
+    // Add Category Images
+    categories.forEach(cat => {
+        if (cat.image) {
+            const virtualId = `v-cat:${(cat as any).id}`
+            addUniqueMedia(cat.image, cat.name, "IMAGE", cat.updatedAt, virtualId)
+        }
+    })
+
+    aggregatedMedia.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    return NextResponse.json(aggregatedMedia)
 }
 
 export async function POST(req: Request) {
@@ -175,11 +238,57 @@ export async function DELETE(req: Request) {
     const id = searchParams.get("id")
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 })
 
-    // Verify ownership
     const dashboardType = searchParams.get("dashboardType") || "1"
     const store = await getStoreForDashboard(targetUserId, dashboardType)
+    if (!store) return NextResponse.json({ error: "Store not found" }, { status: 404 })
+
+    // Handle Virtual Deletion
+    if (id.startsWith("v-")) {
+        const parts = id.split(":")
+        const type = parts[0] // v-prod or v-cat
+        
+        if (type === "v-prod") {
+            const productId = parts[1]
+            const index = parseInt(parts[2])
+            
+            const product = await prisma.product.findUnique({
+                where: { id: productId, storeId: store.id }
+            })
+            
+            if (product) {
+                let images = []
+                try {
+                    images = JSON.parse(product.images || "[]")
+                } catch (e) {
+                    if (typeof product.images === 'string' && product.images.startsWith('http')) {
+                        images = [product.images]
+                    }
+                }
+                
+                if (Array.isArray(images)) {
+                    images.splice(index, 1)
+                    await prisma.product.update({
+                        where: { id: productId },
+                        data: { images: JSON.stringify(images) }
+                    })
+                    return NextResponse.json({ ok: true, source: "product" })
+                }
+            }
+        } else if (type === "v-cat") {
+            const catId = parts[1]
+            await prisma.category.update({
+                where: { id: catId, storeId: store.id },
+                data: { image: null }
+            })
+            return NextResponse.json({ ok: true, source: "category" })
+        }
+        
+        return NextResponse.json({ error: "Virtual source not found or could not be updated" }, { status: 404 })
+    }
+
+    // Handle Regular MediaLibrary Deletion
     const media = await prisma.mediaLibrary.findFirst({
-        where: { id, storeId: store?.id }
+        where: { id, storeId: store.id }
     })
 
     if (!media) return NextResponse.json({ error: "Not found" }, { status: 404 })

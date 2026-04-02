@@ -11,15 +11,16 @@ import {
     Info, 
     LogOut, 
     ChevronRight, 
-    Store, 
     ArrowLeft,
-    FileText,
     X,
     Package,
     ShoppingBag,
     CreditCard,
+    FileText,
     Loader2,
-    History
+    History,
+    Edit2,
+    MessageCircle
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
@@ -36,12 +37,15 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
     const [activeTab, setActiveTab] = useState<string | null>(null)
     const { data: session, status } = useSession()
     
-    // Auto-select profile on desktop mount
+    // Auto-select tab on mount (including URL param check)
     useEffect(() => {
-        if (window.innerWidth >= 768) {
+        const tab = searchParams.get("tab")
+        if (tab) {
+            setActiveTab(tab)
+        } else if (window.innerWidth >= 768) {
             setActiveTab("profile")
         }
-    }, [])
+    }, [searchParams])
     
     // User preferences state
     const { language, setLanguage, t } = useLanguage()
@@ -59,6 +63,8 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
     const [isSaving, setIsSaving] = useState(false)
     const [saveSuccess, setSaveSuccess] = useState(false)
     const [storeId, setStoreId] = useState<string | null>(null)
+    const [storeName, setStoreName] = useState<string>("")
+    const [storePhone, setStorePhone] = useState<string>("919999999999")
     const [isEditing, setIsEditing] = useState(false)
     const [firstName, setFirstName] = useState("")
     const [lastName, setLastName] = useState("")
@@ -104,6 +110,8 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                 const storeData = await storeRes.json()
                 const sId = storeData?.id
                 setStoreId(sId)
+                if (storeData?.name) setStoreName(storeData.name)
+                if (storeData?.phone) setStorePhone(storeData.phone.replace(/\D/g, ''))
 
                 // 2. Get User Profile
                 const profileRes = await fetch(`/api/customer/profile?storeId=${sId}`)
@@ -139,6 +147,12 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                     }
                 }
 
+                // 5. Set Notification preferences
+                if (profile && !profile.error) {
+                    if (profile.emailNotif !== undefined) setEmailNotif(profile.emailNotif)
+                    if (profile.smsNotif !== undefined) setSmsNotif(profile.smsNotif)
+                    if (profile.orderUpdates !== undefined) setOrderUpdates(profile.orderUpdates)
+                }
             } catch (err) {
                 console.error("Load failed:", err)
             } finally {
@@ -168,7 +182,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                 body: JSON.stringify({
                     firstName,
                     lastName,
-                    gender, // Added gender
+                    gender,
                     phone: mobile,
                     address,
                     area,
@@ -176,7 +190,10 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                     city,
                     state,
                     pincode,
-                    storeId
+                    storeId,
+                    emailNotif,
+                    smsNotif,
+                    orderUpdates
                 })
             })
             if (res.ok) {
@@ -188,6 +205,25 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
             console.error("Save failed:", err)
         } finally {
             setIsSaving(false)
+        }
+    }
+
+    const saveNotif = async (key: string, value: boolean) => {
+        // Optimistic update
+        const payload = {
+            firstName, lastName, gender, phone: mobile, address, area, landmark, city, state, pincode, storeId,
+            emailNotif, smsNotif, orderUpdates,
+            [key]: value
+        }
+
+        try {
+            await fetch("/api/customer/profile", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+        } catch (err) {
+            console.error("Failed to save notification preference:", err)
         }
     }
 
@@ -286,6 +322,37 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
             <AnimatePresence>
                 {isOpen && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-end md:p-4">
+                        <style>{`
+                            @media print {
+                                /* Hide everything except the invoice */
+                                body * { visibility: hidden !important; }
+                                #invoice-print-template, #invoice-print-template * { visibility: visible !important; }
+                                #invoice-print-template {
+                                    position: fixed !important;
+                                    left: 0 !important;
+                                    top: 0 !important;
+                                    width: 100% !important;
+                                    height: 100% !important;
+                                    display: block !important;
+                                    background: white !important;
+                                    z-index: 9999999 !important;
+                                    padding: 0 !important;
+                                    margin: 0 !important;
+                                    overflow: hidden !important;
+                                }
+                                /* Ensure browser doesn't add extra pages due to container heights */
+                                html, body { 
+                                    height: 100% !important; 
+                                    overflow: hidden !important;
+                                    background: white !important;
+                                }
+                                @page { 
+                                    size: A4; 
+                                    margin: 10mm; 
+                                }
+                                * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                            }
+                        `}</style>
                         <motion.div 
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                             onClick={onClose}
@@ -302,7 +369,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                     <button onClick={onClose} className="p-2 hover:bg-zinc-100 rounded-full transition-all text-zinc-400 md:hidden"><ArrowLeft size={20} /></button>
                                     <div>
                                         <h3 className="text-lg font-bold text-zinc-900">{t("orderDetails")}</h3>
-                                        <p className="text-[10px] font-semibold text-zinc-400">ID: #{order.id.slice(-6).toUpperCase()}</p>
+                                        <p className="text-[10px] font-semibold text-zinc-400">ID: #{order.id.toUpperCase()}</p>
                                     </div>
                                 </div>
                                 <button onClick={onClose} className="p-2 hover:bg-zinc-100 rounded-full transition-all text-zinc-400 hidden md:block"><X size={20} /></button>
@@ -425,16 +492,18 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                     </div>
                                 </section>
 
-                                {/* Download Invoice Button */}
-                                <div className="pt-8">
-                                    <button 
-                                        onClick={() => window.print()}
-                                        className="w-full py-5 bg-white border-2 border-zinc-100 text-zinc-900 rounded-2xl text-[11px] font-bold hover:bg-zinc-50 hover:border-zinc-200 transition-all flex items-center justify-center gap-3 group"
-                                    >
-                                        <FileText size={18} className="text-zinc-300 group-hover:text-zinc-600 transition-colors" />
-                                        {t("downloadInvoice")}
-                                    </button>
-                                </div>
+                                {/* Download Invoice Button - ONLY FOR DELIVERED ORDERS */}
+                                {(order.status === 'DELIVERED' || order.status === 'COMPLETED') && (
+                                    <div className="pt-8">
+                                        <button 
+                                            onClick={() => window.print()}
+                                            className="w-full py-5 bg-white border-2 border-zinc-100 text-zinc-900 rounded-2xl text-[11px] font-bold hover:bg-zinc-50 hover:border-zinc-200 transition-all flex items-center justify-center gap-3 group"
+                                        >
+                                            <FileText size={18} className="text-zinc-300 group-hover:text-zinc-600 transition-colors" />
+                                            {t("downloadInvoice")}
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </motion.div>
                     </div>
@@ -565,28 +634,16 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                             </form>
                         )}
 
-                        <div className="relative py-4">
-                            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-zinc-100"></div></div>
-                            <div className="relative flex justify-center text-[10px] uppercase tracking-[0.2em] font-black text-zinc-300"><span className="bg-white px-4">Or sign in with</span></div>
                         </div>
                         
-                        <button 
-                            onClick={() => signIn("google", { callbackUrl: window.location.href })}
-                            className="w-full flex items-center justify-center gap-4 py-4 bg-white border-2 border-zinc-100 rounded-2xl hover:border-zinc-200 transition-all group"
-                        >
-                            <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5 grayscale group-hover:grayscale-0 transition-all" />
-                            <span className="text-[13px] font-bold text-zinc-600">Continue with Google</span>
-                        </button>
-                    </div>
-                    
-                    <div className="mt-8">
-                        <Link 
-                            href={`/s/${slug}`}
-                            className="text-[10px] font-bold text-zinc-400 hover:text-zinc-600 transition-all"
-                        >
-                            ← Return to Store
-                        </Link>
-                    </div>
+                        <div className="mt-8">
+                            <Link 
+                                href={`/s/${slug}`}
+                                className="text-[10px] font-bold text-zinc-400 hover:text-zinc-600 transition-all"
+                            >
+                                ← Return to Store
+                            </Link>
+                        </div>
 
                     <p className="mt-12 text-[9px] font-semibold text-zinc-300 tracking-wider">
                         By signing in, you agree to our <span className="text-zinc-400 underline cursor-pointer">Terms</span> & <span className="text-zinc-400 underline cursor-pointer">Privacy</span>
@@ -612,19 +669,27 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                 {/* Sidebar */}
                 <aside className={`space-y-4 ${activeTab ? "hidden md:block" : "block"}`}>
                     {/* User Greeting */}
-                    <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center border border-amber-200 overflow-hidden">
-                            <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${firstName || "Guest"}`} alt="Avatar" className="w-full h-full object-cover" />
+                    <div className="bg-white p-4 rounded-xl shadow-sm flex items-center justify-between group/card">
+                        <div className="flex items-center gap-4 min-w-0">
+                            <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center border border-amber-200 overflow-hidden shrink-0">
+                                <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${firstName || "Guest"}`} alt="Avatar" className="w-full h-full object-cover" />
+                            </div>
+                            <div className="min-w-0">
+                                <p className="text-[10px] font-semibold text-zinc-400">{t("hello")}</p>
+                                <h2 className="text-sm font-bold text-zinc-900 truncate">{firstName} {lastName}</h2>
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-[10px] font-semibold text-zinc-400">{t("hello")}</p>
-                            <h2 className="text-sm font-bold text-zinc-900">{firstName} {lastName}</h2>
-                        </div>
+                        <button 
+                            onClick={() => setActiveTab("profile")}
+                            className="p-2 hover:bg-[var(--primary-color)]/10 rounded-lg text-zinc-400 hover:text-[var(--primary-color)] transition-all shrink-0"
+                            title="Edit Profile"
+                        >
+                            <Edit2 size={16} />
+                        </button>
                     </div>
 
                     {/* Navigation Menu */}
                     <div className="bg-white rounded-xl shadow-sm overflow-hidden py-1">
-                        <NavLink id="profile" label={t("profile")} icon={User} active={activeTab === "profile"} />
                         <NavLink id="orders" label={t("myOrders")} icon={ShoppingBag} active={activeTab === "orders"} />
                         <NavLink id="address" label={t("manageAddresses")} icon={MapPin} active={activeTab === "address"} />
                         <NavLink id="reviews" label={t("myReviews")} icon={Star} active={activeTab === "reviews"} />
@@ -673,30 +738,30 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                             {/* Name Fields */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-zinc-400 block ml-1">{t("firstName")}</label>
+                                    <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider ml-1">{t("firstName")}</label>
                                     <input 
                                         type="text" 
                                         value={firstName}
                                         onChange={(e) => setFirstName(e.target.value)}
                                         placeholder="Enter first name"
-                                        className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]/10 focus:bg-white transition-all"
+                                        className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-xl text-sm font-medium text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]/10 focus:bg-white transition-all shadow-sm"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-zinc-400 block ml-1">{t("lastName")}</label>
+                                    <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider ml-1">{t("lastName")}</label>
                                     <input 
                                         type="text" 
                                         value={lastName}
                                         onChange={(e) => setLastName(e.target.value)}
                                         placeholder="Enter last name"
-                                        className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]/10 focus:bg-white transition-all"
+                                        className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-xl text-sm font-medium text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]/10 focus:bg-white transition-all shadow-sm"
                                     />
                                 </div>
                             </div>
 
                             {/* Gender selection */}
                             <div className="space-y-4 mb-14">
-                                <label className="text-[10px] font-bold text-zinc-400 block ml-1">{t("gender")}</label>
+                                <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider ml-1">{t("gender")}</label>
                                 <div className="flex gap-8">
                                     {["Male", "Female"].map(g => (
                                         <button 
@@ -764,8 +829,8 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                     )}
 
                     {activeTab === "orders" && (
-                        <div className="p-8 md:p-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <h2 className="text-xl font-black text-zinc-900 uppercase italic mb-10">{t("myOrders")}</h2>
+                        <div className="p-8 md:p-12 animate-in fade-in slide-in-from-bottom-4 duration-500 text-[13px] tracking-tight truncate">
+                            <h2 className="text-xl font-bold text-zinc-900 mb-10">{t("myOrders")}</h2>
                             
                             {orders.length > 0 ? (
                                 <div className="space-y-4">
@@ -786,7 +851,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                             
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">
-                                                    <span className="text-[10px] font-medium text-zinc-400">Order #{order.id.slice(-6).toUpperCase()}</span>
+                                                    <span className="text-[10px] font-medium text-zinc-400">Order #{order.id.toUpperCase()}</span>
                                                     <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
                                                         order.status === 'DELIVERED' ? 'bg-emerald-50 text-emerald-600' :
                                                         order.status === 'CANCELLED' ? 'bg-rose-50 text-rose-600' :
@@ -812,8 +877,8 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                             ) : (
                                 <div className="p-20 text-center border-2 border-dashed border-zinc-100 rounded-[40px] bg-zinc-50/50">
                                     <ShoppingBag size={48} className="mx-auto text-zinc-200 mb-6" />
-                                    <p className="text-xs font-black text-zinc-400 uppercase tracking-widest italic mb-2">{t("noOrdersFound")}</p>
-                                    <p className="text-[11px] text-zinc-400 font-bold max-w-xs mx-auto">Start shopping to see your orders appear here!</p>
+                                    <p className="text-xs font-bold text-zinc-500 mb-2">{t("noOrdersFound")}</p>
+                                    <p className="text-[11px] text-zinc-400 font-medium max-w-xs mx-auto">Start shopping to see your orders appear here!</p>
                                 </div>
                             )}
                         </div>
@@ -823,7 +888,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                     {activeTab === "address" && (
                         <div className="p-8 md:p-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
                             <div className="flex items-center justify-between mb-10">
-                                <h2 className="text-xl font-black text-zinc-900 uppercase italic">{t("manageAddresses")}</h2>
+                                <h2 className="text-xl font-bold text-zinc-900">{t("manageAddresses")}</h2>
                                 {!isEditing && (
                                     <button 
                                         onClick={() => setIsEditing(true)}
@@ -836,54 +901,54 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                                 <div className="md:col-span-2 space-y-2">
-                                    <label className="text-[10px] font-bold text-zinc-400 block ml-1">Street Address</label>
+                                    <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider ml-1">Street Address</label>
                                     <input 
                                         type="text" 
                                         disabled={!isEditing}
                                         value={address}
                                         onChange={(e) => setAddress(e.target.value)}
                                         placeholder="Flat, House no., Building, Company, Apartment"
-                                        className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]/10 transition-all disabled:opacity-60"
+                                        className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-xl text-sm font-medium text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]/10 transition-all disabled:opacity-60 shadow-sm"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-zinc-400 block ml-1">Area / Landmark</label>
+                                    <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider ml-1">Area / Landmark</label>
                                     <input 
                                         type="text" 
                                         disabled={!isEditing}
                                         value={area}
                                         onChange={(e) => setArea(e.target.value)}
-                                        className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]/10 transition-all disabled:opacity-60"
+                                        className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-xl text-sm font-medium text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]/10 transition-all disabled:opacity-60 shadow-sm"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-zinc-400 block ml-1">City</label>
+                                    <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider ml-1">City</label>
                                     <input 
                                         type="text" 
                                         disabled={!isEditing}
                                         value={city}
                                         onChange={(e) => setCity(e.target.value)}
-                                        className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]/10 transition-all disabled:opacity-60"
+                                        className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-xl text-sm font-medium text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]/10 transition-all disabled:opacity-60 shadow-sm"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-zinc-400 block ml-1">State</label>
+                                    <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider ml-1">State</label>
                                     <input 
                                         type="text" 
                                         disabled={!isEditing}
                                         value={state}
                                         onChange={(e) => setState(e.target.value)}
-                                        className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]/10 transition-all disabled:opacity-60"
+                                        className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-xl text-sm font-medium text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]/10 transition-all disabled:opacity-60 shadow-sm"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-zinc-400 block ml-1">Pincode</label>
+                                    <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider ml-1">Pincode</label>
                                     <input 
                                         type="text" 
                                         disabled={!isEditing}
                                         value={pincode}
                                         onChange={(e) => setPincode(e.target.value)}
-                                        className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]/10 transition-all disabled:opacity-60"
+                                        className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-xl text-sm font-medium text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]/10 transition-all disabled:opacity-60 shadow-sm"
                                     />
                                 </div>
                             </div>
@@ -920,7 +985,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
 
                     {activeTab === "reviews" && (
                         <div className="p-8 md:p-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <h2 className="text-xl font-black text-zinc-900 uppercase italic mb-10">{t("myReviews")}</h2>
+                            <h2 className="text-xl font-bold text-zinc-900 mb-10">{t("myReviews")}</h2>
                             
                             {reviews.length > 0 ? (
                                 <div className="space-y-6">
@@ -935,8 +1000,8 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                             </div>
                                             <div className="flex-1">
                                                 <div className="flex items-center justify-between mb-2">
-                                                    <h3 className="text-sm font-black text-zinc-900 uppercase tracking-tight">{review.product.name}</h3>
-                                                    <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest ${review.isApproved ? "bg-emerald-100 text-emerald-600" : "bg-amber-100 text-amber-600"}`}>
+                                                    <h3 className="text-sm font-bold text-zinc-900">{review.product.name}</h3>
+                                                    <span className={`text-[10px] font-bold px-3 py-1 rounded-full ${review.isApproved ? "bg-emerald-100 text-emerald-600" : "bg-amber-100 text-amber-600"}`}>
                                                         {review.isApproved ? "Approved" : "Pending"}
                                                     </span>
                                                 </div>
@@ -958,8 +1023,8 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                             ) : (
                                 <div className="p-20 text-center border-2 border-dashed border-zinc-100 rounded-[40px] bg-zinc-50/50">
                                     <Star size={48} className="mx-auto text-zinc-200 mb-6" />
-                                    <p className="text-xs font-black text-zinc-400 uppercase tracking-widest italic mb-2">{t("noReviewsFound")}</p>
-                                    <p className="text-[11px] text-zinc-400 font-bold max-w-xs mx-auto">Help other shoppers by sharing your feedback on products you've bought!</p>
+                                    <p className="text-xs font-bold text-zinc-500 mb-2">{t("noReviewsFound")}</p>
+                                    <p className="text-[11px] text-zinc-400 font-medium max-w-xs mx-auto">Help other shoppers by sharing your feedback on products you've bought!</p>
                                 </div>
                             )}
                         </div>
@@ -967,7 +1032,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
 
                     {activeTab === "viewed_products" && (
                         <div className="p-8 md:p-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <h2 className="text-xl font-black text-zinc-900 uppercase italic mb-10">{t("recentlyViewed")}</h2>
+                            <h2 className="text-xl font-bold text-zinc-900 mb-10">{t("recentlyViewed")}</h2>
                             {recentlyViewed.length > 0 ? (
                                 <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                     {recentlyViewed.map((product) => (
@@ -995,8 +1060,8 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                             ) : (
                                 <div className="p-20 text-center border-2 border-dashed border-zinc-100 rounded-[40px] bg-zinc-50/50">
                                     <History size={48} className="mx-auto text-zinc-200 mb-6" />
-                                    <p className="text-xs font-black text-zinc-400 uppercase tracking-widest italic mb-2">{t("noHistoryFound")}</p>
-                                    <p className="text-[11px] text-zinc-400 font-bold max-w-xs mx-auto">Click on products to see them appear here!</p>
+                                    <p className="text-xs font-bold text-zinc-500 mb-2">{t("noHistoryFound")}</p>
+                                    <p className="text-[11px] text-zinc-400 font-medium max-w-xs mx-auto">Click on products to see them appear here!</p>
                                 </div>
                             )}
                         </div>
@@ -1008,7 +1073,6 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                             <div className="space-y-6 max-w-xl">
                                 {[
                                     { id: 'email', label: 'Email Notifications', desc: 'Get order updates and promo deals via email', state: emailNotif, setter: setEmailNotif },
-                                    { id: 'sms', label: 'SMS Notifications', desc: 'Get critical alerts via text message', state: smsNotif, setter: setSmsNotif },
                                     { id: 'orders', label: 'Order Updates', desc: 'Real-time updates on your active orders', state: orderUpdates, setter: setOrderUpdates },
                                 ].map((item) => (
                                     <div key={item.id} className="flex items-start justify-between p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
@@ -1017,7 +1081,11 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                             <p className="text-[11px] font-medium text-zinc-400 leading-normal">{item.desc}</p>
                                         </div>
                                         <button 
-                                            onClick={() => item.setter(!item.state)}
+                                            onClick={() => {
+                                                const newVal = !item.state;
+                                                item.setter(newVal);
+                                                saveNotif(item.id === 'email' ? 'emailNotif' : item.id === 'sms' ? 'smsNotif' : 'orderUpdates', newVal);
+                                            }}
                                             className={`relative w-12 h-6 rounded-full transition-all duration-300 flex items-center px-1 ${item.state ? 'bg-[var(--primary-color)]' : 'bg-zinc-300'}`}
                                         >
                                             <motion.div 
@@ -1033,7 +1101,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
 
                     {activeTab === "language" && (
                         <div className="p-8 md:p-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <h2 className="text-xl font-black text-zinc-900 uppercase italic mb-10">{t("selectLanguage")}</h2>
+                            <h2 className="text-xl font-bold text-zinc-900 mb-10">{t("selectLanguage")}</h2>
                             <div className="space-y-4">
                                 {(["English", "Tamil", "Hindi"] as const).map((lang) => (
                                     <button 
@@ -1047,7 +1115,7 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                                             </div>
                                             <span className={`font-bold ${language === lang ? "text-[var(--primary-color)]/90" : "text-zinc-600"}`}>{lang}</span>
                                         </div>
-                                        {language === lang && <div className="text-[10px] font-black text-[var(--primary-color)] uppercase tracking-widest">{t("active")}</div>}
+                                        {language === lang && <div className="text-[10px] font-bold text-[var(--primary-color)]">{t("active")}</div>}
                                     </button>
                                 ))}
                             </div>
@@ -1061,6 +1129,106 @@ export default function ShopperProfilePage({ params }: { params: Promise<{ slug:
                 isOpen={!!selectedOrderForTracking} 
                 onClose={() => setSelectedOrderForTracking(null)} 
             />
+
+            {/* Hidden Xerox-Friendly Invoice Template */}
+            <div id="invoice-print-template" className="hidden print:block bg-white text-black p-0">
+                <div className="flex justify-between items-start border-b-[3px] border-black pb-6 mb-8">
+                    <div>
+                        <h1 className="text-4xl font-extrabold tracking-tight uppercase mb-1">{storeName || "QICMART STORE"}</h1>
+                        <p className="text-lg font-bold tracking-[0.2em] text-zinc-600 uppercase">Tax Invoice</p>
+                    </div>
+                    <div className="text-right space-y-1">
+                        <p className="text-sm font-bold uppercase">Invoice No: <span className="font-black text-lg">#{selectedOrderForTracking?.id.substring(0, 8).toUpperCase()}</span></p>
+                        <p className="text-sm font-medium">Date: <span className="font-bold">{selectedOrderForTracking ? new Date(selectedOrderForTracking.createdAt).toLocaleDateString() : ""}</span></p>
+                        <p className="text-sm font-medium">Payment: <span className="font-bold uppercase">{selectedOrderForTracking?.payments?.[0]?.provider || "Prepaid"}</span></p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-12 mb-10">
+                    <div className="border-l-4 border-black pl-6">
+                        <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2">Billed To / Delivered To</h2>
+                        <div className="space-y-1">
+                            <p className="text-lg font-black uppercase">{selectedOrderForTracking?.customer?.firstName} {selectedOrderForTracking?.customer?.lastName}</p>
+                            <div className="text-sm font-medium leading-relaxed">
+                                {selectedOrderForTracking?.shippingAddress ? (
+                                    (() => {
+                                        try {
+                                            if (selectedOrderForTracking.shippingAddress.trim().startsWith('{')) {
+                                                const p = JSON.parse(selectedOrderForTracking.shippingAddress);
+                                                return (
+                                                    <div className="not-italic">
+                                                        <p>{p.address}</p>
+                                                        <p>{p.city}, {p.state} {p.pincode}</p>
+                                                    </div>
+                                                );
+                                            }
+                                        } catch(e) {}
+                                        return <p>{selectedOrderForTracking.shippingAddress}</p>;
+                                    })()
+                                ) : (
+                                    <p className="italic text-zinc-400">No address provided</p>
+                                )}
+                            </div>
+                            <p className="text-sm font-bold mt-2">Tel: {selectedOrderForTracking?.customer?.phone || mobile || "N/A"}</p>
+                            <p className="text-sm font-medium">{selectedOrderForTracking?.customer?.email || email}</p>
+                        </div>
+                    </div>
+                    <div className="text-right flex flex-col justify-end">
+                        <div className="bg-black text-white p-4 inline-block ml-auto">
+                            <p className="text-[10px] font-bold uppercase tracking-widest mb-1">Status</p>
+                            <p className="text-xl font-black uppercase tracking-tight">{selectedOrderForTracking?.status}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <table className="w-full border-collapse border-b-2 border-black">
+                    <thead>
+                        <tr className="bg-zinc-100 border-y-2 border-black">
+                            <th className="px-4 py-3 text-left text-xs font-black uppercase tracking-widest border-x border-black">Description</th>
+                            <th className="px-4 py-3 text-center text-xs font-black uppercase tracking-widest border-x border-black w-24">Qty</th>
+                            <th className="px-4 py-3 text-right text-xs font-black uppercase tracking-widest border-x border-black w-32">Price</th>
+                            <th className="px-4 py-3 text-right text-xs font-black uppercase tracking-widest border-x border-black w-40">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {selectedOrderForTracking?.items.map((item: any) => (
+                            <tr key={item.id} className="border-b border-zinc-200">
+                                <td className="px-4 py-4 text-sm font-bold border-x border-black uppercase">{item.product.name}</td>
+                                <td className="px-4 py-4 text-center text-sm font-medium border-x border-black">{item.quantity}</td>
+                                <td className="px-4 py-4 text-right text-sm font-medium border-x border-black">
+                                    ₹{item.price.toFixed(2)}
+                                </td>
+                                <td className="px-4 py-4 text-right text-sm font-black border-x border-black">
+                                    ₹{(item.quantity * item.price).toFixed(2)}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+
+                <div className="mt-8 flex justify-end">
+                    <div className="w-80 space-y-3">
+                        <div className="flex justify-between items-center text-sm font-medium">
+                            <span className="text-zinc-500 uppercase font-bold tracking-widest">Subtotal</span>
+                            <span className="font-bold">₹{selectedOrderForTracking?.total.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm font-medium">
+                            <span className="text-zinc-500 uppercase font-bold tracking-widest">Shipping</span>
+                            <span className="font-bold">FREE</span>
+                        </div>
+                        <div className="flex justify-between items-center pt-4 border-t-2 border-black">
+                            <span className="text-lg font-black uppercase tracking-tight">Grand Total</span>
+                            <span className="text-2xl font-black">
+                                ₹{selectedOrderForTracking?.total.toFixed(2)}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-12 pt-6 border-t border-zinc-100 text-center">
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">Thank you for your business • Computer Generated Invoice</p>
+                </div>
+            </div>
         </div>
     )
 }

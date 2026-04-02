@@ -6,6 +6,7 @@ import { ChevronLeft, Loader2, Check, Star, RefreshCw, AlertCircle, Upload, Zap,
 import { useDashboardStore } from "@/components/DashboardStoreProvider"
 import { motion, AnimatePresence } from "framer-motion"
 import MediaPicker from "@/components/dashboard/MediaPicker"
+import PremiumButton from "@/components/dashboard/PremiumButton"
 
 interface Product {
     id: string
@@ -263,7 +264,10 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
         seoDescription: "",
         focusKeyword: "",
         seoScore: 0,
+        shippingProfileId: "",
     })
+
+    const [shippingProfiles, setShippingProfiles] = useState<{id: string, name: string, isDefault: boolean}[]>([])
 
     const [picker, setPicker] = useState<{ open: boolean, field: 'cover' | 'gallery' | 'variation', variationIndex?: number }>({
         open: false,
@@ -278,6 +282,11 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                 const cRes = await fetch(categoriesUrl)
                 const cData = await cRes.json()
                 setCategories(Array.isArray(cData) ? cData : [])
+
+                const profilesUrl = ownerId ? `/api/dashboard/shipping/profiles?ownerId=${ownerId}` : "/api/dashboard/shipping/profiles"
+                const sRes = await fetch(profilesUrl)
+                const sData = await sRes.json()
+                setShippingProfiles(Array.isArray(sData) ? sData : [])
 
                 if (productId) {
                     const productUrl = ownerId ? `/api/dashboard/products?id=${productId}&ownerId=${ownerId}` : `/api/dashboard/products?id=${productId}`
@@ -317,6 +326,7 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                             seoDescription: p.seoDescription || "",
                             focusKeyword: p.focusKeyword || "",
                             seoScore: p.seoScore || 0,
+                            shippingProfileId: p.shippingProfileId || "",
                         }
                         setForm(initial)
                         setInitialForm(initial)
@@ -368,9 +378,8 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
         const formattedVariations = form.variations.map(v => ({
             ...v,
             price: parseFloat(String(v.price)) || 0,
-            stock: parseInt(String(v.stock)) || 0
         }))
-
+        
         const payload = {
             id: productId,
             name: form.name,
@@ -394,6 +403,7 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
             seoDescription: form.seoDescription,
             focusKeyword: form.focusKeyword,
             seoScore: form.seoScore,
+            shippingProfileId: form.shippingProfileId || null,
         }
 
         const url = ownerId ? `/api/dashboard/products?ownerId=${ownerId}` : "/api/dashboard/products"
@@ -483,6 +493,7 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
             seoDescription: form.seoDescription,
             focusKeyword: form.focusKeyword,
             seoScore: form.seoScore,
+            shippingProfileId: form.shippingProfileId || null,
         }
 
         const url = ownerId ? `/api/dashboard/products?ownerId=${ownerId}` : "/api/dashboard/products"
@@ -610,14 +621,15 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                         Cancel
                     </button>
 
-                    <button 
+                    <PremiumButton 
                         onClick={save}
                         disabled={saving || uploading}
-                        className="px-8 py-3 bg-indigo-600 text-white rounded-2xl text-[12px] font-bold hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-600/20 disabled:opacity-50 flex items-center gap-2"
+                        isLoading={saving}
+                        className="px-10"
+                        icon={Check}
                     >
-                        {saving ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}
-                        {productId ? "Update Product" : "Save Product"}
-                    </button>
+                        {productId ? "Update Details" : "Save Product"}
+                    </PremiumButton>
                 </div>
             </div>
 
@@ -819,6 +831,22 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                                             <div className="space-y-3">
                                                 <label className="text-[12px] font-bold text-zinc-400 capitalize ml-1">Product SKU</label>
                                                 <input value={form.sku} onChange={e => setForm(f => ({ ...f, sku: e.target.value }))} className="w-full px-6 py-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl text-sm font-bold outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all shadow-sm" placeholder="e.g. SKU-001" />
+                                            </div>
+                                            <div className="space-y-3">
+                                                <label className="text-[12px] font-bold text-zinc-400 capitalize ml-1">Shipping Profile</label>
+                                                <select 
+                                                    value={form.shippingProfileId} 
+                                                    onChange={e => setForm(f => ({ ...f, shippingProfileId: e.target.value }))}
+                                                    className="w-full px-6 py-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl text-sm font-semibold appearance-none outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all shadow-sm"
+                                                >
+                                                    <option value="">General Shipping</option>
+                                                    {shippingProfiles.map(p => (
+                                                        <option key={p.id} value={p.id}>
+                                                            {p.name} {p.isDefault ? "(General)" : ""}
+                                                         </option>
+                                                    ))}
+                                                </select>
+                                                <p className="text-[10px] text-zinc-400 font-medium ml-2 italic">Groups this product with others for specific shipping rates.</p>
                                             </div>
                                         </div>
                                     </div>

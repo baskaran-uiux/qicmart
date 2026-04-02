@@ -8,6 +8,9 @@ import {
 import { useSession } from "next-auth/react"
 import { QRCodeCanvas } from "qrcode.react"
 import { toast } from "sonner"
+import { FormSkeleton } from "@/components/dashboard/DashboardSkeletons"
+import PremiumButton from "@/components/dashboard/PremiumButton"
+import { useDashboardStore } from "@/components/DashboardStoreProvider"
 
 interface PaymentSettings {
     name: string
@@ -40,6 +43,7 @@ export default function PaymentPage() {
     const [saving, setSaving] = useState(false)
     const [saved, setSaved] = useState(false)
     const { data: session } = useSession()
+    const { t } = useDashboardStore()
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search)
@@ -98,12 +102,6 @@ export default function PaymentPage() {
 
     const update = (key: keyof PaymentSettings, val: any) => setSettings(s => ({ ...s, [key]: val }))
 
-    if (loading) return (
-        <div className="flex flex-col items-center justify-center h-96 gap-4 text-zinc-500">
-            <Loader2 className="animate-spin text-indigo-500" size={32} /> 
-            <p className="font-medium tracking-tight">Loading payment settings...</p>
-        </div>
-    )
 
     return (
         <div className="max-w-6xl mx-auto space-y-8 pb-20 animate-fade-in">
@@ -111,29 +109,33 @@ export default function PaymentPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3">
-                        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-black dark:text-white capitalize truncate">Payment Methods</h2>
+                        <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize truncate">Payment Methods</h2>
                         <span className="hidden sm:inline-flex px-3 py-1 bg-emerald-500/10 text-emerald-500 rounded-full text-[10px] font-bold capitalize border border-emerald-500/20 whitespace-nowrap">
                             Secure Integration
                         </span>
                     </div>
-                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-xs sm:text-sm font-medium tracking-normal">Configure how you receive payments from customers.</p>
+                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">Configure how you receive payments from customers.</p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                    <button
+                    <PremiumButton
                         onClick={handleSave}
-                        disabled={saving}
-                        className={`group flex items-center justify-center gap-3 px-8 sm:px-12 py-3.5 rounded-2xl text-[10px] font-bold capitalize transition-all shadow-xl active:scale-95 ${
-                            saved ? "bg-emerald-500 text-white" : "bg-indigo-600 dark:bg-white text-white dark:text-black hover:opacity-90 transition-all shadow-indigo-500/10"
-                        } disabled:opacity-60`}
+                        isLoading={saving}
+                        isSaved={saved}
+                        icon={saved ? Check : Save}
                     >
-                        {saving ? <Loader2 size={16} className="animate-spin" /> : saved ? <Check size={16} /> : <Save className="group-hover:scale-110 transition-transform" size={16} />}
-                        {saving ? "Saving..." : saved ? "Saved!" : "Save Changes"}
-                    </button>
+                        {t("saveChanges") || "Save Changes"}
+                    </PremiumButton>
                 </div>
             </div>
 
-            <div className="space-y-12">
+            {loading ? (
+                <div className="mt-12 space-y-8">
+                    <FormSkeleton />
+                    <FormSkeleton />
+                </div>
+            ) : (
+                <div className="space-y-12">
                 {/* UPI Payment Configuration */}
                 <section className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm transition-all hover:shadow-xl hover:shadow-indigo-500/5 mt-4">
                     <div className="p-8 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-800/20">
@@ -372,19 +374,19 @@ export default function PaymentPage() {
                         </div>
                     </div>
                 </section>
-            </div>
+                </div>
+            )}
 
             {/* Action Bar (Bottom) */}
             <div className="flex items-center justify-end pt-8 mt-12 border-t border-zinc-100 dark:border-zinc-800">
-                <button
+                <PremiumButton
                      onClick={handleSave}
-                     disabled={saving}
-                     className={`w-full sm:w-auto group flex items-center justify-center gap-3 px-8 sm:px-12 py-4 rounded-2xl text-sm font-bold capitalize transition-all shadow-xl active:scale-95 ${
-                         saved ? "bg-emerald-500 text-white" : "bg-indigo-600 dark:bg-white text-white dark:text-black hover:opacity-90 transition-all shadow-indigo-500/10"
-                     } disabled:opacity-60`}
+                     isLoading={saving}
+                     isSaved={saved}
+                     icon={saved ? Check : RefreshCw}
                  >
-                    {saving ? <Loader2 size={18} className="animate-spin" /> : saved ? <><Check size={18} /> Saved</> : <>Save Changes <RefreshCw size={16} className="group-hover:rotate-180 transition-transform duration-500" /></>}
-                </button>
+                    {t("saveChanges") || "Save Changes"}
+                </PremiumButton>
             </div>
         </div>
     )

@@ -76,7 +76,7 @@ export default function NewCustomPage() {
                         <ChevronLeft size={20} />
                     </Link>
                     <div>
-                        <h1 className="text-xl font-black italic tracking-tight">Create Masterpiece</h1>
+                        <h2 className="text-xl font-bold tracking-tight text-black dark:text-white capitalize">Create Page</h2>
                         <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">New Custom Page</p>
                     </div>
                 </div>
@@ -112,7 +112,7 @@ export default function NewCustomPage() {
                             <div className="space-y-2">
                                 <label className="text-[11px] font-black uppercase tracking-widest text-zinc-400 ml-1">URL Slug</label>
                                 <div className="relative group">
-                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-xs italic">/page/</div>
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-bold text-xs">/page/</div>
                                     <input 
                                         type="text"
                                         value={form.slug}
@@ -163,7 +163,7 @@ export default function NewCustomPage() {
                         <div className="space-y-6">
                             <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl border border-transparent hover:border-indigo-500/20 transition-all">
                                 <div className="space-y-0.5">
-                                    <p className="text-sm font-black italic">Public Status</p>
+                                    <p className="text-sm font-black">Public Status</p>
                                     <p className="text-[10px] font-bold text-zinc-500">Visible on storefront</p>
                                 </div>
                                 <label className="relative inline-flex items-center cursor-pointer">
@@ -196,7 +196,7 @@ export default function NewCustomPage() {
                     <Section card title="Aesthetics" icon={Sparkles}>
                         <div className="p-6 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl text-white space-y-4 shadow-xl shadow-indigo-500/20 relative overflow-hidden group">
                            <div className="relative z-10">
-                                <h4 className="font-black italic text-lg leading-tight mb-2 text-nowrap select-none">Design Your Identity</h4>
+                                <h4 className="font-black text-lg leading-tight mb-2 text-nowrap select-none">Design Your Identity</h4>
                                 <p className="text-xs font-bold text-white/80 leading-relaxed select-none">Every page is an opportunity to tell your customers who you are. Make it bold.</p>
                            </div>
                            <Sparkles className="absolute -right-4 top-0 opacity-20 group-hover:scale-150 transition-transform" size={100} />
@@ -206,7 +206,7 @@ export default function NewCustomPage() {
                     <Section card title="Live Preview" icon={Eye}>
                          <div className="aspect-[4/5] bg-zinc-100 dark:bg-zinc-800 rounded-3xl border-4 border-zinc-200 dark:border-zinc-800 overflow-hidden relative group">
                             <div className="absolute inset-0 flex items-center justify-center p-8 text-center bg-white/50 dark:bg-black/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                                <p className="text-xs font-black uppercase tracking-tighter italic">Preview will be available after saving</p>
+                                <p className="text-xs font-black uppercase tracking-tighter">Preview will be available after saving</p>
                             </div>
                             <div className="p-4 space-y-3 opacity-40 blur-[1px]">
                                 <div className="h-4 bg-zinc-300 dark:bg-zinc-700 rounded-full w-2/3 animate-pulse"></div>
@@ -231,7 +231,7 @@ function Section({ children, title, icon: Icon, card }: any) {
                 <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-xl">
                     <Icon size={18} strokeWidth={2.5} />
                 </div>
-                <h3 className="text-sm font-black uppercase tracking-[0.2em] text-zinc-400 italic">{title}</h3>
+                <h3 className="text-sm font-black uppercase tracking-[0.2em] text-zinc-400">{title}</h3>
             </div>
             {children}
         </div>

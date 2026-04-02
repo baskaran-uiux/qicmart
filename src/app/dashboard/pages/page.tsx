@@ -10,6 +10,7 @@ import {
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useDashboardStore } from "@/components/DashboardStoreProvider"
+import PremiumButton from "@/components/dashboard/PremiumButton"
 
 interface CustomPage {
     id: string
@@ -85,21 +86,17 @@ export default function CustomPagesPage() {
     return (
         <div className="max-w-[1400px] mx-auto space-y-10 pb-20">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                 <div>
-                    <h1 className="text-4xl font-black tracking-tight text-black dark:text-white flex items-center gap-3">
-                        <Sparkles className="text-indigo-500" size={32} />
-                        Custom Pages
-                    </h1>
-                    <p className="text-zinc-500 dark:text-zinc-400 font-medium mt-1">Design and publish static content for your premium storefront.</p>
+                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize truncate">Custom Pages</h2>
+                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">Design and publish static content for your premium storefront.</p>
                 </div>
-                <Link
+                <PremiumButton 
                     href={ownerId ? `/dashboard/pages/new?ownerId=${ownerId}` : "/dashboard/pages/new"}
-                    className="px-8 py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-2xl font-bold flex items-center gap-2 shadow-2xl hover:scale-105 active:scale-95 transition-all text-sm"
+                    icon={Plus}
                 >
-                    <Plus size={18} strokeWidth={2.5} />
                     Create New Page
-                </Link>
+                </PremiumButton>
             </div>
 
             {/* Quick Templates Section */}
@@ -111,7 +108,7 @@ export default function CustomPagesPage() {
                             <Plus size={24} strokeWidth={2.5} />
                         </div>
                         <div>
-                            <h3 className="text-2xl font-black tracking-tight italic">Quick Templates</h3>
+                            <h3 className="text-2xl font-black tracking-tight">Quick Templates</h3>
                             <p className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Jumpstart your store content</p>
                         </div>
                     </div>
@@ -150,7 +147,7 @@ export default function CustomPagesPage() {
             {/* Search & List */}
             <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-                    <h3 className="text-2xl font-black tracking-tighter italic">Manage Content</h3>
+                    <h3 className="text-2xl font-black tracking-tighter">Manage Content</h3>
                     <div className="relative w-full sm:w-96 group">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
                         <input 
@@ -187,7 +184,7 @@ export default function CustomPagesPage() {
                                                 </span>
                                             </div>
                                             <div className="flex flex-wrap items-center gap-4 text-[11px] font-bold text-zinc-400">
-                                                <span className="bg-zinc-50 dark:bg-zinc-800 px-2 py-0.5 rounded-md text-indigo-500 italic">/{page.slug}</span>
+                                                <span className="bg-zinc-50 dark:bg-zinc-800 px-2 py-0.5 rounded-md text-indigo-500">/{page.slug}</span>
                                                 <span className="flex items-center gap-1.5"><Eye size={14} /> {page.views} views</span>
                                                 <span className="flex items-center gap-1.5"><Clock size={14} /> {new Date(page.updatedAt).toLocaleDateString()}</span>
                                                 <span className="capitalize px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded-md">Theme: {page.template}</span>
@@ -235,13 +232,13 @@ export default function CustomPagesPage() {
                                     </div>
                                     <h4 className="text-3xl font-black text-black dark:text-white tracking-tight">Your Canvas is Empty</h4>
                                     <p className="text-zinc-500 font-bold mt-3 max-w-sm mx-auto uppercase text-xs tracking-widest">Start building your brand story with custom pages</p>
-                                    <Link
+                                    <PremiumButton 
                                         href={ownerId ? `/dashboard/pages/new?ownerId=${ownerId}` : "/dashboard/pages/new"}
-                                        className="mt-10 inline-flex items-center gap-2 px-10 py-5 bg-indigo-600 text-white rounded-[24px] font-black text-sm shadow-2xl hover:bg-indigo-700 transition-all hover:scale-105 active:scale-95"
+                                        icon={Plus}
+                                        className="mt-10"
                                     >
-                                        <Plus size={20} strokeWidth={3} />
                                         Make Magic
-                                    </Link>
+                                    </PremiumButton>
                                 </motion.div>
                         )}
                     </AnimatePresence>
@@ -270,7 +267,7 @@ function StatCard({ label, value, subtext, icon: Icon, color }: any) {
                     <h3 className="text-4xl font-black tracking-tighter text-black dark:text-white">
                         {typeof value === 'number' ? value.toLocaleString() : value}
                     </h3>
-                    <p className="text-[11px] font-bold text-zinc-500 italic">{subtext}</p>
+                    <p className="text-[11px] font-bold text-zinc-500">{subtext}</p>
                 </div>
             </div>
             <div className={`absolute -right-4 -bottom-4 w-24 h-24 rounded-full opacity-5 group-hover:opacity-20 transition-opacity bg-current ${colors[color].split(' ')[0]}`}></div>

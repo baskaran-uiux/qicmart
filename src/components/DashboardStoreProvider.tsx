@@ -20,6 +20,9 @@ interface DashboardStoreContextType {
     language: Language
     t: (key: TranslationKey) => string
     setLanguage: (lang: Language) => void
+    whatsappNumber?: string
+    whatsappMessage?: string
+    storeTheme?: string
 }
 
 const DashboardStoreContext = createContext<DashboardStoreContextType>({
@@ -37,7 +40,10 @@ const DashboardStoreContext = createContext<DashboardStoreContextType>({
     userImage: null,
     language: "English",
     t: (key: TranslationKey) => key,
-    setLanguage: () => {}
+    setLanguage: () => {},
+    whatsappNumber: "",
+    whatsappMessage: "",
+    storeTheme: "modern"
 })
 
 export function DashboardStoreProvider({ children, dashboardType = "1" }: { children: React.ReactNode, dashboardType?: string }) {
@@ -65,7 +71,8 @@ export function DashboardStoreProvider({ children, dashboardType = "1" }: { chil
                 language: lang,
                 t: (k: TranslationKey) => translations[lang]?.[k] || translations["English"][k] || k
             }))
-        }
+        },
+        storeTheme: "modern"
     })
 
     useEffect(() => {
@@ -94,7 +101,13 @@ export function DashboardStoreProvider({ children, dashboardType = "1" }: { chil
                     primaryColor: data.primaryColor || "purple",
                     userImage: data.userImage || null,
                     language: lang,
-                    t: (key: TranslationKey) => translations[lang]?.[key] || translations["English"][key] || key
+                    t: (key: TranslationKey) => {
+                        const dict = (translations as any)[lang] || translations["English"];
+                        return dict[key] || (translations["English"] as any)[key] || key;
+                    },
+                    whatsappNumber: data.whatsappNumber || "",
+                    whatsappMessage: data.whatsappMessage || "",
+                    storeTheme: data.storeTheme || "modern"
                 }))
             })
             .catch((err) => {

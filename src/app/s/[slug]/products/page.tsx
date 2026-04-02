@@ -56,6 +56,7 @@ export default async function CatalogPage({
                 categories={categories}
                 slug={slug} 
                 currency={store.currency} 
+                themeConfig={store.themeConfig}
             />
         </Suspense>
     )

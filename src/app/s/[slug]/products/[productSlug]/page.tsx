@@ -51,6 +51,13 @@ export default async function ProductDetailsPage({
         })
     }
 
+    // Parse themeConfig for extra settings
+    let themeConfig: any = {}
+    try { if (store.themeConfig) themeConfig = JSON.parse(store.themeConfig) } catch (e) {}
+    
+    const storeTheme = themeConfig.storeTheme || "modern"
+    const layoutStyle = (storeTheme === 'nextgen' || storeTheme === 'sports') ? storeTheme : (themeConfig.layoutStyle || "default")
+
     // Serialize to handle Date/Decimal types from Prisma
     const product = JSON.parse(JSON.stringify(productData))
     const relatedProducts = JSON.parse(JSON.stringify(relatedProductsData))
@@ -61,6 +68,8 @@ export default async function ProductDetailsPage({
             relatedProducts={relatedProducts}
             slug={slug} 
             currency={store.currency} 
+            storeTheme={storeTheme}
+            layoutStyle={layoutStyle}
         />
     )
 }

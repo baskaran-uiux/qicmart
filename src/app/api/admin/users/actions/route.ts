@@ -67,13 +67,15 @@ export async function POST(req: Request) {
                 return NextResponse.json({ message: "User and associated data deleted successfully" })
 
             case "RESET_PASSWORD":
-                const defaultPassword = "password123"
-                const hashedPassword = await bcrypt.hash(defaultPassword, 10)
+                const { newPassword } = payload || {}
+                if (!newPassword) return NextResponse.json({ error: "New password is required" }, { status: 400 })
+
+                const hashedPassword = await bcrypt.hash(newPassword, 10)
                 await prisma.user.update({
                     where: { id: userId },
                     data: { password: hashedPassword }
                 })
-                return NextResponse.json({ message: `Password reset to: ${defaultPassword}` })
+                return NextResponse.json({ message: "Password reset successfully" })
 
             default:
                 return NextResponse.json({ error: "Invalid action" }, { status: 400 })
