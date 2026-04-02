@@ -1,7 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Montserrat:wght@400;600;700;800;900&family=Open+Sans:wght@400;600;700;800&family=Ubuntu:wght@400;500;700&family=Lato:wght@400;700;900&family=Outfit:wght@400;600;700;900&display=swap');
 @import "tailwindcss";
 @config "../../tailwind.config.js";
-@import "../styles/fonts.css";
-@import "../styles/theme.css";
 
 :root {
   --background: #fdfdfd;
@@ -27,7 +26,6 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-instrument: 'Instrument Serif', serif;
 }
 
 @layer utilities {
