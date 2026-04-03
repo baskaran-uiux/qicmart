@@ -9,8 +9,16 @@ import PremiumGetStartedButton from "./PremiumGetStartedButton";
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
+    const [isMobile, setIsMobile] = useState(false);
+ 
     useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 1024);
+        };
+        
+        handleResize();
+        window.addEventListener("resize", handleResize);
+        
         const handleScroll = () => {
             if (window.scrollY > 100) {
                 setIsScrolled(true);
@@ -20,7 +28,10 @@ const Navbar = () => {
         };
 
         window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+            window.removeEventListener("resize", handleResize);
+        };
     }, []);
 
     const navLinks = [
@@ -35,20 +46,20 @@ const Navbar = () => {
             <motion.div
                 initial={{ y: -120, opacity: 0, scale: 0.98 }}
                 animate={{
-                    width: isScrolled ? (isMobileMenuOpen ? "100%" : "min(90%, 850px)") : "100%",
-                    y: isScrolled ? 16 : 0,
+                    width: (isScrolled || isMobile) ? (isMobileMenuOpen ? "100%" : (isMobile ? "calc(100% - 32px)" : "min(90%, 850px)")) : "100%",
+                    y: (isScrolled || isMobile) ? 16 : 0,
                     opacity: 1,
                     scale: 1,
-                    borderRadius: isScrolled && !isMobileMenuOpen ? "9999px" : "0px",
-                    backgroundColor: isScrolled ? "rgba(10, 10, 12, 0.8)" : "rgba(0, 0, 0, 0.95)",
-                    paddingLeft: isScrolled ? "2rem" : "5%",
-                    paddingRight: isScrolled ? "2rem" : "5%",
-                    height: isScrolled ? "68px" : "96px",
+                    borderRadius: (isScrolled || isMobile) && !isMobileMenuOpen ? (isMobile ? "24px" : "9999px") : "0px",
+                    backgroundColor: (isScrolled || isMobile) ? "rgba(10, 10, 12, 0.85)" : "rgba(0, 0, 0, 0.95)",
+                    paddingLeft: (isScrolled || isMobile) ? (isMobile ? "1.5rem" : "2rem") : "5%",
+                    paddingRight: (isScrolled || isMobile) ? (isMobile ? "1rem" : "2rem") : "5%",
+                    height: (isScrolled || isMobile) ? (isMobile ? "60px" : "68px") : "96px",
                 }}
                 className={`
                     flex items-center justify-between backdrop-blur-3xl 
                     border-b border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.8)] pointer-events-auto
-                    ${isScrolled ? 'border border-white/20 ring-1 ring-white/10 shadow-indigo-500/10' : ''}
+                    ${(isScrolled || isMobile) ? 'border border-white/20 ring-1 ring-white/10 shadow-indigo-500/10' : ''}
                     transition-all duration-500
                 `}
             >
@@ -57,9 +68,9 @@ const Navbar = () => {
                     <Link href="/" className="flex items-center gap-4 group">
                         <motion.div 
                             animate={{ 
-                                width: isScrolled ? 36 : 48,
-                                height: isScrolled ? 36 : 48,
-                                borderRadius: isScrolled ? "12px" : "16px"
+                                width: (isScrolled || isMobile) ? 32 : 48,
+                                height: (isScrolled || isMobile) ? 32 : 48,
+                                borderRadius: (isScrolled || isMobile) ? "10px" : "16px"
                             }}
                             className="bg-indigo-600 flex items-center justify-center overflow-hidden shrink-0 shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform"
                         >
@@ -67,8 +78,8 @@ const Navbar = () => {
                         </motion.div>
                         <motion.span 
                             animate={{ 
-                                fontSize: isScrolled ? "1.25rem" : "1.875rem",
-                                letterSpacing: isScrolled ? "-0.04em" : "-0.07em"
+                                fontSize: (isScrolled || isMobile) ? "1.1rem" : "1.875rem",
+                                letterSpacing: (isScrolled || isMobile) ? "-0.04em" : "-0.07em"
                             }}
                             className="font-black tracking-[-0.07em] uppercase italic text-white shrink-0 leading-none"
                         >
@@ -128,14 +139,14 @@ const Navbar = () => {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className="fixed inset-0 bg-black/60 backdrop-blur-md z-40 pointer-events-auto"
+                            className="fixed inset-0 bg-black/80 backdrop-blur-xl z-40 pointer-events-auto"
                         />
                         <motion.div
-                            initial={{ x: "100%" }}
-                            animate={{ x: 0 }}
-                            exit={{ x: "100%" }}
-                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            className="fixed top-0 right-0 h-full w-[80%] max-w-[360px] bg-zinc-900/95 backdrop-blur-3xl border-l border-white/10 p-10 z-50 pointer-events-auto shadow-[-25px_0_60px_rgba(0,0,0,0.5)] flex flex-col"
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-[400px] h-auto max-h-[80vh] bg-zinc-950/90 backdrop-blur-3xl border border-white/10 p-10 z-50 pointer-events-auto shadow-[0_0_100px_rgba(79,70,229,0.3)] flex flex-col rounded-[40px] overflow-hidden"
                         >
                             {/* Close Button Inside Menu */}
                             <button 

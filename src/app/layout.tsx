@@ -46,7 +46,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${outfit.variable} ${montserrat.variable} ${poppins.variable} ${playfair.variable} ${opensans.variable} ${ubuntu.variable} ${lato.variable} ${jetbrains.variable} font-sans bg-background text-foreground antialiased transition-colors duration-300`}>
+      <body className={`${inter.variable} ${outfit.variable} ${montserrat.variable} ${poppins.variable} ${playfair.variable} ${opensans.variable} ${ubuntu.variable} ${lato.variable} ${jetbrains.variable} ${outfit.className} bg-background text-foreground antialiased transition-colors duration-300`}>
         <Providers>
           {children}
           <Toaster richColors position="top-right" closeButton />
