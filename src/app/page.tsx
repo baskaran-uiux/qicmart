@@ -116,11 +116,11 @@ export default async function RootPage() {
                     {/* Centered Atmosphere Glow */}
                     <div className="absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-indigo-600/10 blur-[150px] rounded-full" />
                     
-                    {/* Animated Glow Orbs */}
-                    <GlowOrb className="top-[10%] left-[10%] bg-indigo-500/20" delay={0} duration={25} />
-                    <GlowOrb className="top-[40%] right-[15%] bg-purple-600/15" delay={5} duration={30} size="w-[500px] h-[500px]" />
-                    <GlowOrb className="bottom-[10%] left-[20%] bg-indigo-400/10" delay={2} duration={22} size="w-80 h-80" />
-                    <GlowOrb className="top-[20%] left-1/2 bg-purple-500/10" delay={8} duration={28} size="w-[600px] h-[600px]" />
+                    {/* Animated Glow Orbs - Hidden on mobile for performance */}
+                    <GlowOrb className="hidden lg:block top-[10%] left-[10%] bg-indigo-500/20" delay={0} duration={25} />
+                    <GlowOrb className="hidden lg:block top-[40%] right-[15%] bg-purple-600/15" delay={5} duration={30} size="w-[500px] h-[500px]" />
+                    <GlowOrb className="hidden lg:block bottom-[10%] left-[20%] bg-indigo-400/10" delay={2} duration={22} size="w-80 h-80" />
+                    <GlowOrb className="hidden lg:block top-[20%] left-1/2 bg-purple-500/10" delay={8} duration={28} size="w-[600px] h-[600px]" />
 
                     {/* Left: Human Hand */}
                     <Motion.div 
@@ -185,7 +185,7 @@ export default async function RootPage() {
                         <span className="mono-label">READY TO LAUNCH</span>
                     </div>
 
-                    <h1 className="text-6xl md:text-8xl font-black tracking-[calc(-0.04em)] mb-6 leading-[0.9] uppercase italic">
+                    <h1 className="text-[2.8rem] sm:text-6xl md:text-8xl font-black tracking-[calc(-0.04em)] mb-6 leading-[0.9] uppercase italic">
                         <StaggeredText text="LAUNCH YOUR" className="block text-white" />
                         <StaggeredText 
                             text="ONLINE STORE" 
@@ -193,8 +193,9 @@ export default async function RootPage() {
                         />
                     </h1>
 
-                    <p className="text-zinc-400 text-lg md:text-2xl max-w-3xl mx-auto mb-10 font-medium leading-relaxed drop-shadow-md">
-                        No coding required. Qicmart is the ultimate platform to build your website, manage inventory, process payments, and scale your business globally in minutes.
+                    <p className="text-zinc-400 text-base md:text-2xl max-w-2xl mx-auto mb-10 font-medium leading-relaxed drop-shadow-md px-4">
+                        <span className="hidden sm:inline">No coding required. Qicmart is the ultimate platform to build your website, manage inventory, process payments, and scale your business globally in minutes.</span>
+                        <span className="sm:hidden">Build, manage, and scale your online store in minutes. No coding required.</span>
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
@@ -226,7 +227,7 @@ export default async function RootPage() {
                             viewport={{ once: true }}
                             whileHover={{ y: -10 }}
                             transition={{ delay: i * 0.1, duration: 0.8 }}
-                            className="relative p-6 md:p-16 bg-[#0a0a0c] border border-white/5 beveled-sm text-center group hover:border-indigo-500/50 hover:bg-[#0f0f12] transition-all duration-300"
+                            className="relative p-6 sm:p-10 md:p-16 bg-[#0a0a0c] border border-white/5 beveled-sm text-center group hover:border-indigo-500/50 hover:bg-[#0f0f12] transition-all duration-300"
                         >
                             <div className="absolute top-0 left-0 w-1 h-12 bg-indigo-500/0 group-hover:bg-indigo-500/50 transition-all" />
                             
@@ -286,7 +287,7 @@ export default async function RootPage() {
                                 viewport={{ once: true }}
                                 transition={{ delay: i * 0.1, duration: 0.8 }}
                                 whileHover={{ scale: 1.02 }}
-                                className="relative p-10 bg-zinc-900/40 border border-white/5 beveled group overflow-hidden transition-all duration-300"
+                                className="relative p-7 sm:p-10 bg-zinc-900/40 border border-white/5 beveled group overflow-hidden transition-all duration-300"
                             >
                                 {/* Corner Brackets (Tactical Edge) */}
                                 <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-indigo-500/0 group-hover:border-indigo-500/40 transition-all duration-500" />
@@ -354,7 +355,7 @@ export default async function RootPage() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: i * 0.2, duration: 0.8 }}
-                                className="relative p-12 text-center group"
+                                className="relative p-8 sm:p-12 text-center group"
                             >
                                 <div className="w-20 h-20 bg-indigo-600/10 rounded-full flex items-center justify-center mx-auto mb-10 border border-indigo-500/20 relative z-10 group-hover:bg-indigo-600 transition-all duration-500">
                                     <span className="absolute -top-4 -right-4 bg-zinc-950 border border-indigo-500/30 text-[10px] font-black w-10 h-10 rounded-full flex items-center justify-center text-indigo-400">
