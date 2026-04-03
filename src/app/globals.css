@@ -63,6 +63,16 @@ html {
     animation: scroll-rtl 30s linear infinite;
   }
 
+  @keyframes gradient-slow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .animate-gradient-slow {
+    animation: gradient-slow 8s ease infinite;
+  }
+
   .premium-card {
     @apply bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl border border-zinc-200/50 dark:border-white/5 rounded-[32px] shadow-sm hover:shadow-2xl transition-all duration-500;
   }

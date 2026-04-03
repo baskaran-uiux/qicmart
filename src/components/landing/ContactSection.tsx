@@ -59,27 +59,28 @@ const ContactSection = () => {
     }
 
     return (
-        <section id="contact" className="py-32 relative overflow-hidden bg-zinc-950">
+        <section id="contact" className="py-10 md:py-20 relative overflow-hidden bg-zinc-950">
             {/* Tactical Grid Background */}
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
                  style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
             
             <div className="max-w-4xl mx-auto px-6 relative z-10">
                 <Motion.div
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 40 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="text-center mb-16"
+                    transition={{ duration: 0.8 }}
+                    className="text-center mb-12"
                 >
-                    <div className="mono-label mb-6 flex items-center justify-center gap-4">
+                    <div className="mono-label mb-4 flex items-center justify-center gap-4">
                         <span className="h-px w-8 bg-indigo-500/30" />
                         / DIRECT_CHANNEL_HQ
                         <span className="h-px w-8 bg-indigo-500/30" />
                     </div>
-                    <h2 className="text-4xl md:text-6xl font-black italic tracking-tighter text-white mb-6">
+                    <h2 className="text-3xl md:text-6xl font-black italic tracking-tighter text-white mb-6">
                         Establish <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-600">Contact</span>.
                     </h2>
-                    <p className="text-zinc-500 font-medium max-w-xl mx-auto">
+                    <p className="text-zinc-500 font-medium max-w-xl mx-auto text-sm md:text-base">
                         Need technical support or custom infrastructure? Our command center is standing by to assist with your deployment.
                     </p>
                 </Motion.div>
@@ -88,7 +89,7 @@ const ContactSection = () => {
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    className="bg-zinc-900/50 backdrop-blur-3xl border border-white/5 rounded-[40px] p-8 md:p-12 beveled-lg relative overflow-hidden"
+                    className="bg-zinc-900/50 backdrop-blur-3xl border border-white/5 rounded-3xl md:rounded-[40px] p-6 md:p-12 beveled-lg relative overflow-hidden"
                 >
                     {/* Subtle Internal Glow */}
                     <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-600/10 blur-[100px] rounded-full" />

@@ -51,12 +51,18 @@ export default function PricingSection() {
     }
 
     return (
-        <section id="pricing" className="py-32 relative overflow-hidden bg-[#020205]">
+        <section id="pricing" className="py-16 md:py-32 relative overflow-hidden bg-[#020205]">
             <div className="max-w-7xl mx-auto px-6 relative z-10">
-                <div className="text-center mb-16">
+                <Motion.div 
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8 }}
+                    className="text-center mb-10 md:mb-16"
+                >
                     <Motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
                         className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6"
                     >
@@ -68,7 +74,7 @@ export default function PricingSection() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="text-5xl md:text-7xl font-bold text-white mb-6"
+                        className="text-4xl md:text-7xl font-bold text-white mb-6"
                     >
                         Flexible Pricing Plans
                     </Motion.h2>
@@ -81,9 +87,9 @@ export default function PricingSection() {
                     >
                         Transparent pricing for businesses of all sizes. Scale your infrastructure as you grow with our planetary-scale edge network.
                     </Motion.p>
-
+ 
                     {/* Toggle */}
-                    <div className="flex justify-center mb-20">
+                    <div className="flex justify-center mb-10 md:mb-20">
                         <div className="relative p-1 bg-white/5 rounded-2xl border border-white/10 flex items-center">
                             <Motion.div
                                 className="absolute bg-indigo-600 rounded-xl h-[calc(100%-8px)]"
@@ -108,17 +114,17 @@ export default function PricingSection() {
                             </button>
                         </div>
                     </div>
-                </div>
+                </Motion.div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
                     {plans.map((plan, i) => (
                         <Motion.div
                             key={plan.name}
-                            initial={{ opacity: 0, y: 30 }}
+                            initial={{ opacity: 0, y: 40 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ delay: i * 0.1 }}
-                            className={`p-10 rounded-[40px] bg-white/[0.03] border transition-all duration-500 hover:bg-white/[0.05] flex flex-col h-full group relative ${
+                            transition={{ delay: i * 0.1, duration: 0.8 }}
+                            className={`p-6 md:p-10 rounded-3xl md:rounded-[40px] bg-white/[0.03] border transition-all duration-500 hover:bg-white/[0.05] flex flex-col h-full group relative ${
                                 plan.highlight 
                                     ? "border-indigo-500/50 shadow-[0_0_50px_rgba(79,70,229,0.15)] ring-1 ring-indigo-500/20" 
                                     : "border-white/5 hover:border-white/10"
@@ -143,7 +149,7 @@ export default function PricingSection() {
                             <p className="text-zinc-500 text-sm mb-8">{plan.desc}</p>
 
                             <div className="mb-10 flex items-baseline gap-2">
-                                <span className="text-5xl font-bold text-white tracking-tight">
+                                <span className="text-3xl md:text-5xl font-bold text-white tracking-tight">
                                     {period === "monthly" ? plan.monthlyPrice : plan.yearlyPrice}
                                 </span>
                                 {(plan.monthlyPrice.includes("₹") || plan.monthlyPrice === "Custom") && (

@@ -107,7 +107,7 @@ export default async function RootPage() {
             <Navbar />
 
             {/* Hero Section */}
-            <section className="relative pt-48 pb-32 px-4 flex flex-col items-center justify-center min-h-screen text-center overflow-hidden">
+            <section id="home" className="relative pt-20 pb-16 md:pt-32 md:pb-24 px-4 flex flex-col items-center justify-center min-h-[60vh] md:min-h-[85vh] text-center overflow-hidden">
                 {/* Convergence Hands Backdrop */}
                 <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden">
                     {/* Cyber Grid Background */}
@@ -187,7 +187,10 @@ export default async function RootPage() {
 
                     <h1 className="text-6xl md:text-8xl font-black tracking-[calc(-0.04em)] mb-6 leading-[0.9] uppercase italic">
                         <StaggeredText text="LAUNCH YOUR" className="block text-white" />
-                        <StaggeredText text="ONLINE STORE" className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-white" />
+                        <StaggeredText 
+                            text="ONLINE STORE" 
+                            className="block text-transparent bg-clip-text bg-[linear-gradient(to_right,#6366f1,#a855f7,#fff,#6366f1)] bg-[length:200%_auto] animate-gradient-slow" 
+                        />
                     </h1>
 
                     <p className="text-zinc-400 text-lg md:text-2xl max-w-3xl mx-auto mb-10 font-medium leading-relaxed drop-shadow-md">
@@ -196,7 +199,11 @@ export default async function RootPage() {
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
                         <Motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                            <LoginButton />
+                            <a href="#pricing" className="relative group/btn bg-white text-black px-10 py-4 rounded-full font-medium text-base tracking-tight shadow-[0_20px_50px_rgba(255,255,255,0.15)] hover:shadow-[0_20px_60px_rgba(255,255,255,0.3)] transition-all flex items-center gap-3">
+                                <Rocket className="w-5 h-5 shrink-0" />
+                                Get Started
+                                <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                            </a>
                         </Motion.div>
                         <button className="flex items-center gap-3 mono-label !text-zinc-300 hover:!text-white transition-colors group">
                             <Code2 size={16} /> SEE HOW IT WORKS <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
@@ -205,35 +212,37 @@ export default async function RootPage() {
                 </Motion.div>
 
                 {/* Stats Grid */}
-                <div className="relative z-10 mt-32 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+                <div className="relative z-10 mt-16 md:mt-32 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
                     {[
-                        { label: 'Secure Uptime', value: '99.99%', icon: Network },
+                        { label: 'Secure Uptime', value: '99.99%', icon: ShieldCheck },
                         { label: 'Stores Created', value: '5,000+', icon: BarChart3 },
-                        { label: 'Monthly Sales', value: '$45M+', icon: Cpu },
+                        { label: 'Monthly Sales', value: '₹450Cr+', icon: Cpu },
                         { label: 'Setup Time', value: '< 2 Min', icon: Zap },
                     ].map((stat, i) => (
                         <Motion.div
                             key={stat.label}
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 40 }}
                             whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
                             whileHover={{ y: -10 }}
-                            transition={{ delay: i * 0.1 }}
-                            className="relative p-16 bg-[#0a0a0c] border border-white/5 beveled-sm text-center group hover:border-indigo-500/50 hover:bg-[#0f0f12] transition-all duration-300"
+                            transition={{ delay: i * 0.1, duration: 0.8 }}
+                            className="relative p-6 md:p-16 bg-[#0a0a0c] border border-white/5 beveled-sm text-center group hover:border-indigo-500/50 hover:bg-[#0f0f12] transition-all duration-300"
                         >
                             <div className="absolute top-0 left-0 w-1 h-12 bg-indigo-500/0 group-hover:bg-indigo-500/50 transition-all" />
                             
                             <div className="relative z-10 flex flex-col items-center">
-                                <div className="w-16 h-16 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl flex items-center justify-center mb-10 group-hover:scale-110 group-hover:bg-indigo-500/20 transition-all duration-500">
-                                    <stat.icon size={28} className="text-indigo-500 opacity-60 group-hover:opacity-100 transition-opacity" />
+                                <div className="w-12 h-12 md:w-16 md:h-16 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl flex items-center justify-center mb-4 md:mb-10 group-hover:scale-110 group-hover:bg-indigo-500/20 transition-all duration-500">
+                                    <stat.icon size={24} className="text-indigo-500 md:hidden opacity-60 group-hover:opacity-100" />
+                                    <stat.icon size={28} className="text-indigo-500 hidden md:block opacity-60 group-hover:opacity-100 transition-opacity" />
                                 </div>
-                                <div className="text-4xl font-black mb-3 italic tracking-tighter group-hover:text-white transition-colors">
+                                <div className="text-xl md:text-4xl font-black mb-1 md:mb-3 italic tracking-tighter group-hover:text-white transition-colors">
                                     {stat.value}
                                 </div>
-                                <div className="mono-label text-zinc-500 text-xs tracking-[0.2em] group-hover:text-indigo-400/60 transition-colors uppercase">
+                                <div className="mono-label text-zinc-500 text-[8px] md:text-xs tracking-[0.2em] group-hover:text-indigo-400/60 transition-colors uppercase">
                                     {stat.label}
                                 </div>
                             </div>
-
+ 
                             {/* Background Glow Effect */}
                             <div className="absolute inset-0 bg-indigo-500/0 group-hover:bg-indigo-500/5 blur-[50px] transition-all -z-10 rounded-full" />
                         </Motion.div>
@@ -242,14 +251,20 @@ export default async function RootPage() {
             </section>
 
             {/* Tactical Features */}
-            <section className="py-32 relative border-b border-white/5">
+            <section id="features" className="py-16 md:py-32 relative border-b border-white/5">
                 <GlowOrb className="top-[20%] left-[-10%] bg-indigo-500/5" delay={2} duration={40} size="w-[600px] h-[600px]" />
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex flex-col md:flex-row items-end justify-between mb-20 gap-8">
-                        <div className="text-left">
+                        <Motion.div 
+                            initial={{ opacity: 0, y: 40 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8 }}
+                            className="text-left"
+                        >
                             <div className="mono-label mb-4">/ TACTICAL_ADVANTAGE</div>
                             <h2 className="text-4xl md:text-6xl font-black uppercase italic leading-none">Everything you need <br /> to <span className="text-indigo-500">Dominate</span>.</h2>
-                        </div>
+                        </Motion.div>
                         <div className="mono-label text-right opacity-30 hidden md:block">
                             [SCROLL TO EXPLORE_MODULES]
                         </div>
@@ -266,8 +281,10 @@ export default async function RootPage() {
                         ].map((item, i) => (
                             <Motion.div
                                 key={item.title}
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                whileInView={{ opacity: 1, scale: 1 }}
+                                initial={{ opacity: 0, y: 40 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.1, duration: 0.8 }}
                                 whileHover={{ scale: 1.02 }}
                                 className="relative p-10 bg-zinc-900/40 border border-white/5 beveled group overflow-hidden transition-all duration-300"
                             >
@@ -299,16 +316,22 @@ export default async function RootPage() {
                 </div>
             </section>
 
-            <section className="py-32 relative overflow-hidden bg-[#050507]">
+            <section className="py-16 md:py-32 relative overflow-hidden bg-[#050507]">
                 {/* Background Glows */}
                 <GlowOrb className="top-1/2 left-[-10%] bg-indigo-500/10" delay={0} duration={30} size="w-[600px] h-[600px]" />
                 <GlowOrb className="bottom-[10%] right-[-10%] bg-purple-600/10" delay={15} duration={35} size="w-[500px] h-[500px]" />
 
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
-                    <div className="text-center mb-24">
+                    <Motion.div 
+                        initial={{ opacity: 0, y: 40 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.8 }}
+                        className="text-center mb-24"
+                    >
                         <div className="mono-label mb-4">/ THREE_EASY_STEPS</div>
                         <h2 className="text-4xl md:text-7xl font-black uppercase italic leading-none">The <span className="text-indigo-500 text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-600">Blueprint</span> for Success.</h2>
-                    </div>
+                    </Motion.div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-0 relative">
                         {/* Connecting Line (Desktop) - Repositioned Below Icons */}
@@ -327,9 +350,10 @@ export default async function RootPage() {
                         ].map((item, i) => (
                             <Motion.div
                                 key={item.step}
-                                initial={{ opacity: 0, y: 30 }}
+                                initial={{ opacity: 0, y: 40 }}
                                 whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.2 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.2, duration: 0.8 }}
                                 className="relative p-12 text-center group"
                             >
                                 <div className="w-20 h-20 bg-indigo-600/10 rounded-full flex items-center justify-center mx-auto mb-10 border border-indigo-500/20 relative z-10 group-hover:bg-indigo-600 transition-all duration-500">
@@ -351,7 +375,7 @@ export default async function RootPage() {
             </section>
 
             {/* Visual Showcase: Master Control Center */}
-            <section className="py-20 relative overflow-hidden">
+            <section className="py-12 md:py-20 relative overflow-hidden">
                 {/* Background Atmosphere */}
                 <GlowOrb className="top-[20%] right-[5%] bg-indigo-600/10" delay={5} duration={40} size="w-[700px] h-[700px]" />
                 <GlowOrb className="bottom-0 left-[10%] bg-purple-500/5" delay={10} duration={30} size="w-[500px] h-[500px]" />
@@ -359,9 +383,10 @@ export default async function RootPage() {
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
                         <Motion.div
-                            initial={{ opacity: 0, x: -50 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 1 }}
+                            initial={{ opacity: 0, y: 40 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8 }}
                         >
                             <div className="mono-label mb-6">/ ALL_IN_ONE_DASHBOARD</div>
                             <h2 className="text-4xl md:text-6xl font-black uppercase italic leading-[0.9] mb-10">
@@ -388,9 +413,10 @@ export default async function RootPage() {
                         </Motion.div>
 
                         <Motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 1.2, ease: "easeOut" }}
+                            initial={{ opacity: 0, y: 40 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8, delay: 0.2 }}
                             className="relative group lg:mt-0 mt-12"
                         >
                             <div className="absolute -inset-4 bg-indigo-600/20 blur-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
@@ -410,76 +436,64 @@ export default async function RootPage() {
             {/* Performance Showcase: Global Edge Network */}
             <section className="py-12 relative overflow-hidden bg-zinc-950/50 border-y border-white/5">
                 <div className="max-w-7xl mx-auto px-6">
-                    <div className="relative rounded-[60px] overflow-hidden border border-white/5 group bg-zinc-950">
-                        <Motion.div
-                            initial={{ opacity: 0, scale: 1.1 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 1.5 }}
-                        >
-                            <img 
-                                src="/global_edge_network_1775213867607.png" 
-                                alt="Global Edge Network visualization" 
-                                className="w-full h-auto grayscale-[50%] group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
-                            />
-                        </Motion.div>
-                        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/80 via-transparent to-zinc-950/80" />
-                        
+                    <div className="relative rounded-[60px] overflow-hidden border border-white/5 group bg-zinc-950 flex flex-col">
                         {/* Centered Heading Overlaying Glow */}
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12 pointer-events-none">
+                        <div className="relative md:absolute md:inset-0 flex flex-col items-center justify-start md:justify-center text-center p-6 md:p-12 pointer-events-none z-20 mt-20 md:mt-0">
                             <Motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.5 }}
                                 className="mb-4 relative"
                             >
-                                {/* Vertical Scanning Line */}
-                                <Motion.div 
-                                    animate={{ 
-                                        top: ["-50%", "150%"],
-                                        opacity: [0, 1, 1, 0]
-                                    }}
-                                    transition={{
-                                        duration: 4,
-                                        repeat: Infinity,
-                                        ease: "linear"
-                                    }}
-                                    className="absolute left-0 right-0 h-[2px] bg-indigo-500/50 shadow-[0_0_20px_rgba(79,70,229,1)] z-20"
-                                />
-
-                                <div className="mono-label mb-6 !text-indigo-400">/ GLOBAL_INFRASTRUCTURE</div>
-                                <h2 className="text-4xl md:text-7xl font-black uppercase italic leading-none max-w-4xl mx-auto drop-shadow-[0_0_30px_rgba(79,70,229,0.5)]">
-                                    Retail on the <br />
-                                    <span className="text-white text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-400 to-indigo-600">Planetary Edge</span>.
+                                <div className="mono-label mb-6 !text-indigo-400">/ QICMART_OPERATIONS</div>
+                                <h2 className="text-3xl md:text-7xl font-black uppercase italic leading-none max-w-4xl mx-auto drop-shadow-[0_0_30px_rgba(79,70,229,0.5)]">
+                                    Commerce powered by the <br />
+                                    <span className="text-white text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-400 to-indigo-600">Global Edge</span>.
                                 </h2>
                             </Motion.div>
                         </div>
-
+ 
                         {/* Interactive Markers */}
-                        <div className="absolute bottom-0 left-0 w-full grid grid-cols-2 md:grid-cols-4 gap-8 p-12 items-end">
+                        <div className="relative md:absolute md:bottom-0 md:left-0 w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 p-6 md:p-12 items-end mt-12 md:mt-0 z-30">
                             {[
-                                { label: 'Node Clusters', value: '450+' },
-                                { label: 'Latency Node', value: '<2.4ms' },
-                                { label: 'Throughput', value: '1.2 PB/s' },
-                                { label: 'Uptime Protocol', value: 'Tier 5' }
+                                { label: 'Retail Clusters', value: '1,200+' },
+                                { label: 'Edge Latency', value: '<1.2ms' },
+                                { label: 'Daily Requests', value: '250M+' },
+                                { label: 'Security Shield', value: 'Shield v3' }
                             ].map((stat, i) => (
                                 <Motion.div
                                     key={stat.label}
                                     initial={{ opacity: 0, y: 50 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     transition={{ delay: i * 0.1 + 0.5 }}
-                                    className="bg-black/40 backdrop-blur-3xl border border-white/10 p-8 beveled-sm"
+                                    className="bg-black/40 backdrop-blur-3xl border border-white/10 p-6 md:p-8 beveled-sm"
                                 >
-                                    <div className="text-4xl font-black italic text-white mb-2">{stat.value}</div>
-                                    <div className="mono-label !text-indigo-400">{stat.label}</div>
+                                    <div className="text-2xl md:text-4xl font-black italic text-white mb-2">{stat.value}</div>
+                                    <div className="mono-label !text-indigo-400 text-[10px] md:text-xs">{stat.label}</div>
                                 </Motion.div>
                             ))}
                         </div>
+
+                        {/* Visualization - Moved to bottom for mobile flow */}
+                        <Motion.div
+                            initial={{ opacity: 0, scale: 1.1 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 1.5 }}
+                            className="relative md:absolute md:inset-0 z-10 order-last"
+                        >
+                            <img 
+                                src="/global_edge_network_1775213867607.png" 
+                                alt="Global Edge Network visualization" 
+                                className="w-full h-auto grayscale-0 md:grayscale-[50%] group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
+                            />
+                            <div className="hidden md:block absolute inset-0 bg-gradient-to-b from-zinc-950/80 via-transparent to-zinc-950/80" />
+                        </Motion.div>
                     </div>
                 </div>
             </section>
 
             {/* Mobile Showcase: Retail Sovereignty */}
-            <section className="py-48 relative overflow-hidden">
+            <section className="py-16 md:py-48 relative overflow-hidden">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
                         <Motion.div
@@ -502,10 +516,10 @@ export default async function RootPage() {
                         </Motion.div>
 
                         <Motion.div
-                            initial={{ opacity: 0, x: 50 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 1 }}
-                            className="order-1 lg:order-2"
+                            initial={{ opacity: 0, y: 40 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8 }}
                         >
                             <div className="mono-label mb-6">/ MOBILE_FIRST_DESIGN</div>
                             <h2 className="text-4xl md:text-6xl font-black uppercase italic leading-[0.9] mb-10">
@@ -539,43 +553,41 @@ export default async function RootPage() {
             <FAQSection />
 
             {/* Final CTA */}
-            <section className="py-48 px-6 text-center relative overflow-hidden">
-                {/* Background Decor */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[1200px] bg-indigo-600/20 blur-[250px] rounded-full animate-pulse" />
-                <GlowOrb className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-purple-600/10" delay={0} duration={10} size="w-[800px] h-[800px]" />
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-50 mix-blend-overlay" />
+            <section className="py-20 md:py-48 px-6 text-center relative overflow-hidden bg-gradient-to-b from-black via-[#050507] to-[#020205]">
+                {/* Background Decor - Linear Gradient instead of Pulse */}
+                <div className="absolute top-0 left-0 w-full h-[300px] md:h-[600px] bg-gradient-to-b from-indigo-600/10 via-transparent to-transparent pointer-events-none" />
+                <GlowOrb className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-purple-600/5" delay={0} duration={10} size="w-[800px] h-[800px]" />
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 brightness-50 mix-blend-overlay pointer-events-none" />
                 
                 <div className="relative z-10 max-w-4xl mx-auto">
                     <Motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                     >
-                        <div className="mono-label mb-10 flex items-center justify-center gap-4">
+                        <div className="mono-label mb-6 md:mb-10 flex items-center justify-center gap-4">
                             <span className="h-px w-8 bg-indigo-500/30" />
                             / INITIALIZE_SUCCESS_STORY
                             <span className="h-px w-8 bg-indigo-500/30" />
                         </div>
-                        <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-16 italic uppercase leading-[0.9] text-white">
+                        <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 md:mb-12 italic uppercase leading-[0.9] text-white">
                             Own your <br /> 
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-white to-indigo-400 drop-shadow-[0_0_30px_rgba(79,70,229,0.3)]">
-                                Retail Empire
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-indigo-600 to-purple-500 drop-shadow-[0_0_30px_rgba(79,70,229,0.5)]">
+                                RETAIL EMPIRE
                             </span> today.
                         </h2>
                         
-                        <div className="flex flex-col items-center gap-10">
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 md:gap-10">
                             <Motion.div 
                                 whileHover={{ scale: 1.05 }} 
                                 whileTap={{ scale: 0.95 }}
                                 className="relative group"
                             >
                                 <div className="absolute -inset-4 bg-indigo-500/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                <div className="relative">
-                                    <LoginButton 
-                                        label="Start Your Journey" 
-                                        variant="sparkle"
-                                        className="!px-12 !py-4"
-                                    />
-                                </div>
+                                <a href="#pricing" className="relative group/btn bg-white text-black px-12 py-5 rounded-full font-black text-lg uppercase tracking-tighter shadow-[0_20px_50px_rgba(255,255,255,0.2)] hover:shadow-[0_20px_70px_rgba(255,255,255,0.4)] transition-all flex items-center gap-3">
+                                    <Rocket className="w-6 h-6" />
+                                    Get Started
+                                    <ArrowRight className="w-6 h-6 group-hover/btn:translate-x-2 transition-transform" />
+                                </a>
                             </Motion.div>
                             
                             <div className="space-y-4 text-center">
@@ -591,7 +603,7 @@ export default async function RootPage() {
             <ContactSection />
 
             {/* Operational Hub (Footer) */}
-            <footer className="py-32 px-6 border-t border-white/5 bg-zinc-950 relative z-20">
+            <footer className="py-16 md:py-32 px-6 border-t border-white/5 bg-zinc-950 relative z-20">
                 <div className="max-w-7xl mx-auto">
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-16 mb-24">
                         {/* Branding & Status */}

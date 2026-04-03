@@ -31,40 +31,48 @@ export default function FAQSection() {
     const [activeIndex, setActiveIndex] = useState<number | null>(null)
 
     return (
-        <section id="faq" className="py-32 relative overflow-hidden bg-[#020205] border-t border-white/5">
+        <section id="faq" className="py-16 md:py-32 relative overflow-hidden bg-[#020205] border-t border-white/5">
             <div className="max-w-7xl mx-auto px-6 relative z-10">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-20">
                     
                     {/* Left Column: Heading & Contact Card */}
                     <div className="space-y-12">
-                        <div>
-                            <Motion.div
-                                initial={{ opacity: 0, x: -20 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                viewport={{ once: true }}
-                                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6"
-                            >
-                                <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
-                                <span className="text-[10px] font-mono tracking-widest text-zinc-400 uppercase">SUPPORT_RESOURCES</span>
-                            </Motion.div>
-                            <Motion.h2 
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: 0.1 }}
-                                className="text-5xl md:text-6xl font-bold text-white leading-tight"
-                            >
-                                Frequently asked <br />
-                                <span className="text-zinc-600">questions</span>
-                            </Motion.h2>
-                        </div>
+                        <Motion.div 
+                            initial={{ opacity: 0, y: 40 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8 }}
+                            className="space-y-12"
+                        >
+                            <div>
+                                <Motion.div
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    whileInView={{ opacity: 1, scale: 1 }}
+                                    viewport={{ once: true }}
+                                    className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6"
+                                >
+                                    <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+                                    <span className="text-[10px] font-mono tracking-widest text-zinc-400 uppercase">SUPPORT_RESOURCES</span>
+                                </Motion.div>
+                                <Motion.h2 
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: 0.1 }}
+                                    className="text-5xl md:text-6xl font-bold text-white leading-tight"
+                                >
+                                    Frequently asked <br />
+                                    <span className="text-zinc-600">questions</span>
+                                </Motion.h2>
+                            </div>
+                        </Motion.div>
 
                         {/* Still have questions? Card */}
                         <Motion.div 
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
+                            initial={{ opacity: 0, y: 40 }}
+                            whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ delay: 0.3 }}
+                            transition={{ delay: 0.3, duration: 0.8 }}
                             className="p-10 rounded-[40px] bg-white/5 border border-white/10 relative overflow-hidden group"
                         >
                             <div className="relative z-10">
@@ -91,10 +99,10 @@ export default function FAQSection() {
                         {faqs.map((faq, index) => (
                             <Motion.div
                                 key={index}
-                                initial={{ opacity: 0, y: 20 }}
+                                initial={{ opacity: 0, y: 40 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
-                                transition={{ delay: index * 0.1 }}
+                                transition={{ delay: index * 0.1, duration: 0.8 }}
                                 className={`rounded-[32px] border transition-all duration-300 overflow-hidden ${
                                     activeIndex === index 
                                         ? "bg-white/[0.05] border-white/20" 
