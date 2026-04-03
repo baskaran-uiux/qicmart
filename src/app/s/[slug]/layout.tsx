@@ -13,6 +13,7 @@ import { Providers } from "@/components/Providers"
 import { LanguageProvider, useLanguage } from "@/context/LanguageContext"
 import { formatPrice } from "./utils"
 import CouponPopup from "@/components/storefront/CouponPopup"
+import AIChatbot from "@/components/storefront/AIChatbot"
 
 interface StoreCategory {
     id: string
@@ -1047,6 +1048,10 @@ export default function StoreLayout({
     }
 
     const config = storeInfo.themeConfig ? JSON.parse(storeInfo.themeConfig) : {}
+    const storeTheme = config.storeTheme || "modern"
+    const layoutStyle = storeTheme === 'nextgen' ? 'nextgen' : (config.layoutStyle || "default")
+    const isAura = storeTheme === "aura"
+    const isSports = storeTheme === "sports"
     const fontStyle = config.fontStyle || "modern"
 
     const FONT_MAP: Record<string, { heading: string; body: string }> = {
@@ -1205,9 +1210,7 @@ export default function StoreLayout({
         )
     }
 
-    const storeTheme = config.storeTheme || "modern"
-    const isAura = storeTheme === "aura"
-    const isSports = storeTheme === "sports"
+
 
     return (
         <Providers>
@@ -1251,7 +1254,10 @@ export default function StoreLayout({
                             )}
 
                             <CouponPopup storeId={storeInfo.id} currency={storeInfo.currency} />
-                            <main className={`relative flex-1 ${isSports && !isHomePage ? 'pt-24 lg:pt-40' : ''}`}>
+                            <main className={`relative flex-1 
+                                ${isSports && !isHomePage ? 'pt-24 lg:pt-40' : 
+                                  layoutStyle === 'nextgen' ? 'pt-20 lg:pt-36' : 
+                                  !isSports && !isAura ? 'pt-20' : ''}`}>
                                 {/* Ambient Glows */}
                                 <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
                                     <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[var(--primary-color)]/5 blur-[120px] rounded-full animate-pulse" />

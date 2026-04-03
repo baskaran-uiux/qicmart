@@ -173,9 +173,9 @@ export default function HeroBanner({ slug, banners = [], layoutStyle = "default"
                         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                         className="absolute inset-0 cursor-grab active:cursor-grabbing touch-pan-y"
                     >
-                        {activeSlides.map((s: Banner) => {
-                            const currentIdx = activeSlides.indexOf(s);
-                            if (currentIdx !== current) return null;
+                        {(function() {
+                            const s = activeSlides[current];
+                            if (!s) return null;
                             const isDefault = (s as any).bg !== undefined;
                             const isVideo = s.type === 'video' || s.image.match(/\.(mp4|webm|ogg|mov)$/i);
                             
@@ -204,11 +204,12 @@ export default function HeroBanner({ slug, banners = [], layoutStyle = "default"
                                                 />
                                             ) : (
                                                 <div className={`w-full h-full relative flex items-center justify-center`}>
-                                                    <img
+                                                    <OptimizedImage
                                                         src={s.image}
                                                         alt={s.title}
+                                                        fill
+                                                        priority={current === 0}
                                                         className={`w-full h-full object-cover animate-zoom-banner`}
-                                                        loading="eager"
                                                     />
                                                 </div>
                                             )
@@ -273,8 +274,8 @@ export default function HeroBanner({ slug, banners = [], layoutStyle = "default"
                                         )}
                                     </div>
                                 </div>
-                            )
-                        })}
+                            );
+                        })()}
                     </motion.div>
                 </AnimatePresence>
 

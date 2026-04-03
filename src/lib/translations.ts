@@ -1,5 +1,22 @@
 export const translations = {
     English: {
+        // --- AI Campaign ---
+        createAiCampaign: "Create AI Campaign",
+        campaignTopic: "Campaign Topic",
+        generateCampaign: "Generate Campaign",
+        aiContent: "AI Content",
+        copyContent: "Copy Content",
+        placeholderCampaignTopic: "e.g. Summer Sale 50% off on all products",
+
+        // --- AI Magic Studio ---
+        aiStudio: "AI Magic Studio",
+        removeBackground: "Remove Background",
+        applyMockup: "Apply Mockup",
+        suggestedScenes: "Suggested Scenes",
+        analyzingProduct: "Analyzing Product...",
+        processingImage: "Processing Image...",
+        savingToGallery: "Saving to Gallery...",
+
         // --- Core / Navigation ---
         dashboard: "Dashboard",
         overview: "Dashboard",
@@ -506,6 +523,23 @@ export const translations = {
         notifyDashboardDesc: "Show order alerts in the dashboard notification bell."
     },
     Tamil: {
+        // --- AI Campaign ---
+        createAiCampaign: "AI பிரச்சாரத்தை உருவாக்கு",
+        campaignTopic: "பிரச்சாரத்தின் தலைப்பு",
+        generateCampaign: "உருவாக்கு",
+        aiContent: "AI உள்ளடக்கம்",
+        copyContent: "நகலெடு",
+        placeholderCampaignTopic: "உதாரணம்: 50% ஆஃபர் அதிரடித் தள்ளுபடி",
+
+        // --- AI Magic Studio ---
+        aiStudio: "AI மேஜிக் ஸ்டுடியோ",
+        removeBackground: "பின்னணியை நீக்கு",
+        applyMockup: "மாக்கப் பயன்படுத்து",
+        suggestedScenes: "பரிந்துரைக்கப்படும் காட்சிகள்",
+        analyzingProduct: "தயாரிப்பு ஆய்வு செய்யப்படுகிறது...",
+        processingImage: "படம் செயலாக்கப்படுகிறது...",
+        savingToGallery: "கேலரியில் சேமிக்கப்படுகிறது...",
+
         // --- Core / Navigation ---
         dashboard: "டாஷ்போர்டு",
         overview: "டாஷ்போர்டு",

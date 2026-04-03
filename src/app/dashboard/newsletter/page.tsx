@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react"
 import { 
     Search, Mail, Calendar, Download, Trash2, 
-    Loader2, Users, ArrowUpRight, TrendingUp,
-    ExternalLink, MailOpen, UserCheck
+    Loader2, Users, TrendingUp,
+    ExternalLink, MailOpen, X, Sparkles, Copy, Check
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useDashboardStore } from "@/components/DashboardStoreProvider"
 import { NewsletterSkeleton, KpiCardSkeleton } from "@/components/dashboard/DashboardSkeletons"
+import { toast } from "sonner"
 
 interface Subscriber {
     id: string
@@ -17,11 +18,16 @@ interface Subscriber {
 }
 
 export default function NewsletterPage() {
-    const { t } = useDashboardStore()
+    const { t, id: storeId, updateCredits, name: storeName } = useDashboardStore()
     const [subscribers, setSubscribers] = useState<Subscriber[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState("")
     const [exporting, setExporting] = useState(false)
+    const [isAiModalOpen, setIsAiModalOpen] = useState(false)
+    const [campaignTopic, setCampaignTopic] = useState("")
+    const [isGenerating, setIsGenerating] = useState(false)
+    const [aiOutput, setAiOutput] = useState("")
+    const [copied, setCopied] = useState(false)
 
     const fetchSubscribers = async () => {
         try {
@@ -54,6 +60,44 @@ export default function NewsletterPage() {
         } catch (error) {
             console.error("Delete failed:", error)
         }
+    }
+
+    const handleGenerateAI = async () => {
+        if (!campaignTopic) {
+            toast.error(t('placeholderCampaignTopic'))
+            return
+        }
+        setIsGenerating(true)
+        setAiOutput("")
+        try {
+            const res = await fetch(`/api/ai?storeId=${storeId}&type=marketing`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    prompt: campaignTopic,
+                    context: { storeName }
+                })
+            })
+            const data = await res.json()
+            if (data.error) throw new Error(data.error)
+            
+            // Remove markdown bold (stars)
+            const cleanText = data.response.replace(/\*\*/g, "")
+            setAiOutput(cleanText)
+            
+            if (data.creditsRemaining !== undefined) updateCredits(data.creditsRemaining)
+        } catch (error: any) {
+            toast.error(error.message || "Failed to generate campaign")
+        } finally {
+            setIsGenerating(false)
+        }
+    }
+
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText(aiOutput)
+        setCopied(true)
+        toast.success(t('linkCopied'))
+        setTimeout(() => setCopied(false), 2000)
     }
 
     const exportToCSV = () => {
@@ -97,13 +141,21 @@ export default function NewsletterPage() {
                     <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize">{t('newsletterTitle')}</h2>
                     <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">{t('newsletterSummary')}</p>
                 </div>
-                <button 
-                    onClick={exportToCSV}
-                    disabled={subscribers.length === 0 || exporting}
-                    className="flex items-center gap-2 px-6 py-3 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black rounded-2xl text-[14px] font-bold hover:bg-zinc-800 dark:hover:bg-white transition-all active:scale-95 shadow-xl disabled:opacity-50"
-                >
-                    <Download size={18} /> {exporting ? t('exporting') : t('exportToCSV')}
-                </button>
+                <div className="flex flex-wrap items-center gap-3">
+                    <button 
+                        onClick={() => setIsAiModalOpen(true)}
+                        className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl text-[14px] font-bold hover:bg-indigo-700 transition-all active:scale-95 shadow-lg shadow-indigo-600/20"
+                    >
+                        <Sparkles size={18} /> {t('createAiCampaign')}
+                    </button>
+                    <button 
+                        onClick={exportToCSV}
+                        disabled={subscribers.length === 0 || exporting}
+                        className="flex items-center gap-2 px-6 py-3 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black rounded-2xl text-[14px] font-bold hover:bg-zinc-800 dark:hover:bg-white transition-all active:scale-95 shadow-xl disabled:opacity-50"
+                    >
+                        <Download size={18} /> {exporting ? t('exporting') : t('exportToCSV')}
+                    </button>
+                </div>
             </div>
 
             {/* Stats Cards */}
@@ -234,6 +286,83 @@ export default function NewsletterPage() {
                     {t('connectMarketingTools')} <ExternalLink size={14} />
                 </button>
             </div>
+
+            {/* AI Campaign Modal */}
+            <AnimatePresence>
+                {isAiModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm">
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-[32px] shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800"
+                        >
+                            <div className="p-8 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-950/20">
+                                <div className="flex items-center gap-3 text-indigo-600">
+                                    <div className="p-3 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-600/20">
+                                        <Sparkles size={20} />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-black dark:text-white">{t('createAiCampaign')}</h3>
+                                </div>
+                                <button onClick={() => setIsAiModalOpen(false)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl text-zinc-400 transition-colors">
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar text-left text-black dark:text-white">
+                                <div className="space-y-3">
+                                    <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest px-1">{t('campaignTopic')}</label>
+                                    <div className="relative group">
+                                        <input 
+                                            type="text" 
+                                            placeholder={t('placeholderCampaignTopic')}
+                                            value={campaignTopic}
+                                            onChange={(e) => setCampaignTopic(e.target.value)}
+                                            className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-[20px] text-[15px] focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none text-black dark:text-white transition-all font-medium"
+                                        />
+                                        <button 
+                                            onClick={handleGenerateAI}
+                                            disabled={isGenerating || !campaignTopic}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-indigo-600/20"
+                                        >
+                                            {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <TrendingUp size={16} />} 
+                                            {t('generateCampaign')}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {aiOutput && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="space-y-3"
+                                    >
+                                        <div className="flex items-center justify-between px-1">
+                                            <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{t('aiContent')}</label>
+                                            <button 
+                                                onClick={copyToClipboard}
+                                                className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-bold text-[11px] uppercase tracking-wider transition-colors"
+                                            >
+                                                {copied ? <Check size={14} /> : <Copy size={14} />}
+                                                {copied ? "Copied!" : t('copyContent')}
+                                            </button>
+                                        </div>
+                                        <div className="p-6 bg-zinc-50 dark:bg-black rounded-[24px] border border-zinc-200 dark:border-zinc-800 font-medium text-[14px] leading-relaxed text-zinc-800 dark:text-zinc-200 whitespace-pre-wrap min-h-[200px] border-l-4 border-l-indigo-500 shadow-inner overflow-y-auto">
+                                            {aiOutput}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </div>
+
+                            <div className="p-8 bg-zinc-50/50 dark:bg-zinc-950/20 border-t border-zinc-100 dark:border-zinc-800">
+                                <p className="text-[11px] text-zinc-400 font-medium text-center italic opacity-80">
+                                    ✨ Powered by 2.5 Flash Lite • High precision marketing strategist
+                                </p>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     )
 }

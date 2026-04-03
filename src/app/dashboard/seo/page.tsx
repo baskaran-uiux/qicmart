@@ -20,12 +20,54 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { SEOSkeleton } from "@/components/dashboard/DashboardSkeletons";
+import { useDashboardStore } from "@/components/DashboardStoreProvider";
+import { Sparkles, Loader2 } from "lucide-react";
 
 export default function SEOManagerPage() {
     const [activeTab, setActiveTab] = useState("global");
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [score, setScore] = useState(0);
+    const { id: storeId, aiCredits, name: storeName } = useDashboardStore();
+    const [isGenerating, setIsGenerating] = useState<string | null>(null);
+
+    const generateAISEO = async (field: 'title' | 'description' | 'bulk') => {
+        if (aiCredits <= 0) {
+            toast.error("Insufficient AI credits");
+            return;
+        }
+
+        setIsGenerating(field);
+        try {
+            const res = await fetch(`/api/ai?storeId=${storeId}&type=seo`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    prompt: field === 'title' 
+                        ? `Generate a highly optimized, high-CTR search title for an e-commerce store named "${storeName}". Max 60 chars.`
+                        : field === 'description'
+                        ? `Generate a persuasive, keyword-rich meta description for an e-commerce store named "${storeName}". Max 160 chars.`
+                        : `Identify the best SEO settings for an e-commerce store named "${storeName}".`,
+                    context: { storeName }
+                })
+            });
+
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+
+            if (field === 'title') {
+                setSettings(prev => ({ ...prev, seoTitle: data.response }));
+            } else if (field === 'description') {
+                setSettings(prev => ({ ...prev, seoDescription: data.response }));
+            }
+            toast.success("AI SEO generated successfully!");
+        } catch (err: any) {
+            toast.error(err.message || "AI generation failed");
+        } finally {
+            setIsGenerating(null);
+        }
+    };
+
     const [settings, setSettings] = useState({
         seoTitle: "",
         seoDescription: "",
@@ -141,7 +183,9 @@ export default function SEOManagerPage() {
                                 settings={settings} 
                                 setSettings={setSettings} 
                                 handleSave={handleSave} 
-                                saving={saving} 
+                                saving={saving}
+                                isGenerating={isGenerating}
+                                generateAISEO={generateAISEO}
                             />
                         )}
                         {activeTab === "analytics" && <SearchAnalytics data={analytics} />}
@@ -154,7 +198,7 @@ export default function SEOManagerPage() {
     );
 }
 
-function GlobalSEOSettings({ settings, setSettings, handleSave, saving }: { settings: any, setSettings: any, handleSave: any, saving: boolean }) {
+function GlobalSEOSettings({ settings, setSettings, handleSave, saving, isGenerating, generateAISEO }: { settings: any, setSettings: any, handleSave: any, saving: boolean, isGenerating: string | null, generateAISEO: any }) {
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'ogImage' | 'favicon') => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
@@ -177,8 +221,18 @@ function GlobalSEOSettings({ settings, setSettings, handleSave, saving }: { sett
                         </div>
 
                         <div className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Store Search Title</label>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between ml-1">
+                                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Store Search Title</label>
+                                    <button 
+                                        onClick={() => generateAISEO('title')}
+                                        disabled={!!isGenerating}
+                                        className="flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-indigo-500/20 transition-all"
+                                    >
+                                        {isGenerating === 'title' ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} fill="currentColor" />}
+                                        AI Generate
+                                    </button>
+                                </div>
                                 <input 
                                     value={settings.seoTitle}
                                     onChange={e => setSettings({ ...settings, seoTitle: e.target.value })}
@@ -186,8 +240,18 @@ function GlobalSEOSettings({ settings, setSettings, handleSave, saving }: { sett
                                     placeholder="e.g. Qicmart - The Premium SaaS Marketplace"
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Meta Description</label>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between ml-1">
+                                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Meta Description</label>
+                                    <button 
+                                        onClick={() => generateAISEO('description')}
+                                        disabled={!!isGenerating}
+                                        className="flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-indigo-500/20 transition-all"
+                                    >
+                                        {isGenerating === 'description' ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} fill="currentColor" />}
+                                        AI Generate
+                                    </button>
+                                </div>
                                 <textarea 
                                     value={settings.seoDescription}
                                     onChange={e => setSettings({ ...settings, seoDescription: e.target.value })}

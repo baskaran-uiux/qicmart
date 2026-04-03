@@ -282,5 +282,3 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
         </Motion.div>
     )
 }
-
-

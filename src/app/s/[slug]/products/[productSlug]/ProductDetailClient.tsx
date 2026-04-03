@@ -95,7 +95,7 @@ export default function ProductDetailClient({
             // LocalStorage Tracking for "Recently Viewed"
             const viewed = localStorage.getItem("recentlyViewedProducts")
             const products = viewed ? JSON.parse(viewed) : []
-            const images = JSON.parse(product.images)
+            const images = typeof product.images === 'string' ? JSON.parse(product.images) : product.images
             const currentItem = {
                 id: product.id,
                 name: product.name,
@@ -111,12 +111,12 @@ export default function ProductDetailClient({
         }
     }, [product.id, !!session])
 
-    const images: string[] = JSON.parse(product.images)
+    const images: string[] = typeof product.images === 'string' ? JSON.parse(product.images) : product.images
     const [activeIndex, setActiveIndex] = useState(0)
     const activeImage = images[activeIndex] || ""
     // Parse attributes and variations
-    const attributes = JSON.parse(product.attributes || "[]")
-    const variations = JSON.parse(product.variations || "[]")
+    const attributes = typeof product.attributes === 'string' ? JSON.parse(product.attributes || "[]") : product.attributes
+    const variations = typeof product.variations === 'string' ? JSON.parse(product.variations || "[]") : product.variations
 
     const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() => {
         if (product.type === "VARIABLE" && attributes.length > 0) {

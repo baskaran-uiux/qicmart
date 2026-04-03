@@ -5,11 +5,64 @@ import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { 
-    Zap, Shield, Smartphone, Globe, ArrowRight, CheckCircle2, 
-    Star, Users, ChevronRight, BarChart3, Rocket, MessageCircle
+    Zap, Shield, Globe, ArrowRight, Star, 
+    BarChart3, Rocket, MessageCircle, Layout, Code2, 
+    Cpu, Network, Check, 
+    Twitter, Github, Linkedin, Mail, Headphones, Book, Globe2,
+    Terminal, Database, Layers, Bot, Sparkles, ShieldCheck, Activity,
+    Plus, Minus, ChevronDown
 } from "lucide-react"
 import * as Motion from "framer-motion/client"
 import LoginButton from "@/components/auth/LoginButton"
+
+import Navbar from "@/components/landing/Navbar"
+import SmoothScroll from "@/components/landing/SmoothScroll"
+import PricingSection from "@/components/landing/PricingSection"
+import FAQSection from "@/components/landing/FAQSection"
+import ContactSection from "@/components/landing/ContactSection"
+
+// Staggered Text Component for Kzero Effect
+const StaggeredText = ({ text, className }: { text: string, className?: string }) => {
+    const words = text.split(" ");
+    return (
+        <span className={className}>
+            {words.map((word, i) => (
+                <Motion.span
+                    key={i}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                        duration: 0.5,
+                        delay: i * 0.1,
+                        ease: [0.2, 0.65, 0.3, 0.9],
+                    }}
+                    className="inline-block mr-[0.25em]"
+                >
+                    {word}
+                </Motion.span>
+            ))}
+        </span>
+    );
+};
+
+// Reusable Glow Orb for Atmosphere
+const GlowOrb = ({ className, delay = 0, duration = 20, size = "w-96 h-96" }: { className?: string, delay?: number, duration?: number, size?: string }) => (
+    <Motion.div
+        animate={{
+            x: [0, 100, -50, 0],
+            y: [0, -50, 100, 0],
+            scale: [1, 1.2, 0.9, 1],
+            opacity: [0.1, 0.2, 0.1]
+        }}
+        transition={{
+            duration: duration,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: delay
+        }}
+        className={`absolute rounded-full blur-[120px] mix-blend-screen pointer-events-none ${size} ${className}`}
+    />
+);
 
 export default async function RootPage() {
     const session = await getServerSession(authOptions)
@@ -32,182 +85,598 @@ export default async function RootPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#03060b] text-white selection:bg-indigo-500/30 selection:text-indigo-200 overflow-x-hidden">
-            {/* Background Spotlights */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-600/20 blur-[120px] animate-pulse" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-600/10 blur-[120px]" />
-                <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-blue-600/10 blur-[120px] delay-700" />
+        <SmoothScroll>
+            <div className="min-h-screen bg-[#000000] text-white selection:bg-indigo-500/30 selection:text-indigo-200 overflow-hidden font-sans relative">
+            {/* Kzero-style Background Overlay */}
+            <div className="fixed inset-0 z-0 pointer-events-none">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(79,70,229,0.15)_0%,transparent_50%)]" />
+                <div className="absolute inset-0 scanlines opacity-[0.03]" />
+                
+                {/* Abstract 3D Wireframe Grid (Animated) */}
+                <svg className="absolute w-full h-full opacity-[0.2]" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5"/>
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#grid)" />
+                </svg>
             </div>
 
-            {/* Navigation */}
-            <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-[#03060b]/60 backdrop-blur-xl">
-                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-2 group cursor-pointer">
-                        <div className="w-11 h-11 bg-indigo-600 rounded-2xl overflow-hidden flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform">
-                            <img src="/logo.png" alt="QICMART Logo" className="w-full h-full object-cover" />
-                        </div>
-                        <span className="text-xl font-black tracking-tight italic uppercase">QIC<span className="text-indigo-500">MART</span></span>
-                    </div>
-                    
-                    <div className="hidden md:flex items-center gap-10">
-                        {['Features', 'Solutions', 'Pricing', 'Resources'].map((item) => (
-                            <Link key={item} href="#" className="text-sm font-semibold text-zinc-400 hover:text-white transition-colors tracking-wide uppercase text-[11px]">
-                                {item}
-                            </Link>
-                        ))}
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        <LoginButton />
-                    </div>
-                </div>
-            </nav>
+            {/* Dynamic Navbar */}
+            <Navbar />
 
             {/* Hero Section */}
-            <section className="relative pt-44 pb-32 px-6">
-                <div className="max-w-7xl mx-auto text-center">
-                    <Motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-8 animate-bounce-subtle">
-                            <Star size={12} className="fill-indigo-400" /> Trusted by 5,000+ Store Owners
-                        </span>
-                        <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-8 leading-[1.05] italic uppercase">
-                            Build Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-blue-500">Digital Empire</span> <br />
-                            In Record Time.
-                        </h1>
-                        <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto mb-12 font-medium leading-relaxed">
-                            Stop struggling with complex e-commerce setups. QICMART gives you the tools to launch, manage, and scale your online store with professional speed.
-                        </p>
+            <section className="relative pt-48 pb-32 px-4 flex flex-col items-center justify-center min-h-screen text-center overflow-hidden">
+                {/* Convergence Hands Backdrop */}
+                <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden">
+                    {/* Cyber Grid Background */}
+                    <div className="cyber-grid absolute inset-0 opacity-40" />
+                    
+                    {/* Centered Atmosphere Glow */}
+                    <div className="absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-indigo-600/10 blur-[150px] rounded-full" />
+                    
+                    {/* Animated Glow Orbs */}
+                    <GlowOrb className="top-[10%] left-[10%] bg-indigo-500/20" delay={0} duration={25} />
+                    <GlowOrb className="top-[40%] right-[15%] bg-purple-600/15" delay={5} duration={30} size="w-[500px] h-[500px]" />
+                    <GlowOrb className="bottom-[10%] left-[20%] bg-indigo-400/10" delay={2} duration={22} size="w-80 h-80" />
+                    <GlowOrb className="top-[20%] left-1/2 bg-purple-500/10" delay={8} duration={28} size="w-[600px] h-[600px]" />
 
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                            <LoginButton />
-                            <button className="flex items-center gap-2 group text-sm font-bold uppercase tracking-widest text-zinc-300 hover:text-white transition-colors">
-                                View Demo <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                            </button>
-                        </div>
-                    </Motion.div>
-
-                    {/* Stats */}
+                    {/* Left: Human Hand */}
                     <Motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.5, duration: 1 }}
-                        className="mt-24 grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-white/5 pt-16"
+                        initial={{ x: -200, opacity: 0, rotate: -15 }}
+                        animate={{ 
+                            x: 0, 
+                            opacity: 1, 
+                            rotate: -10,
+                            y: [0, -15, 0] 
+                        }}
+                        transition={{ 
+                            x: { duration: 1.5, ease: "easeOut", delay: 1.2 },
+                            opacity: { duration: 1.5, delay: 1.2 },
+                            y: { duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1.2 }
+                        }}
+                        className="absolute left-[-5%] top-[25%] w-[45%] h-auto max-w-[600px] hidden lg:block transition-all duration-700"
                     >
-                        {[
-                            { label: 'Active Stores', value: '12K+' },
-                            { label: 'Transactions', value: '$45M+' },
-                            { label: 'Uptime', value: '99.9%' },
-                            { label: 'Support', value: '24/7' },
-                        ].map((stat) => (
-                            <div key={stat.label} className="text-center">
-                                <p className="text-3xl md:text-4xl font-black mb-1 italic">{stat.value}</p>
-                                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{stat.label}</p>
-                            </div>
-                        ))}
+                        <img 
+                            src="/images/landing/human-hand.png" 
+                            alt="Human Evolution" 
+                            className="w-full h-auto object-contain"
+                        />
                     </Motion.div>
+
+                    {/* Right: Robot Hand */}
+                    <Motion.div 
+                        initial={{ x: 200, opacity: 0, rotate: 15 }}
+                        animate={{ 
+                            x: 0, 
+                            opacity: 1, 
+                            rotate: 10,
+                            y: [0, -15, 0] 
+                        }}
+                        transition={{ 
+                            x: { duration: 1.5, ease: "easeOut", delay: 2.2 },
+                            opacity: { duration: 1.5, delay: 2.2 },
+                            y: { duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2.5 }
+                        }}
+                        className="absolute right-[-5%] top-[25%] w-[45%] h-auto max-w-[600px] hidden lg:block transition-all duration-700"
+                    >
+                        <img 
+                            src="/images/landing/robot-hand.png" 
+                            alt="AI Integration" 
+                            className="w-full h-auto object-contain"
+                        />
+                    </Motion.div>
+
+                    {/* Convergence Glow at center */}
+                    <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full" />
+                </div>
+
+                <Motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1, delay: 0.2 }}
+                    className="relative z-10 mt-12"
+                >
+                    <div className="flex items-center justify-center gap-3 mb-8">
+                        <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
+                        <span className="mono-label !text-indigo-400">/ THE ALL_IN_ONE PLATFORM</span>
+                        <span className="h-px w-12 bg-indigo-500/30" />
+                        <span className="mono-label">READY TO LAUNCH</span>
+                    </div>
+
+                    <h1 className="text-6xl md:text-8xl font-black tracking-[calc(-0.04em)] mb-6 leading-[0.9] uppercase italic">
+                        <StaggeredText text="LAUNCH YOUR" className="block text-white" />
+                        <StaggeredText text="ONLINE STORE" className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-white" />
+                    </h1>
+
+                    <p className="text-zinc-400 text-lg md:text-2xl max-w-3xl mx-auto mb-10 font-medium leading-relaxed drop-shadow-md">
+                        No coding required. Qicmart is the ultimate platform to build your website, manage inventory, process payments, and scale your business globally in minutes.
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
+                        <Motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                            <LoginButton />
+                        </Motion.div>
+                        <button className="flex items-center gap-3 mono-label !text-zinc-300 hover:!text-white transition-colors group">
+                            <Code2 size={16} /> SEE HOW IT WORKS <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                        </button>
+                    </div>
+                </Motion.div>
+
+                {/* Stats Grid */}
+                <div className="relative z-10 mt-32 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+                    {[
+                        { label: 'Secure Uptime', value: '99.99%', icon: Network },
+                        { label: 'Stores Created', value: '5,000+', icon: BarChart3 },
+                        { label: 'Monthly Sales', value: '$45M+', icon: Cpu },
+                        { label: 'Setup Time', value: '< 2 Min', icon: Zap },
+                    ].map((stat, i) => (
+                        <Motion.div
+                            key={stat.label}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            whileHover={{ y: -10 }}
+                            transition={{ delay: i * 0.1 }}
+                            className="relative p-16 bg-[#0a0a0c] border border-white/5 beveled-sm text-center group hover:border-indigo-500/50 hover:bg-[#0f0f12] transition-all duration-300"
+                        >
+                            <div className="absolute top-0 left-0 w-1 h-12 bg-indigo-500/0 group-hover:bg-indigo-500/50 transition-all" />
+                            
+                            <div className="relative z-10 flex flex-col items-center">
+                                <div className="w-16 h-16 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl flex items-center justify-center mb-10 group-hover:scale-110 group-hover:bg-indigo-500/20 transition-all duration-500">
+                                    <stat.icon size={28} className="text-indigo-500 opacity-60 group-hover:opacity-100 transition-opacity" />
+                                </div>
+                                <div className="text-4xl font-black mb-3 italic tracking-tighter group-hover:text-white transition-colors">
+                                    {stat.value}
+                                </div>
+                                <div className="mono-label text-zinc-500 text-xs tracking-[0.2em] group-hover:text-indigo-400/60 transition-colors uppercase">
+                                    {stat.label}
+                                </div>
+                            </div>
+
+                            {/* Background Glow Effect */}
+                            <div className="absolute inset-0 bg-indigo-500/0 group-hover:bg-indigo-500/5 blur-[50px] transition-all -z-10 rounded-full" />
+                        </Motion.div>
+                    ))}
                 </div>
             </section>
 
-            {/* Features Grid */}
-            <section className="py-32 bg-white/[0.02] border-y border-white/5">
-                <div className="max-w-7xl mx-auto px-6 text-center">
-                    <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-20 italic uppercase">Everything you need <br /> to <span className="text-indigo-500">Dominate</span> sales.</h2>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Tactical Features */}
+            <section className="py-32 relative border-b border-white/5">
+                <GlowOrb className="top-[20%] left-[-10%] bg-indigo-500/5" delay={2} duration={40} size="w-[600px] h-[600px]" />
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="flex flex-col md:flex-row items-end justify-between mb-20 gap-8">
+                        <div className="text-left">
+                            <div className="mono-label mb-4">/ TACTICAL_ADVANTAGE</div>
+                            <h2 className="text-4xl md:text-6xl font-black uppercase italic leading-none">Everything you need <br /> to <span className="text-indigo-500">Dominate</span>.</h2>
+                        </div>
+                        <div className="mono-label text-right opacity-30 hidden md:block">
+                            [SCROLL TO EXPLORE_MODULES]
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {[
-                            { 
-                                icon: Zap, 
-                                title: 'Lightning Fast', 
-                                desc: 'Your store loads in under 1 second. High performance translates to high conversion.',
-                                color: 'text-yellow-400'
-                            },
-                            { 
-                                icon: Shield, 
-                                title: 'Enterprise Security', 
-                                desc: 'Bank-level encryption and secure payment integrations built-in as standard.',
-                                color: 'text-emerald-400'
-                            },
-                            { 
-                                icon: Globe, 
-                                title: 'Global Reach', 
-                                desc: 'Multi-language support and international currencies to sell anywhere on earth.',
-                                color: 'text-blue-400'
-                            },
-                            { 
-                                icon: BarChart3, 
-                                title: 'Deep Analytics', 
-                                desc: 'Detailed insights into your customers and sales to make smarter data-driven decisions.',
-                                color: 'text-purple-400'
-                            },
-                            { 
-                                icon: MessageCircle, 
-                                title: 'Marketing Tools', 
-                                desc: 'Built-in SEO management, blogs, and coupons to grow your brand organically.',
-                                color: 'text-indigo-400'
-                            },
-                            { 
-                                icon: Rocket, 
-                                title: 'One-Click Deploy', 
-                                desc: 'From onboarding to live sales in minutes. No coding required, ever.',
-                                color: 'text-rose-400'
-                            }
+                            { icon: Shield, title: 'Secure Payments', desc: 'Accept credit cards, UPI, and global wallets instantly. Bank-grade encryption protects every transaction.' },
+                            { icon: Layout, title: 'Beautiful Themes', desc: 'Choose from premium, high-converting templates that look stunning on phones, tablets, and desktops.' },
+                            { icon: Database, title: 'Easy Inventory', desc: 'Track your products, manage stock levels, and organize variants like sizes and colors effortlessly.' },
+                            { icon: Rocket, title: 'Unlimited Growth', desc: 'Whether you sell one product or 10,000, our system scales automatically with zero slowdowns.' },
+                            { icon: Cpu, title: 'AI Store Builder', desc: 'Let our AI automatically write product descriptions and pick the perfect layout for your brand.' },
+                            { icon: Activity, title: '24/7 Support', desc: 'Real human experts available around the clock to help your business launch and succeed.' }
                         ].map((item, i) => (
                             <Motion.div
                                 key={item.title}
-                                whileHover={{ y: -10, backgroundColor: 'rgba(255,255,255,0.05)' }}
-                                className="p-10 rounded-[40px] border border-white/5 text-left transition-all duration-300 group"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                whileHover={{ scale: 1.02 }}
+                                className="relative p-10 bg-zinc-900/40 border border-white/5 beveled group overflow-hidden transition-all duration-300"
                             >
-                                <div className={`w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform ${item.color}`}>
-                                    <item.icon size={28} />
+                                {/* Corner Brackets (Tactical Edge) */}
+                                <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-indigo-500/0 group-hover:border-indigo-500/40 transition-all duration-500" />
+                                <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-indigo-500/0 group-hover:border-indigo-500/40 transition-all duration-500" />
+                                <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-indigo-500/0 group-hover:border-indigo-500/40 transition-all duration-500" />
+                                <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-indigo-500/0 group-hover:border-indigo-500/40 transition-all duration-500" />
+
+                                <div className="w-16 h-16 bg-indigo-600/5 rounded-2xl flex items-center justify-center mb-8 border border-indigo-500/10 group-hover:bg-indigo-600 group-hover:text-white group-hover:border-indigo-400 group-hover:shadow-[0_0_20px_rgba(79,70,229,0.4)] transition-all duration-500 relative">
+                                    {/* Constant Ambient Glow */}
+                                    <div className="absolute inset-0 bg-indigo-500/5 rounded-full blur-xl animate-pulse" />
+                                    <item.icon size={32} className="relative z-10 group-hover:animate-pulse" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-4 tracking-tight uppercase italic">{item.title}</h3>
-                                <p className="text-zinc-500 font-medium leading-relaxed">{item.desc}</p>
+                                <h3 className="text-2xl font-black mb-4 uppercase italic tracking-tighter group-hover:text-indigo-50 transition-colors">
+                                    {item.title}
+                                </h3>
+                                <p className="text-zinc-500 font-medium leading-relaxed mb-8 group-hover:text-zinc-300 transition-colors">
+                                    {item.desc}
+                                </p>
+                                
+                                <div className="h-px w-full bg-white/5 group-hover:bg-indigo-500/40 transition-colors" />
+                                
+                                {/* Background Aura (More vibrant now) */}
+                                <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-indigo-500/5 blur-[60px] rounded-full group-hover:bg-indigo-500/20 transition-all duration-700" />
                             </Motion.div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Final CTA */}
-            <section className="py-40 px-6 text-center relative overflow-hidden">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/20 blur-[150px] rounded-full" />
-                <div className="relative z-10 max-w-4xl mx-auto">
-                    <h2 className="text-4xl md:text-7xl font-black tracking-tighter mb-10 italic uppercase">Ready to start your <br /> Success story?</h2>
-                    <p className="text-zinc-400 text-lg mb-12 font-medium">Join thousands of entrepreneurs who chose Qicmart for their online journey.</p>
-                    <div className="flex justify-center">
-                        <LoginButton />
+            <section className="py-32 relative overflow-hidden bg-[#050507]">
+                {/* Background Glows */}
+                <GlowOrb className="top-1/2 left-[-10%] bg-indigo-500/10" delay={0} duration={30} size="w-[600px] h-[600px]" />
+                <GlowOrb className="bottom-[10%] right-[-10%] bg-purple-600/10" delay={15} duration={35} size="w-[500px] h-[500px]" />
+
+                <div className="max-w-7xl mx-auto px-6 relative z-10">
+                    <div className="text-center mb-24">
+                        <div className="mono-label mb-4">/ THREE_EASY_STEPS</div>
+                        <h2 className="text-4xl md:text-7xl font-black uppercase italic leading-none">The <span className="text-indigo-500 text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-600">Blueprint</span> for Success.</h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-0 relative">
+                        {/* Connecting Line (Desktop) - Repositioned Below Icons */}
+                        <div className="absolute top-[144px] left-0 w-full h-[2px] bg-white/5 hidden md:block overflow-hidden">
+                            <Motion.div 
+                                animate={{ x: ["-100%", "100%"] }}
+                                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                                className="w-1/2 h-full bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent"
+                            />
+                        </div>
+                        
+                        {[
+                            { step: '01', title: 'ADD PRODUCTS', desc: 'Securely upload your product images, set your prices, and add descriptions through our simple interface.', icon: Plus },
+                            { step: '02', title: 'LAUNCH STORE', desc: 'Select a premium design theme, connect your custom domain, and go live to the world in a single click.', icon: Rocket },
+                            { step: '03', title: 'START SELLING', desc: 'Accept global payments securely, pack orders, and track your daily revenue from one powerful dashboard.', icon: Activity }
+                        ].map((item, i) => (
+                            <Motion.div
+                                key={item.step}
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.2 }}
+                                className="relative p-12 text-center group"
+                            >
+                                <div className="w-20 h-20 bg-indigo-600/10 rounded-full flex items-center justify-center mx-auto mb-10 border border-indigo-500/20 relative z-10 group-hover:bg-indigo-600 transition-all duration-500">
+                                    <span className="absolute -top-4 -right-4 bg-zinc-950 border border-indigo-500/30 text-[10px] font-black w-10 h-10 rounded-full flex items-center justify-center text-indigo-400">
+                                        {item.step}
+                                    </span>
+                                    <item.icon size={32} className="text-indigo-500 group-hover:text-white transition-colors" />
+                                </div>
+                                <h3 className="text-2xl font-black mb-4 uppercase italic tracking-tighter group-hover:text-indigo-400 transition-colors">
+                                    {item.title}
+                                </h3>
+                                <p className="text-zinc-500 font-medium leading-relaxed max-w-xs mx-auto">
+                                    {item.desc}
+                                </p>
+                            </Motion.div>
+                        ))}
                     </div>
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer className="py-20 px-6 border-t border-white/5">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10">
-                    <div className="flex items-center gap-2">
-                        <div className="w-9 h-9 bg-indigo-600 rounded-xl overflow-hidden flex items-center justify-center">
-                            <img src="/logo.png" alt="QICMART Logo" className="w-full h-full object-cover" />
+            {/* Visual Showcase: Master Control Center */}
+            <section className="py-20 relative overflow-hidden">
+                {/* Background Atmosphere */}
+                <GlowOrb className="top-[20%] right-[5%] bg-indigo-600/10" delay={5} duration={40} size="w-[700px] h-[700px]" />
+                <GlowOrb className="bottom-0 left-[10%] bg-purple-500/5" delay={10} duration={30} size="w-[500px] h-[500px]" />
+
+                <div className="max-w-7xl mx-auto px-6 relative z-10">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+                        <Motion.div
+                            initial={{ opacity: 0, x: -50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 1 }}
+                        >
+                            <div className="mono-label mb-6">/ ALL_IN_ONE_DASHBOARD</div>
+                            <h2 className="text-4xl md:text-6xl font-black uppercase italic leading-[0.9] mb-10">
+                                Manage Everything <br /> <span className="text-indigo-500">In One Place</span>.
+                            </h2>
+                            <p className="text-zinc-400 text-xl font-medium leading-relaxed mb-12">
+                                Say goodbye to confusing software. Our intuitive dashboard acts as the command center for your entire business—tracking live sales, managing stock, and forecasting growth automatically.
+                            </p>
+                            <ul className="space-y-6">
+                                {[
+                                    'Live Sales & Revenue Tracking',
+                                    'Automated Inventory Management',
+                                    'Built-in Customer CRM Tools',
+                                    'AI-Powered Growth Suggestions'
+                                ].map(feat => (
+                                    <li key={feat} className="flex items-center gap-4 text-sm font-black uppercase tracking-tight italic group">
+                                        <div className="w-6 h-6 rounded-lg bg-indigo-600/10 border border-indigo-500/30 flex items-center justify-center text-indigo-500 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                                            <Check size={14} />
+                                        </div>
+                                        {feat}
+                                    </li>
+                                ))}
+                            </ul>
+                        </Motion.div>
+
+                        <Motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 1.2, ease: "easeOut" }}
+                            className="relative group lg:mt-0 mt-12"
+                        >
+                            <div className="absolute -inset-4 bg-indigo-600/20 blur-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+                            <div className="relative border border-white/5 rounded-[40px] overflow-hidden shadow-2xl shadow-indigo-500/20 transition-all duration-700 hover:scale-[1.02]">
+                                <img 
+                                    src="/images/landing/qicmart_dashboard_ui.png" 
+                                    alt="Qicmart Tactical Dashboard" 
+                                    className="w-full h-auto"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-40" />
+                            </div>
+                        </Motion.div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Performance Showcase: Global Edge Network */}
+            <section className="py-12 relative overflow-hidden bg-zinc-950/50 border-y border-white/5">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="relative rounded-[60px] overflow-hidden border border-white/5 group bg-zinc-950">
+                        <Motion.div
+                            initial={{ opacity: 0, scale: 1.1 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 1.5 }}
+                        >
+                            <img 
+                                src="/global_edge_network_1775213867607.png" 
+                                alt="Global Edge Network visualization" 
+                                className="w-full h-auto grayscale-[50%] group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
+                            />
+                        </Motion.div>
+                        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/80 via-transparent to-zinc-950/80" />
+                        
+                        {/* Centered Heading Overlaying Glow */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12 pointer-events-none">
+                            <Motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.5 }}
+                                className="mb-4 relative"
+                            >
+                                {/* Vertical Scanning Line */}
+                                <Motion.div 
+                                    animate={{ 
+                                        top: ["-50%", "150%"],
+                                        opacity: [0, 1, 1, 0]
+                                    }}
+                                    transition={{
+                                        duration: 4,
+                                        repeat: Infinity,
+                                        ease: "linear"
+                                    }}
+                                    className="absolute left-0 right-0 h-[2px] bg-indigo-500/50 shadow-[0_0_20px_rgba(79,70,229,1)] z-20"
+                                />
+
+                                <div className="mono-label mb-6 !text-indigo-400">/ GLOBAL_INFRASTRUCTURE</div>
+                                <h2 className="text-4xl md:text-7xl font-black uppercase italic leading-none max-w-4xl mx-auto drop-shadow-[0_0_30px_rgba(79,70,229,0.5)]">
+                                    Retail on the <br />
+                                    <span className="text-white text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-400 to-indigo-600">Planetary Edge</span>.
+                                </h2>
+                            </Motion.div>
                         </div>
-                        <span className="text-lg font-black tracking-tight italic uppercase">Qic<span className="text-indigo-500">Mart</span></span>
+
+                        {/* Interactive Markers */}
+                        <div className="absolute bottom-0 left-0 w-full grid grid-cols-2 md:grid-cols-4 gap-8 p-12 items-end">
+                            {[
+                                { label: 'Node Clusters', value: '450+' },
+                                { label: 'Latency Node', value: '<2.4ms' },
+                                { label: 'Throughput', value: '1.2 PB/s' },
+                                { label: 'Uptime Protocol', value: 'Tier 5' }
+                            ].map((stat, i) => (
+                                <Motion.div
+                                    key={stat.label}
+                                    initial={{ opacity: 0, y: 50 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: i * 0.1 + 0.5 }}
+                                    className="bg-black/40 backdrop-blur-3xl border border-white/10 p-8 beveled-sm"
+                                >
+                                    <div className="text-4xl font-black italic text-white mb-2">{stat.value}</div>
+                                    <div className="mono-label !text-indigo-400">{stat.label}</div>
+                                </Motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Mobile Showcase: Retail Sovereignty */}
+            <section className="py-48 relative overflow-hidden">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+                        <Motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 1.2 }}
+                            className="order-2 lg:order-1"
+                        >
+                            <div className="relative group max-w-md mx-auto">
+                                <div className="absolute -inset-4 bg-indigo-600/20 blur-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+                                <div className="relative border border-white/5 rounded-[60px] overflow-hidden shadow-2xl shadow-indigo-500/20 transform -rotate-6 group-hover:rotate-0 transition-all duration-700">
+                                    <img 
+                                        src="/images/landing/qicmart_mobile_store_ui.png" 
+                                        alt="Mobile storefront sovereignty" 
+                                        className="w-full h-auto"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 to-transparent opacity-40" />
+                                </div>
+                            </div>
+                        </Motion.div>
+
+                        <Motion.div
+                            initial={{ opacity: 0, x: 50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 1 }}
+                            className="order-1 lg:order-2"
+                        >
+                            <div className="mono-label mb-6">/ MOBILE_FIRST_DESIGN</div>
+                            <h2 className="text-4xl md:text-6xl font-black uppercase italic leading-[0.9] mb-10">
+                                Perfect on Every <br /> <span className="text-indigo-500">Mobile Screen</span>.
+                            </h2>
+                            <p className="text-zinc-400 text-xl font-medium leading-relaxed mb-12">
+                                Over 70% of shopping happens on phones. We ensure your store loads instantly and looks incredibly premium on all devices, leading to massive conversion rates.
+                            </p>
+                            <ul className="space-y-6">
+                                {[
+                                    'Lightning Fast Mobile Loading',
+                                    'One-Tap Secure Checkouts',
+                                    'Responsive Premium Layouts',
+                                    'App-Like Shopping Experience'
+                                ].map(feat => (
+                                    <li key={feat} className="flex items-center gap-4 text-sm font-black uppercase tracking-tight italic group">
+                                        <div className="w-6 h-6 rounded-lg bg-indigo-600/10 border border-indigo-500/30 flex items-center justify-center text-indigo-500 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                                            <Check size={14} />
+                                        </div>
+                                        {feat}
+                                    </li>
+                                ))}
+                            </ul>
+                        </Motion.div>
+                    </div>
+                </div>
+            </section>
+
+            <PricingSection />
+
+            <FAQSection />
+
+            {/* Final CTA */}
+            <section className="py-48 px-6 text-center relative overflow-hidden">
+                {/* Background Decor */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[1200px] bg-indigo-600/20 blur-[250px] rounded-full animate-pulse" />
+                <GlowOrb className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-purple-600/10" delay={0} duration={10} size="w-[800px] h-[800px]" />
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-50 mix-blend-overlay" />
+                
+                <div className="relative z-10 max-w-4xl mx-auto">
+                    <Motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                    >
+                        <div className="mono-label mb-10 flex items-center justify-center gap-4">
+                            <span className="h-px w-8 bg-indigo-500/30" />
+                            / INITIALIZE_SUCCESS_STORY
+                            <span className="h-px w-8 bg-indigo-500/30" />
+                        </div>
+                        <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-16 italic uppercase leading-[0.9] text-white">
+                            Own your <br /> 
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-white to-indigo-400 drop-shadow-[0_0_30px_rgba(79,70,229,0.3)]">
+                                Retail Empire
+                            </span> today.
+                        </h2>
+                        
+                        <div className="flex flex-col items-center gap-10">
+                            <Motion.div 
+                                whileHover={{ scale: 1.05 }} 
+                                whileTap={{ scale: 0.95 }}
+                                className="relative group"
+                            >
+                                <div className="absolute -inset-4 bg-indigo-500/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                <div className="relative">
+                                    <LoginButton 
+                                        label="Start Your Journey" 
+                                        variant="sparkle"
+                                        className="!px-12 !py-4"
+                                    />
+                                </div>
+                            </Motion.div>
+                            
+                            <div className="space-y-4 text-center">
+                                <p className="mono-label !text-zinc-500 text-[10px] uppercase tracking-[0.2em]">
+                                    Join 5,000+ infrastructure commanders worldwide.
+                                </p>
+                            </div>
+                        </div>
+                    </Motion.div>
+                </div>
+            </section>
+
+            <ContactSection />
+
+            {/* Operational Hub (Footer) */}
+            <footer className="py-32 px-6 border-t border-white/5 bg-zinc-950 relative z-20">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-16 mb-24">
+                        {/* Branding & Status */}
+                        <div className="col-span-2 lg:col-span-2">
+                            <div className="flex items-center gap-4 mb-10">
+                                <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/20 overflow-hidden">
+                                    <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
+                                </div>
+                                <span className="text-3xl font-black tracking-[-0.07em] uppercase italic leading-[0.9]">
+                                    Qic<span className="text-indigo-500">Mart</span>
+                                </span>
+                            </div>
+                            <p className="text-zinc-500 max-w-sm mb-10 font-medium leading-relaxed">
+                                Deploying high-performance commerce infrastructure across the global planetary grid. 
+                                Join the retail sovereignty movement today.
+                            </p>
+                            <div className="flex items-center gap-4">
+                                {[Twitter, Github, Linkedin, Mail].map((Icon, i) => (
+                                    <Link key={i} href="#" className="w-10 h-10 rounded-xl bg-zinc-900 border border-white/5 flex items-center justify-center text-zinc-500 hover:bg-indigo-600 hover:text-white hover:border-indigo-400 transition-all">
+                                        <Icon size={20} />
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Link Clusters */}
+                        <div>
+                            <div className="mono-label !text-zinc-400 mb-8 tracking-[0.3em]">/ PRODUCT</div>
+                            <ul className="space-y-4">
+                                {['Storefronts', 'Dashboard', 'AI Guru', 'Global Edge', 'Infrastructure'].map(item => (
+                                    <li key={item}>
+                                        <Link href="#" className="text-sm font-medium text-zinc-500 hover:text-indigo-500 transition-colors tracking-tight">{item}</Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        <div>
+                            <div className="mono-label !text-zinc-400 mb-8 tracking-[0.3em]">/ SUPPORT</div>
+                            <ul className="space-y-4">
+                                {['Documentation', 'API Status', 'Change Log', 'Security Cluster', 'Help Desk'].map(item => (
+                                    <li key={item}>
+                                        <Link href="#" className="text-sm font-medium text-zinc-500 hover:text-indigo-500 transition-colors tracking-tight">{item}</Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        <div>
+                            <div className="mono-label !text-zinc-400 mb-8 tracking-[0.3em]">/ COMPANY</div>
+                            <ul className="space-y-4">
+                                {['About Project', 'Tactical HQ', 'Press Node', 'Legal Assets', 'Privacy.sh'].map(item => (
+                                    <li key={item}>
+                                        <Link href="#" className="text-sm font-medium text-zinc-500 hover:text-indigo-500 transition-colors tracking-tight">{item}</Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     </div>
                     
-                    <div className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em]">
-                        &copy; {new Date().getFullYear()} Qicmart Global. All Rights Reserved.
-                    </div>
+                    <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-8">
+                        <div className="mono-label !text-zinc-600 flex items-center gap-2">
+                            <div className="w-2 h-2 bg-emerald-500 animate-pulse rounded-full" />
+                            ALL_SYSTEMS_OPERATIONAL / MKXXVI
+                        </div>
+                        
+                        <div className="mono-label !text-zinc-600">
+                            &copy; QICMART_GLOBAL / SECURE_PLANETARY_COMMERCE
+                        </div>
 
-                    <div className="flex items-center gap-8">
-                        {['Privacy', 'Terms', 'Connect'].map((item) => (
-                            <Link key={item} href="#" className="text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">
-                                {item}
-                            </Link>
-                        ))}
+                        <div className="flex items-center gap-8">
+                            <Link href="#" className="mono-label hover:text-indigo-500 transition-colors">PRIVACY_POLICY</Link>
+                            <Link href="#" className="mono-label hover:text-indigo-500 transition-colors">LEGAL_RESOURCES</Link>
+                        </div>
                     </div>
+                </div>
+
+                {/* Massive Background Watermark */}
+                <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-full overflow-hidden pointer-events-none select-none z-0 opacity-5 flex justify-center">
+                    <span className="text-[20vw] font-black tracking-[-0.07em] uppercase italic leading-none whitespace-nowrap text-white">
+                        QICMART
+                    </span>
                 </div>
             </footer>
         </div>
+        </SmoothScroll>
     )
 }

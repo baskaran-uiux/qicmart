@@ -101,6 +101,7 @@ model Store {
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
   selectedTheme         String                 @default("default")
+  aiCredits             Int                    @default(100)
   analytics             Analytics[]
   blogs                 Blog[]
   categories            Category[]

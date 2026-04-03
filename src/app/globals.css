@@ -2,6 +2,10 @@
 @import "tailwindcss";
 @config "../../tailwind.config.js";
 
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
   --background: #fdfdfd;
   --foreground: #0f172a;
@@ -63,6 +67,185 @@
     @apply bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl border border-zinc-200/50 dark:border-white/5 rounded-[32px] shadow-sm hover:shadow-2xl transition-all duration-500;
   }
 
+  .beveled {
+    clip-path: polygon(
+      0% 20px, 20px 0%, 
+      100% 0%, 100% calc(100% - 20px), 
+      calc(100% - 20px) 100%, 0% 100%
+    );
+  }
+
+  .beveled-sm {
+    clip-path: polygon(
+      0% 10px, 10px 0%, 
+      100% 0%, 100% calc(100% - 10px), 
+      calc(100% - 10px) 100%, 0% 100%
+    );
+  }
+
+  .scanlines {
+    background: linear-gradient(
+      to bottom,
+      transparent 50%,
+      rgba(0, 0, 0, 0.05) 50%
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+  }
+
+  .mono-label {
+  @apply font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-bold;
+}
+
+/* Sparkle Button Custom Styles */
+.sparkle-button {
+    --black-700: hsla(0, 0%, 12%, 1);
+    --border_radius: 9999px;
+    --transition: 0.3s ease-in-out;
+    --active: 0;
+    
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.5rem;
+    min-height: 2.75rem;
+    background-color: transparent;
+    border: none;
+    border-radius: var(--border_radius);
+    transform: scale(calc(1 + (var(--active) * 0.05)));
+    transition: transform var(--transition);
+}
+
+.sparkle-button:is(:hover, :focus-visible) {
+    --active: 1;
+}
+
+.sparkle-button:active {
+    transform: scale(1);
+}
+
+.sparkle-button::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background-color: var(--sparkle-bg, var(--black-700));
+    border-radius: var(--border_radius);
+    box-shadow: inset 0 0.5px hsl(0, 0%, 100%), inset 0 -1px 2px 0 hsl(0, 0%, 0%);
+    transition: all var(--transition);
+    z-index: 0;
+}
+
+.sparkle-button:is(:hover, :focus-visible)::before {
+    box-shadow: inset 0 0.5px hsl(0, 0%, 100%), inset 0 -1px 2px 0 hsl(0, 0%, 0%),
+      0 0 35px 2px rgba(99, 102, 241, 0.8);
+}
+
+.sparkle-button::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background-color: hsla(260, 97%, 61%, 0.75);
+    background-image: radial-gradient(at 51% 89%, hsla(266, 45%, 74%, 1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(266, 36%, 60%, 1) 0px, transparent 50%),
+      radial-gradient(at 22% 91%, hsla(266, 36%, 60%, 1) 0px, transparent 50%);
+    background-position: top;
+    opacity: 0;
+    border-radius: var(--border_radius);
+    transition: opacity var(--transition);
+    z-index: 2;
+}
+
+.sparkle-button:hover::after {
+    opacity: 1;
+}
+
+.sparkle-button .dots_border {
+    --size_border: calc(100% + 2px);
+    overflow: hidden;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: var(--size_border);
+    height: var(--size_border);
+    background-color: transparent;
+    border-radius: var(--border_radius);
+    z-index: -10;
+    opacity: 1;
+    transition: opacity var(--transition);
+}
+
+.sparkle-button:hover .dots_border {
+    opacity: 1;
+}
+
+.sparkle-button .dots_border::before {
+    content: "";
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transform-origin: left;
+    width: 100%;
+    height: 2.5rem;
+    background-color: white;
+    mask: linear-gradient(transparent 0%, white 120%);
+    animation: rotate-sparkle 2s linear infinite;
+}
+
+@keyframes rotate-sparkle {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.sparkle-button .sparkle-svg {
+    position: relative;
+    z-index: 10;
+    width: 1.2rem;
+    height: 1.2rem;
+    color: white;
+    flex-shrink: 0;
+    opacity: 1;
+    transition: opacity var(--transition), transform var(--transition);
+    transform: scale(1);
+}
+
+.sparkle-button:hover .sparkle-svg {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.sparkle-button:is(:hover, :focus) .sparkle-svg .path {
+    animation: path-sparkle 1.5s linear infinite;
+}
+
+@keyframes path-sparkle {
+    0%, 34%, 71%, 100% { transform: scale(1); }
+    17% { transform: scale(1.2); }
+    49% { transform: scale(1.2); }
+    83% { transform: scale(1.2); }
+}
+
+.sparkle-button .text_button {
+    position: relative;
+    z-index: 10;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: white;
+}
+
   .glow-indigo {
     @apply shadow-[0_0_20px_rgba(79,70,229,0.1)] hover:shadow-[0_0_40px_rgba(79,70,229,0.2)];
   }
@@ -91,6 +274,20 @@ body {
   letter-spacing: -0.01em;
 }
 
+/* Locomotive Scroll Fixes */
+html.has-scroll-smooth {
+    overflow: hidden;
+}
+
+.has-scroll-smooth body {
+    overflow: hidden;
+}
+
+.has-scroll-smooth [data-scroll-container] {
+    min-height: 100vh;
+}
+
+
 /* Storefront Typography System */
 .storefront-fonts, 
 .storefront-fonts * {
@@ -112,4 +309,12 @@ body {
 .storefront-fonts h6 *,
 .storefront-fonts .heading-font * {
   font-family: var(--font-heading, 'Inter') !important;
+}
+
+.cyber-grid {
+    background-size: 50px 50px;
+    background-image: 
+      linear-gradient(to right, rgba(99, 102, 241, 0.5) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(99, 102, 241, 0.5) 1px, transparent 1px);
+    mask-image: radial-gradient(ellipse at center, black, transparent 100%);
 }

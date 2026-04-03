@@ -34,7 +34,9 @@ export default function QuickViewModal({ product, slug, currency, isOpen, onClos
     const [quantity, setQuantity] = useState(1)
     const [addedFeedback, setAddedFeedback] = useState(false)
 
-    const images: string[] = JSON.parse(product.images)
+    const images: string[] = Array.isArray(product.images) ? product.images : (function() {
+        try { return JSON.parse(product.images as any || "[]") } catch(e) { return [] }
+    })()
     const wishlisted = isWishlisted(product.id)
     
     const reviews = product.reviews || []

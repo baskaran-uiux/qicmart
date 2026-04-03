@@ -1,7 +1,7 @@
 "use client"
 
 import Image, { ImageProps } from "next/image"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 interface OptimizedImageProps extends Omit<ImageProps, "onLoad"> {
     fallback?: string
@@ -14,15 +14,26 @@ export default function OptimizedImage({
     fallback = "/placeholder-image.png",
     ...props 
 }: OptimizedImageProps) {
-    const [imgSrc, setImgSrc] = useState(src)
+    // Ensure src is a valid type for next/image (string or object) and never an array
+    const validSrc = Array.isArray(src) ? src[0] : src;
+    const [imgSrc, setImgSrc] = useState(validSrc || fallback)
     const [error, setError] = useState(false)
+
+    // Sync state when src prop changes
+    useEffect(() => {
+        setImgSrc(Array.isArray(src) ? src[0] : (src || fallback))
+        setError(false)
+    }, [src, fallback])
 
     return (
         <Image
-            src={error ? fallback : imgSrc}
-            alt={alt}
+            src={error ? fallback : (imgSrc || fallback)}
+            alt={alt || "Image"}
             className={className}
-            onError={() => setError(true)}
+            onError={() => {
+                if (!error) setError(true)
+            }}
+            unoptimized={typeof imgSrc === 'string' && (imgSrc.startsWith('http') && !imgSrc.includes('cloudinary'))}
             {...props}
         />
     )

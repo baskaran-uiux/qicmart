@@ -115,7 +115,7 @@ export default function CatalogClient({
     const handleAddToCart = (product: Product, e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
-        const images = JSON.parse(product.images)
+        const images = typeof product.images === 'string' ? JSON.parse(product.images) : product.images
         addItem({
             productId: product.id,
             name: product.name,
@@ -131,7 +131,7 @@ export default function CatalogClient({
     const handleWishlist = (product: Product, e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
-        const images = JSON.parse(product.images)
+        const images = typeof product.images === 'string' ? JSON.parse(product.images) : product.images
         toggleItem({
             id: product.id,
             name: product.name,

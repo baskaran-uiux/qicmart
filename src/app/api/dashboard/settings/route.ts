@@ -108,6 +108,7 @@ export async function GET(req: Request) {
             plan: (store as any).subscription.plan.name,
             maxProducts: (store as any).subscription.plan.maxProducts
         } : { plan: "Normal", maxProducts: 100 }, // Default fallback
+        aiCredits: (store as any).aiCredits || 0,
     })
 }
 

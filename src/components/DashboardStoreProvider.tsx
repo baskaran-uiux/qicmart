@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation"
 import { translations, Language, TranslationKey } from "@/lib/translations"
 
 interface DashboardStoreContextType {
+    id: string
     name: string
     logo: string | null
     currency: string
@@ -23,9 +24,12 @@ interface DashboardStoreContextType {
     whatsappNumber?: string
     whatsappMessage?: string
     storeTheme?: string
+    aiCredits: number
+    updateCredits: (credits: number) => void
 }
 
 const DashboardStoreContext = createContext<DashboardStoreContextType>({
+    id: "",
     name: "Admin",
     logo: null,
     currency: "INR",
@@ -43,7 +47,9 @@ const DashboardStoreContext = createContext<DashboardStoreContextType>({
     setLanguage: () => {},
     whatsappNumber: "",
     whatsappMessage: "",
-    storeTheme: "modern"
+    storeTheme: "modern",
+    aiCredits: 0,
+    updateCredits: () => {}
 })
 
 export function DashboardStoreProvider({ children, dashboardType = "1" }: { children: React.ReactNode, dashboardType?: string }) {
@@ -51,6 +57,7 @@ export function DashboardStoreProvider({ children, dashboardType = "1" }: { chil
     const ownerId = searchParams.get("ownerId")?.trim()
 
     const [store, setStore] = useState<DashboardStoreContextType>({
+        id: "",
         name: "Admin",
         logo: null,
         currency: "INR",
@@ -72,7 +79,11 @@ export function DashboardStoreProvider({ children, dashboardType = "1" }: { chil
                 t: (k: TranslationKey) => translations[lang]?.[k] || translations["English"][k] || k
             }))
         },
-        storeTheme: "modern"
+        storeTheme: "modern",
+        aiCredits: 0,
+        updateCredits: (credits: number) => {
+            setStore(prev => ({ ...prev, aiCredits: credits }))
+        }
     })
 
     useEffect(() => {
@@ -89,6 +100,7 @@ export function DashboardStoreProvider({ children, dashboardType = "1" }: { chil
                 const lang = (data.language || "English") as Language
                 setStore(prev => ({
                     ...prev,
+                    id: data.id || "",
                     name: data.name || "Admin",
                     logo: data.logo || null,
                     currency: data.currency || "INR",
@@ -107,7 +119,11 @@ export function DashboardStoreProvider({ children, dashboardType = "1" }: { chil
                     },
                     whatsappNumber: data.whatsappNumber || "",
                     whatsappMessage: data.whatsappMessage || "",
-                    storeTheme: data.storeTheme || "modern"
+                    storeTheme: data.storeTheme || "modern",
+                    aiCredits: data.aiCredits || 0,
+                    updateCredits: (credits: number) => {
+                        setStore(prev => ({ ...prev, aiCredits: credits }))
+                    }
                 }))
             })
             .catch((err) => {

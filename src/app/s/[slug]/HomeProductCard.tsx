@@ -65,10 +65,19 @@ export default function HomeProductCard({
         }
     }
 
-    const images: string[] = JSON.parse(product.images)
+    const images: string[] = Array.isArray(product.images) ? product.images : (function() {
+        try { return JSON.parse(product.images as any || "[]") } catch(e) { return [] }
+    })()
     const image = images[0] || null
     const inCart = isInCart(product.id)
     const wishlisted = isWishlisted(product.id)
+
+    // Memoize reviews calculation
+    const reviews = product.reviews || []
+    const avgRating = reviews.length > 0 
+        ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length 
+        : 0
+    const reviewCount = reviews.length
 
     const discount = product.compareAtPrice && product.compareAtPrice > product.price
         ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)
@@ -86,11 +95,13 @@ export default function HomeProductCard({
             slug: product.slug,
         })
 
-        trackActivity("ADD_TO_CART", product.name, {
+        const metadata = {
             productId: product.id,
             quantity: 1,
             price: product.price
-        })
+        }
+
+        trackActivity("ADD_TO_CART", product.name, metadata)
         setAddedFeedback(true)
         setTimeout(() => setAddedFeedback(false), 2000)
     }
@@ -114,12 +125,6 @@ export default function HomeProductCard({
             })
         }
     }
-
-    const reviews = product.reviews || []
-    const avgRating = reviews.length > 0 
-        ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length 
-        : 0
-    const reviewCount = reviews.length
 
     const cardVariants = {
         hidden: { opacity: 0, y: 30 },
@@ -205,7 +210,7 @@ export default function HomeProductCard({
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                     </div>
-7
+
                     {/* Badges */}
                     <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
                         {product.isBestSeller && (

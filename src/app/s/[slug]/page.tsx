@@ -7,6 +7,7 @@ import { formatPrice } from "./utils"
 import CategoryCarousel from "./CategoryCarousel"
 import StaggeredGrid from "./StaggeredGrid"
 import GoogleReviews from "@/components/storefront/GoogleReviews"
+import OptimizedImage from "@/components/common/OptimizedImage"
 
 export const revalidate = 60 // Revalidate every 60 seconds (ISR)
 
@@ -18,10 +19,11 @@ export default async function StorefrontPage({
 }) {
     const { slug } = await params
 
-    const storeData = await prisma.store.findUnique({
+    const rawStore = await prisma.store.findUnique({
         where: { slug: slug.toLowerCase() },
         select: {
             id: true,
+            name: true,
             slug: true,
             isActive: true,
             isPlatformDisabled: true,
@@ -40,9 +42,11 @@ export default async function StorefrontPage({
                     slug: true,
                     name: true,
                     price: true,
+                    compareAtPrice: true,
                     images: true,
                     isBestSeller: true,
                     stock: true,
+                    description: true,
                     category: { select: { name: true } },
                     reviews: {
                         where: { isApproved: true },
@@ -50,7 +54,7 @@ export default async function StorefrontPage({
                     }
                 },
                 orderBy: { createdAt: "desc" },
-                take: 20 // Limit products on home page
+                take: 40 // Fetch slightly more to account for filtering if needed
             },
             categories: {
                 select: {
@@ -64,9 +68,27 @@ export default async function StorefrontPage({
     })
 
 
-    if (!storeData || !storeData.isActive || storeData.isPlatformDisabled || storeData.isStorefrontDisabled) notFound()
+    if (!rawStore || !rawStore.isActive || rawStore.isPlatformDisabled || rawStore.isStorefrontDisabled) notFound()
+    
+    // Sanitize Prisma data to plain POJO for safety and performance
+    const storeData = JSON.parse(JSON.stringify(rawStore))
 
-    const store = storeData as any // Use as any to skip serialization lag if possible, or mapping below
+    // Pre-parse the themeConfig separately
+    const themeConfig = storeData.themeConfig ? (typeof storeData.themeConfig === 'string' ? JSON.parse(storeData.themeConfig) : storeData.themeConfig) : {}
+
+    // Pre-parse images for each product to save client-side JSON.parse calls
+    const processedProducts = storeData.products.map((p: any) => ({
+        ...p,
+        images: Array.isArray(p.images) ? p.images : (function() {
+            try { return JSON.parse(p.images || "[]") } catch(e) { return [] }
+        })()
+    }))
+
+    const store = {
+        ...storeData,
+        themeConfig,
+        products: processedProducts
+    } as any
 
 
     const featuredProducts = store.products.slice(0, 8)
@@ -79,10 +101,6 @@ export default async function StorefrontPage({
         .sort((a: any, b: any) => b.stock - a.stock)
         .slice(0, 4)
 
-    // Parse themeConfig for extra settings
-    let themeConfig: any = {}
-    try { if (store.themeConfig) themeConfig = JSON.parse(store.themeConfig) } catch (e) {}
-    
     const brands = themeConfig.brandCarousel || []
     const banners = themeConfig.banners || []
     const storeTheme = themeConfig.storeTheme || "modern"
@@ -104,8 +122,13 @@ export default async function StorefrontPage({
                     <div className="max-w-7xl mx-auto px-4">
                         <div className="flex items-center justify-center gap-8 md:gap-16 lg:gap-24 opacity-50 grayscale hover:grayscale-0 transition-all duration-700 animate-scroll-rtl flex-nowrap overflow-x-auto no-scrollbar">
                             {brands.map((brand: any) => (
-                                <div key={brand.id} className="shrink-0">
-                                    <img src={brand.logo} alt={brand.name} className={`h-8 md:h-10 w-auto object-contain ${storeTheme === 'aura' ? 'brightness-0 invert' : ''}`} />
+                                <div key={brand.id} className="shrink-0 relative w-20 h-10 md:w-24 md:h-12">
+                                    <OptimizedImage 
+                                        src={brand.logo} 
+                                        alt={brand.name} 
+                                        fill
+                                        className={`object-contain ${storeTheme === 'aura' ? 'brightness-0 invert' : ''}`} 
+                                    />
                                 </div>
                             ))}
                         </div>
@@ -117,10 +140,12 @@ export default async function StorefrontPage({
             {store.categories.length > 0 && (
                 <section className={`py-8 overflow-hidden ${isSports ? 'bg-white' : storeTheme === 'aura' ? 'bg-zinc-950' : 'bg-white'}`}>
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex flex-col items-center text-center mb-4">
-                            <h2 className={`text-2xl sm:text-3xl font-bold tracking-tight ${storeTheme === 'aura' ? 'text-white' : 'text-zinc-900'}`}>Shop by category</h2>
-                            <p className="text-zinc-500 mt-1 text-sm">Find exactly what you're looking for</p>
-                            <Link href={`/s/${slug}/products`} className="mt-3 text-[var(--primary-color)] text-sm font-bold hover:opacity-80 transition-all">
+                        <div className="flex justify-between items-end mb-8">
+                            <div>
+                                <h2 className={`text-2xl sm:text-3xl font-bold tracking-tight ${storeTheme === 'aura' ? 'text-white' : 'text-zinc-900'}`}>Shop by category</h2>
+                                <p className="text-zinc-500 mt-1 text-sm">Find exactly what you're looking for</p>
+                            </div>
+                            <Link href={`/s/${slug}/products`} className="hidden sm:block text-[var(--primary-color)] text-sm font-medium hover:opacity-80 transition-all">
                                 View all →
                             </Link>
                         </div>

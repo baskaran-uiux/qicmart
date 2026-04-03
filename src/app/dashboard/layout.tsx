@@ -13,6 +13,7 @@ import { DashboardStoreProvider, useDashboardStore } from "@/components/Dashboar
 import { Notifications } from "@/components/dashboard/Notifications"
 import PremiumButton from "@/components/dashboard/PremiumButton"
 import DigitalLoader from "@/components/ui/DigitalLoader"
+import AIGrowthGuru from "@/components/dashboard/AIGrowthGuru"
 
 const navGroups = [
     {
@@ -87,6 +88,7 @@ const navGroups = [
             { label: "Menu Manager", key: "menuManager", href: "/dashboard/menu", icon: Layout },
             { label: "Custom Pages", key: "customPages", href: "/dashboard/pages", icon: Layout },
             { label: "Blogs/Articles", key: "blogs", href: "/dashboard/blogs", icon: PenTool },
+            { label: "SEO Manager", key: "seoManager", href: "/dashboard/seo", icon: Globe },
         ]
     },
     {
@@ -522,6 +524,12 @@ function DashboardContent({ children }: { children: ReactNode }) {
                         <span className={`px-2.5 py-1 text-nowrap rounded-full text-[12px] font-semibold ${dark ? 'bg-purple-500/10 border border-purple-500/20 text-purple-400' : 'bg-purple-50 border border-purple-200 text-purple-700'}`}>
                             Standard Plan
                         </span>
+                        {store.aiCredits !== undefined && (
+                            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-bold border shadow-sm ${dark ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-indigo-50 border-indigo-100 text-indigo-600'}`}>
+                                <Zap size={12} fill="currentColor" className="animate-pulse" />
+                                <span>{store.aiCredits} AI Credits</span>
+                            </div>
+                        )}
                         <div className="flex items-center gap-1.5">
                             <Notifications ownerId={ownerId} />
                             <button
@@ -582,6 +590,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                         children
                     )}
                 </div>
+                {store.id && <AIGrowthGuru storeId={store.id} />}
             </main>
         </div>
     )

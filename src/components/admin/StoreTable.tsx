@@ -91,7 +91,7 @@ export function StoreTable({ initialStores }: { initialStores: any[] }) {
                         <tr className="border-b border-zinc-100 dark:border-zinc-800/50">
                             <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 capitalize tracking-wide">Store Details</th>
                             <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 capitalize tracking-wide">Plan Type</th>
-                            <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 capitalize tracking-wide">Access Permissions</th>
+                            <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 capitalize tracking-wide text-center">AI Credits</th>
                             <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 capitalize tracking-wide text-center">Expiry & Management</th>
                             <th className="px-6 py-4 text-[11px] font-bold text-zinc-400 capitalize tracking-wide text-right">Actions</th>
                         </tr>
@@ -190,6 +190,32 @@ export function StoreTable({ initialStores }: { initialStores: any[] }) {
                                                     >
                                                         <div className="w-4 h-4 bg-white rounded-full shadow"></div>
                                                     </button>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        {/* AI Credits */}
+                                        <td className="px-6 py-6 text-center border-r border-zinc-50/50 dark:border-zinc-800/30">
+                                            <div className="flex flex-col items-center gap-3">
+                                                <div className="text-3xl font-black text-indigo-600 dark:text-indigo-400 tracking-tighter">
+                                                    {store.aiCredits || 0}
+                                                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Pts</span>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <button 
+                                                        onClick={() => updateStore(store.id, { aiCredits: (store.aiCredits || 0) - 10 })}
+                                                        className="w-7 h-7 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 text-zinc-500 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all font-bold text-xs"
+                                                    >-</button>
+                                                    <button 
+                                                        onClick={() => updateStore(store.id, { aiCredits: (store.aiCredits || 0) + 100 })}
+                                                        className="px-3 py-1 bg-indigo-600 text-white rounded-lg text-[10px] font-bold transition-all shadow-md shadow-indigo-600/20 active:scale-95"
+                                                    >
+                                                        +100
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => updateStore(store.id, { aiCredits: (store.aiCredits || 0) + 10 })}
+                                                        className="w-7 h-7 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 text-zinc-500 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all font-bold text-xs"
+                                                    >+</button>
                                                 </div>
                                             </div>
                                         </td>

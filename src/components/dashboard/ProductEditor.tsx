@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { ChevronLeft, Loader2, Check, Star, RefreshCw, AlertCircle, Upload, Zap, Eye, X, Image as ImageIcon, Package, Plus, Trash2 } from "lucide-react"
+import { ChevronLeft, Loader2, Check, Star, RefreshCw, AlertCircle, Upload, Zap, Eye, X, Image as ImageIcon, Package, Plus, Trash2, Sparkles } from "lucide-react"
 import { useDashboardStore } from "@/components/DashboardStoreProvider"
 import { motion, AnimatePresence } from "framer-motion"
 import MediaPicker from "@/components/dashboard/MediaPicker"
 import PremiumButton from "@/components/dashboard/PremiumButton"
+import { toast } from "sonner"
+import MagicStudioModal from "@/components/dashboard/MagicStudioModal"
 
 interface Product {
     id: string
@@ -232,7 +234,7 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
     const ownerId = searchParams.get("ownerId")
-    const { currency, subscription } = useDashboardStore()
+    const { id: storeId, currency, subscription, aiCredits, updateCredits } = useDashboardStore()
     
     const [loading, setLoading] = useState(!!productId)
     const [categories, setCategories] = useState<Category[]>([])
@@ -266,6 +268,73 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
         seoScore: 0,
         shippingProfileId: "",
     })
+
+    const [isGenerating, setIsGenerating] = useState<string | null>(null)
+    const [showMagicStudio, setShowMagicStudio] = useState(false)
+
+    const generateAIContent = async (field: 'description' | 'seo' | 'seoTitle' | 'keywords') => {
+        if (!form.name.trim()) {
+            toast.error("Please enter a product name first")
+            return
+        }
+        if (aiCredits <= 0) {
+            toast.error("Insufficient AI credits")
+            return
+        }
+
+        setIsGenerating(field)
+        try {
+            let aiType = "product"
+            let localPrompt = ""
+
+            if (field === 'description') {
+                aiType = "product"
+                localPrompt = `Write a detailed, high-converting product description for "${form.name}".`
+            } else if (field === 'seoTitle') {
+                aiType = "seoTitle"
+                localPrompt = `Generate a compelling meta title for "${form.name}".`
+            } else if (field === 'seo') {
+                aiType = "seoDescription"
+                localPrompt = `Generate a high-CTR meta description for "${form.name}".`
+            } else if (field === 'keywords') {
+                aiType = "keywords"
+                localPrompt = `Provide comma-separated focus keywords for "${form.name}".`
+            }
+
+            const res = await fetch(`/api/ai?storeId=${storeId}&type=${aiType}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    prompt: localPrompt,
+                    context: { productName: form.name, category: categories.find(c => c.id === form.categoryId)?.name }
+                })
+            })
+
+            const data = await res.json()
+            if (data.error) throw new Error(data.error)
+
+            if (field === 'description') {
+                setForm(f => ({ ...f, description: data.response }))
+            } else if (field === 'seo') {
+                setForm(f => ({ ...f, seoDescription: data.response }))
+            } else if (field === 'seoTitle') {
+                setForm(f => ({ ...f, seoTitle: data.response }))
+            } else if (field === 'keywords') {
+                setForm(f => ({ ...f, focusKeyword: data.response }))
+            }
+            
+            // Update credits in real-time
+            if (data.creditsRemaining !== undefined) {
+                updateCredits(data.creditsRemaining)
+            }
+
+            toast.success("AI content generated!")
+        } catch (err: any) {
+            toast.error(err.message || "AI generation failed")
+        } finally {
+            setIsGenerating(null)
+        }
+    }
 
     const [shippingProfiles, setShippingProfiles] = useState<{id: string, name: string, isDefault: boolean}[]>([])
 
@@ -326,7 +395,7 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                             seoDescription: p.seoDescription || "",
                             focusKeyword: p.focusKeyword || "",
                             seoScore: p.seoScore || 0,
-                            shippingProfileId: p.shippingProfileId || "",
+                            shippingProfileId: p.shippingZoneId || "",
                         }
                         setForm(initial)
                         setInitialForm(initial)
@@ -347,19 +416,33 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
     useEffect(() => {
         const calculateScore = () => {
             let s = 0
-            const title = form.seoTitle || form.name
-            const desc = form.seoDescription || form.description
-            const kw = form.focusKeyword.toLowerCase()
-
-            if (kw) {
-                s += 20
-                if (title.toLowerCase().includes(kw)) s += 30
-                if (desc.toLowerCase().includes(kw)) s += 20
-            }
-            if (title.length >= 40 && title.length <= 60) s += 15
-            if (desc.length >= 120 && desc.length <= 160) s += 15
+            const title = (form.seoTitle || form.name).toLowerCase()
+            const desc = (form.seoDescription || form.description).toLowerCase()
+            const keywordList = form.focusKeyword.toLowerCase().split(',').map(k => k.trim()).filter(k => k)
             
-            setForm(f => ({ ...f, seoScore: s }))
+            if (keywordList.length > 0) {
+                s += 20 // Base score for having keywords
+                
+                const primaryKeyword = keywordList[0]
+                
+                // Check primary keyword presence
+                if (title.includes(primaryKeyword)) s += 30
+                if (desc.includes(primaryKeyword)) s += 20
+                
+                // Bonus for other keywords
+                const otherKeywords = keywordList.slice(1)
+                const secondaryMatch = otherKeywords.some(k => title.includes(k) || desc.includes(k))
+                if (secondaryMatch) s += 5
+            }
+
+            // Length optimizations
+            const titleLen = (form.seoTitle || form.name).length
+            const descLen = (form.seoDescription || form.description).length
+
+            if (titleLen >= 30 && titleLen <= 65) s += 15
+            if (descLen >= 100 && descLen <= 170) s += 10
+            
+            setForm(f => ({ ...f, seoScore: Math.min(100, s) }))
         }
         calculateScore()
     }, [form.name, form.description, form.focusKeyword, form.seoTitle, form.seoDescription])
@@ -403,7 +486,7 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
             seoDescription: form.seoDescription,
             focusKeyword: form.focusKeyword,
             seoScore: form.seoScore,
-            shippingProfileId: form.shippingProfileId || null,
+            shippingZoneId: form.shippingProfileId || null,
         }
 
         const url = ownerId ? `/api/dashboard/products?ownerId=${ownerId}` : "/api/dashboard/products"
@@ -448,7 +531,7 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
 
     const save = async () => {
         if (!form.name.trim()) {
-            alert("Product name is required")
+            toast.error("Product name is required to save")
             return
         }
         
@@ -493,7 +576,7 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
             seoDescription: form.seoDescription,
             focusKeyword: form.focusKeyword,
             seoScore: form.seoScore,
-            shippingProfileId: form.shippingProfileId || null,
+            shippingZoneId: form.shippingProfileId || null,
         }
 
         const url = ownerId ? `/api/dashboard/products?ownerId=${ownerId}` : "/api/dashboard/products"
@@ -679,30 +762,66 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                                             <div className="w-1.5 h-8 bg-indigo-600 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.5)]"></div>
                                             <h4 className="text-[18px] font-black text-black dark:text-white uppercase tracking-tight">Product Information</h4>
                                         </div>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                                        <div className="grid grid-cols-1 gap-8">
                                             <div className="space-y-3">
                                                 <label className="text-[12px] font-bold text-zinc-400 capitalize ml-1">Product Name</label>
-                                                <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Classic Collection Tee" className="w-full px-6 py-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl text-sm font-semibold outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all shadow-sm" />
+                                                <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Wait, what are you selling?" className="w-full px-6 py-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl text-sm font-semibold outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all shadow-sm" />
                                             </div>
+                                        </div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                                             <div className="space-y-3">
-                                                <label className="text-[12px] font-bold text-zinc-400 capitalize ml-1">SKU (Stock Keeping Unit)</label>
-                                                <input value={form.sku} onChange={e => setForm(f => ({ ...f, sku: e.target.value }))} placeholder="e.g. TEE-BLK-LG" className="w-full px-6 py-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl text-sm font-semibold outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all shadow-sm" />
+                                                <div className="flex items-center justify-between ml-1">
+                                                    <label className="text-[12px] font-bold text-zinc-400 capitalize">Product Description</label>
+                                                    <div className="flex items-center gap-2">
+                                                        <button 
+                                                            onClick={() => generateAIContent('description')}
+                                                            disabled={!!isGenerating}
+                                                            className="flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500/20 transition-all disabled:opacity-50"
+                                                        >
+                                                            {isGenerating === 'description' ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} fill="currentColor" />}
+                                                            Generate with AI
+                                                        </button>
+                                                        {form.description && (
+                                                            <button 
+                                                                onClick={() => {
+                                                                    if (productId) {
+                                                                        handleAutoSave()
+                                                                        toast.success("Description Saved!")
+                                                                    } else {
+                                                                        save()
+                                                                    }
+                                                                }}
+                                                                className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/20 transition-all"
+                                                            >
+                                                                Quick Save
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Tell your customers more about this product..." className="w-full px-6 py-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[32px] text-sm font-semibold outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all shadow-sm min-h-[250px] resize-none" />
                                             </div>
-                                            <div className="space-y-3">
-                                                <label className="text-[12px] font-bold text-zinc-400 capitalize ml-1">Category</label>
-                                                <select value={form.categoryId} onChange={e => setForm(f => ({ ...f, categoryId: e.target.value }))} className="w-full px-6 py-[18px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl text-sm font-semibold appearance-none outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all shadow-sm">
-                                                    <option value="">Choose Category</option>
-                                                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                                                </select>
-                                            </div>
-                                            <div className="space-y-3">
-                                                <label className="text-[12px] font-bold text-zinc-400 capitalize ml-1">Product Tax (%)</label>
-                                                <select className="w-full px-6 py-[18px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl text-sm font-semibold appearance-none outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all shadow-sm">
-                                                    <option value="0">Zero Tax (0%)</option>
-                                                    <option value="5">GST (5%)</option>
-                                                    <option value="12">GST (12%)</option>
-                                                    <option value="18">GST (18%)</option>
-                                                </select>
+                                            
+                                            <div className="space-y-8">
+                                                <div className="space-y-3">
+                                                    <label className="text-[12px] font-bold text-zinc-400 capitalize ml-1">SKU (Stock Keeping Unit)</label>
+                                                    <input value={form.sku} onChange={e => setForm(f => ({ ...f, sku: e.target.value }))} placeholder="e.g. TEE-BLK-LG" className="w-full px-6 py-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl text-sm font-semibold outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all shadow-sm" />
+                                                </div>
+                                                <div className="space-y-3">
+                                                    <label className="text-[12px] font-bold text-zinc-400 capitalize ml-1">Category</label>
+                                                    <select value={form.categoryId} onChange={e => setForm(f => ({ ...f, categoryId: e.target.value }))} className="w-full px-6 py-[18px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl text-sm font-semibold appearance-none outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all shadow-sm">
+                                                        <option value="">Choose Category</option>
+                                                        {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                                    </select>
+                                                </div>
+                                                <div className="space-y-3">
+                                                    <label className="text-[12px] font-bold text-zinc-400 capitalize ml-1">Product Tax (%)</label>
+                                                    <select className="w-full px-6 py-[18px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl text-sm font-semibold appearance-none outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all shadow-sm">
+                                                        <option value="0">Zero Tax (0%)</option>
+                                                        <option value="5">GST (5%)</option>
+                                                        <option value="12">GST (12%)</option>
+                                                        <option value="18">GST (18%)</option>
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -714,7 +833,18 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                             <div className="space-y-3">
-                                                <label className="text-[12px] font-bold text-zinc-400 capitalize ml-1">Cover Image</label>
+                                                 <div className="flex items-center justify-between ml-1">
+                                                     <label className="text-[12px] font-bold text-zinc-400 capitalize">Cover Image</label>
+                                                     {form.imageUrl && (
+                                                         <button 
+                                                             onClick={() => setShowMagicStudio(true)}
+                                                             className="flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500/20 transition-all"
+                                                         >
+                                                             <Sparkles size={10} fill="currentColor" />
+                                                             Magic Studio
+                                                         </button>
+                                                     )}
+                                                 </div>
                                                 <div className="relative group overflow-hidden rounded-[40px] border-2 border-dashed border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 aspect-video flex flex-col items-center justify-center gap-4 transition-all hover:border-indigo-500/50 hover:bg-indigo-50/10 shadow-sm">
                                                     {form.imageUrl ? (
                                                         <>
@@ -1165,7 +1295,17 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
                                         <div className="space-y-8">
                                             <div className="space-y-3">
-                                                <label className="text-[12px] font-bold text-zinc-400 capitalize ml-1">Focus Keyword</label>
+                                                <div className="flex items-center justify-between ml-1">
+                                                    <label className="text-[12px] font-bold text-zinc-400 capitalize">Focus Keyword</label>
+                                                    <button 
+                                                        onClick={() => generateAIContent('keywords')}
+                                                        disabled={!!isGenerating}
+                                                        className="flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500/20 transition-all disabled:opacity-50"
+                                                    >
+                                                        {isGenerating === 'keywords' ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} fill="currentColor" />}
+                                                        Generate Keywords
+                                                    </button>
+                                                </div>
                                                 <input 
                                                     value={form.focusKeyword} 
                                                     onChange={e => setForm(f => ({ ...f, focusKeyword: e.target.value }))} 
@@ -1174,7 +1314,17 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                                                 />
                                             </div>
                                             <div className="space-y-3">
-                                                <label className="text-[12px] font-bold text-zinc-400 capitalize ml-1">Custom Meta Title</label>
+                                                <div className="flex items-center justify-between ml-1">
+                                                    <label className="text-[12px] font-bold text-zinc-400 capitalize">Custom Meta Title</label>
+                                                    <button 
+                                                        onClick={() => generateAIContent('seoTitle')}
+                                                        disabled={!!isGenerating}
+                                                        className="flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500/20 transition-all disabled:opacity-50"
+                                                    >
+                                                        {isGenerating === 'seoTitle' ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} fill="currentColor" />}
+                                                        Optimize Title
+                                                    </button>
+                                                </div>
                                                 <input 
                                                     value={form.seoTitle} 
                                                     onChange={e => setForm(f => ({ ...f, seoTitle: e.target.value }))} 
@@ -1183,7 +1333,17 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                                                 />
                                             </div>
                                             <div className="space-y-3">
-                                                <label className="text-[12px] font-bold text-zinc-400 capitalize ml-1">Meta Description</label>
+                                                <div className="flex items-center justify-between ml-1">
+                                                    <label className="text-[12px] font-bold text-zinc-400 capitalize">Meta Description</label>
+                                                    <button 
+                                                        onClick={() => generateAIContent('seo')}
+                                                        disabled={!!isGenerating}
+                                                        className="flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500/20 transition-all disabled:opacity-50"
+                                                    >
+                                                        {isGenerating === 'seo' ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} fill="currentColor" />}
+                                                        Generate Meta
+                                                    </button>
+                                                </div>
                                                 <textarea 
                                                     value={form.seoDescription} 
                                                     onChange={e => setForm(f => ({ ...f, seoDescription: e.target.value }))} 
@@ -1236,6 +1396,16 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                     if (picker.field === 'gallery') handlePickGallery(urls)
                 }}
                 title={picker.field === 'gallery' ? "Select Gallery Images" : "Select Cover Image"}
+            />
+            <MagicStudioModal 
+                isOpen={showMagicStudio} 
+                onClose={() => setShowMagicStudio(false)} 
+                initialImage={form.imageUrl}
+                onSave={(processedUrl) => {
+                    setForm(f => ({ ...f, imageUrl: processedUrl, gallery: [processedUrl, ...f.gallery.filter(g => g !== f.imageUrl)] }))
+                    setShowMagicStudio(false)
+                    toast.success("Product stylized in AI Studio!")
+                }}
             />
         </div>
     )
