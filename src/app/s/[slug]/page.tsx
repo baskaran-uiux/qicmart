@@ -70,24 +70,23 @@ export default async function StorefrontPage({
 
     if (!rawStore || !rawStore.isActive || rawStore.isPlatformDisabled || rawStore.isStorefrontDisabled) notFound()
     
-    // Sanitize Prisma data to plain POJO for safety and performance
-    const storeData = JSON.parse(JSON.stringify(rawStore))
+    // Safely extract and parse themeConfig
+    const themeConfig = typeof rawStore.themeConfig === 'string' 
+        ? JSON.parse(rawStore.themeConfig) 
+        : (rawStore.themeConfig || {})
 
-    // Pre-parse the themeConfig separately
-    const themeConfig = storeData.themeConfig ? (typeof storeData.themeConfig === 'string' ? JSON.parse(storeData.themeConfig) : storeData.themeConfig) : {}
-
-    // Pre-parse images for each product to save client-side JSON.parse calls
-    const processedProducts = storeData.products.map((p: any) => ({
-        ...p,
-        images: Array.isArray(p.images) ? p.images : (function() {
-            try { return JSON.parse(p.images || "[]") } catch(e) { return [] }
-        })()
-    }))
-
+    // Process products and categories into a clean, serializable format
     const store = {
-        ...storeData,
+        ...rawStore,
         themeConfig,
-        products: processedProducts
+        products: rawStore.products.map((p: any) => ({
+            ...p,
+            images: Array.isArray(p.images) 
+                ? p.images 
+                : (typeof p.images === 'string' ? (function() {
+                    try { return JSON.parse(p.images) } catch(e) { return [] }
+                })() : [])
+        }))
     } as any
 
 

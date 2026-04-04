@@ -230,9 +230,10 @@ export default function ProductsPage() {
                                 setBulkStocks(initial)
                             }
                         }}
-                        className={`flex-1 sm:flex-none px-6 py-3.5 ${isBulkMode ? "bg-amber-500 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300"} rounded-2xl text-[10px] font-bold capitalize flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95`}
+                        className={`flex-1 sm:flex-none px-4 sm:px-6 py-3 ${isBulkMode ? "bg-amber-500 text-white shadow-lg shadow-amber-500/20" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300"} rounded-2xl text-[11px] font-bold capitalize flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95 whitespace-nowrap min-h-[46px]`}
                     >
-                        <RefreshCw size={18} className={isBulkMode ? "animate-spin" : ""} /> {isBulkMode ? t("cancelBulkEdit") : t("bulkStockEdit")}
+                        <RefreshCw size={16} className={isBulkMode ? "animate-spin" : ""} /> 
+                        <span>{isBulkMode ? t("cancelBulkEdit") : t("bulkStockEdit")}</span>
                     </button>
                     {isBulkMode && (
                         <button 
@@ -255,20 +256,21 @@ export default function ProductsPage() {
                                     console.error("Bulk update failed:", error)
                                 }
                             }}
-                            className="flex-1 sm:flex-none px-6 py-3.5 bg-emerald-600 text-white rounded-2xl text-[10px] font-bold capitalize flex items-center justify-center gap-2 transition-all hover:bg-emerald-700 active:scale-95 shadow-xl shadow-emerald-600/20"
+                            className="flex-1 sm:flex-none px-4 sm:px-6 py-3 bg-emerald-600 text-white rounded-2xl text-[11px] font-bold capitalize flex items-center justify-center gap-2 transition-all hover:bg-emerald-700 active:scale-95 shadow-xl shadow-emerald-600/20 whitespace-nowrap min-h-[46px]"
                         >
-                            <Check size={18} /> {t("applyChanges")}
+                            <Check size={16} /> <span>{t("applyChanges")}</span>
                         </button>
                     )}
                     <button 
                         onClick={handleExport}
-                        className="flex-1 sm:flex-none px-6 py-3.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-2xl text-[10px] font-bold capitalize flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all"
+                        className="flex-1 sm:flex-none px-4 sm:px-6 py-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-2xl text-[11px] font-bold capitalize flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all whitespace-nowrap min-h-[46px]"
                     >
-                        <Download size={18} /> {t("export")}
+                        <Download size={16} /> <span>{t("export")}</span>
                     </button>
                     <PremiumButton 
                         onClick={() => openAdd()}
                         icon={Package}
+                        className="min-h-[46px]"
                     >
                         {t("addProduct")}
                     </PremiumButton>

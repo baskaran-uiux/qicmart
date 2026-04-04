@@ -13,7 +13,7 @@ interface MediaItem {
 interface MediaLibraryModalProps {
     isOpen: boolean
     onClose: () => void
-    onSelect: (url: string) => void
+    onSelect: (url: string, item: MediaItem) => void
     title?: string
 }
 
@@ -22,7 +22,7 @@ export function MediaLibraryModal({ isOpen, onClose, onSelect, title = "Select M
     const [loading, setLoading] = useState(false)
     const [uploading, setUploading] = useState(false)
     const [search, setSearch] = useState("")
-    const [selectedUrl, setSelectedUrl] = useState<string | null>(null)
+    const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null)
     const [uploadError, setUploadError] = useState<string | null>(null)
 
     const fetchMedia = async () => {
@@ -44,7 +44,7 @@ export function MediaLibraryModal({ isOpen, onClose, onSelect, title = "Select M
     useEffect(() => {
         if (isOpen) {
             fetchMedia()
-            setSelectedUrl(null)
+            setSelectedItem(null)
         }
     }, [isOpen])
 
@@ -69,7 +69,7 @@ export function MediaLibraryModal({ isOpen, onClose, onSelect, title = "Select M
             const data = await res.json()
             if (res.ok) {
                 setMedia(prev => [data, ...prev])
-                setSelectedUrl(data.url)
+                setSelectedItem(data)
             } else {
                 setUploadError(data.error || data.details || "Upload failed")
             }
@@ -147,9 +147,9 @@ export function MediaLibraryModal({ isOpen, onClose, onSelect, title = "Select M
                             {filteredMedia.map((item) => (
                                 <div 
                                     key={item.id}
-                                    onClick={() => setSelectedUrl(item.url)}
+                                    onClick={() => setSelectedItem(item)}
                                     className={`group relative aspect-square rounded-3xl overflow-hidden cursor-pointer transition-all border-4 ${
-                                        selectedUrl === item.url ? "border-indigo-600 dark:border-purple-500 ring-4 ring-indigo-500/20" : "border-transparent bg-zinc-100 dark:bg-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700"
+                                        selectedItem?.id === item.id ? "border-indigo-600 dark:border-purple-500 ring-4 ring-indigo-500/20" : "border-transparent bg-zinc-100 dark:bg-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700"
                                     }`}
                                 >
                                     {item.url.match(/\.(mp4|webm|ogg|mov)$/i) ? (
@@ -166,10 +166,10 @@ export function MediaLibraryModal({ isOpen, onClose, onSelect, title = "Select M
                                         />
                                     )}
                                     <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${
-                                        selectedUrl === item.url ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                                        selectedItem?.id === item.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                                     }`}>
                                         <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                                            selectedUrl === item.url ? "bg-indigo-600 dark:bg-purple-500 text-white shadow-xl" : "bg-white/20 backdrop-blur-md text-white"
+                                            selectedItem?.id === item.id ? "bg-indigo-600 dark:border-purple-500 text-white shadow-xl" : "bg-white/20 backdrop-blur-md text-white"
                                         }`}>
                                             <Check size={24} />
                                         </div>
@@ -192,8 +192,8 @@ export function MediaLibraryModal({ isOpen, onClose, onSelect, title = "Select M
                         Cancel
                     </button>
                     <button 
-                        disabled={!selectedUrl}
-                        onClick={() => selectedUrl && onSelect(selectedUrl)}
+                        disabled={!selectedItem}
+                        onClick={() => selectedItem && onSelect(selectedItem.url, selectedItem)}
                         className="px-8 py-3 bg-indigo-600 dark:bg-white text-white dark:text-black font-black rounded-xl transition-all shadow-xl active:scale-95 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed text-sm"
                     >
                         Confirm Selection

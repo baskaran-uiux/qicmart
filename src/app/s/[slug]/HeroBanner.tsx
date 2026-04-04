@@ -177,7 +177,12 @@ export default function HeroBanner({ slug, banners = [], layoutStyle = "default"
                             const s = activeSlides[current];
                             if (!s) return null;
                             const isDefault = (s as any).bg !== undefined;
-                            const isVideo = s.type === 'video' || s.image.match(/\.(mp4|webm|ogg|mov)$/i);
+                            
+                            // Robust video detection: 
+                            // 1. Check if type is explicitly 'video'
+                            // 2. Fallback to regex that handles query params (e.g., from Media Library)
+                            const videoRegex = /\.(mp4|webm|ogg|mov|mov)(\?|$)/i;
+                            const isVideo = s.type === 'video' || (s.image && videoRegex.test(s.image));
                             
                             return (
                                 <div key={s.id} className="absolute inset-0">

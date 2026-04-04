@@ -38,6 +38,7 @@ export const metadata: Metadata = {
 };
 
 import { Toaster } from "sonner";
+import { CookieConsent } from "@/components/common/CookieConsent";
 
 export default function RootLayout({
   children,
@@ -50,6 +51,7 @@ export default function RootLayout({
         <Providers>
           {children}
           <Toaster richColors position="top-right" closeButton />
+          <CookieConsent />
         </Providers>
       </body>
     </html>

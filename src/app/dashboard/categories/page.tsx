@@ -416,7 +416,7 @@ export default function CategoriesPage() {
             <MediaLibraryModal 
                 isOpen={mediaModalOpen}
                 onClose={() => setMediaModalOpen(false)}
-                onSelect={(url) => {
+                onSelect={(url, item) => {
                     setForm(f => ({ ...f, image: url }))
                     setMediaModalOpen(false)
                 }}

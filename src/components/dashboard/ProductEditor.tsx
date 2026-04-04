@@ -236,6 +236,15 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
     const ownerId = searchParams.get("ownerId")
     const { id: storeId, currency, subscription, aiCredits, updateCredits } = useDashboardStore()
     
+    const TABS = [
+        { id: "general", label: "General Information" },
+        { id: "pricing", label: "Pricing & Value" },
+        { id: "inventory", label: "Inventory & Stock" },
+        { id: "content", label: "Rich Content" },
+        { id: "variants", label: "Product Options" },
+        { id: "advanced", label: "Search & Advanced" }
+    ]
+
     const [loading, setLoading] = useState(!!productId)
     const [categories, setCategories] = useState<Category[]>([])
     const [activeTab, setActiveTab] = useState("general")
@@ -627,6 +636,20 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
         setForm(f => ({ ...f, variations: newVariations }))
     }
 
+    const currentTabIndex = TABS.findIndex(t => t.id === activeTab)
+    const nextTab = () => {
+        if (currentTabIndex < TABS.length - 1) {
+            setActiveTab(TABS[currentTabIndex + 1].id)
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+        }
+    }
+    const prevTab = () => {
+        if (currentTabIndex > 0) {
+            setActiveTab(TABS[currentTabIndex - 1].id)
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+        }
+    }
+
 
     const handlePickGallery = (urls: string[]) => {
         setForm(f => ({ ...f, gallery: [...f.gallery, ...urls] }))
@@ -667,39 +690,40 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                     </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex items-center gap-2 px-4 py-2 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl text-zinc-400 border border-zinc-100 dark:border-zinc-800">
+                <div className="grid grid-cols-2 md:flex md:items-center gap-3 sm:gap-4 w-full md:w-auto">
+                    <div className="flex items-center gap-2 px-4 py-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl text-zinc-400 border border-zinc-100 dark:border-zinc-800 justify-center">
                         {saving ? (
                             <>
-                                <Loader2 size={14} className="animate-spin text-indigo-500" />
-                                <span className="text-[10px] font-black uppercase tracking-widest leading-none">Auto-saving...</span>
+                                <Loader2 size={12} className="animate-spin text-indigo-500" />
+                                <span className="text-[9px] font-black uppercase tracking-widest leading-none">Auto-saving</span>
                             </>
                         ) : lastSaved ? (
                             <>
-                                <Check size={14} className="text-emerald-500" />
-                                <span className="text-[10px] font-black uppercase tracking-widest leading-none">Saved {lastSaved}</span>
+                                <Check size={12} className="text-emerald-500" />
+                                <span className="text-[9px] font-black uppercase tracking-widest leading-none">Saved</span>
                             </>
                         ) : isDirty ? (
                             <>
-                                <RefreshCw size={14} className="text-amber-500" />
-                                <span className="text-[10px] font-black uppercase tracking-widest leading-none">Unsaved Changes</span>
+                                <RefreshCw size={12} className="text-amber-500" />
+                                <span className="text-[9px] font-black uppercase tracking-widest leading-none">Unsaved</span>
                             </>
                         ) : (
-                            <span className="text-[10px] font-black uppercase tracking-widest leading-none">Synchronized</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest leading-none">Synced</span>
                         )}
                     </div>
 
                     <button 
                         onClick={() => setForm(f => ({ ...f, isBestSeller: !f.isBestSeller }))} 
-                        className={`p-3 rounded-2xl transition-all border ${form.isBestSeller ? "text-amber-500 bg-amber-50 border-amber-100 dark:bg-amber-500/10 dark:border-amber-500/20" : "text-zinc-400 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"}`}
+                        className={`py-3 rounded-2xl transition-all border flex items-center justify-center gap-2 ${form.isBestSeller ? "text-amber-500 bg-amber-50 border-amber-100 dark:bg-amber-500/10 dark:border-amber-500/20" : "text-zinc-400 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"}`}
                         title="Toggle Best Seller"
                     >
-                        <Star size={20} fill={form.isBestSeller ? "currentColor" : "none"} />
+                        <Star size={16} fill={form.isBestSeller ? "currentColor" : "none"} />
+                        <span className="text-[9px] font-black uppercase tracking-widest sm:hidden">Best Seller</span>
                     </button>
 
                     <button 
                         onClick={() => router.push(ownerId ? `/dashboard/products?ownerId=${ownerId}` : "/dashboard/products")}
-                        className="px-8 py-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-2xl text-[12px] font-bold hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all border border-zinc-200 dark:border-zinc-700 shadow-sm"
+                        className="py-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-2xl text-[11px] font-bold hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all border border-zinc-200 dark:border-zinc-700 shadow-sm text-center"
                     >
                         Cancel
                     </button>
@@ -708,31 +732,24 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                         onClick={save}
                         disabled={saving || uploading}
                         isLoading={saving}
-                        className="px-10"
+                        className="!py-3 !px-4 w-full"
                         icon={Check}
                     >
-                        {productId ? "Update Details" : "Save Product"}
+                        {productId ? "Update" : "Save"}
                     </PremiumButton>
                 </div>
             </div>
 
             {/* Main Editor Section */}
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[40px] shadow-sm overflow-hidden flex flex-col min-h-[70vh]">
-                {/* Internal Tabs */}
-                <div className="px-8 pt-6 border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-x-auto no-scrollbar">
-                    <div className="flex items-center gap-10">
-                        {[
-                            { id: "general", label: "General Information" },
-                            { id: "pricing", label: "Pricing & Value" },
-                            { id: "inventory", label: "Inventory & Stock" },
-                            { id: "content", label: "Rich Content" },
-                            { id: "variants", label: "Product Options" },
-                            { id: "advanced", label: "Search & Advanced" }
-                        ].map((tab) => (
+                {/* Internal Tabs - Optimized for Mobile */}
+                <div className="px-5 sm:px-8 pt-6 border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 sticky top-0 z-20 overflow-x-auto no-scrollbar">
+                    <div className="flex items-center gap-6 sm:gap-10 pb-1">
+                        {TABS.map((tab) => (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`py-5 text-[14px] font-bold capitalize whitespace-nowrap border-b-2 transition-all ${
+                                className={`py-4 sm:py-5 text-[12px] sm:text-[14px] font-bold capitalize whitespace-nowrap border-b-2 transition-all ${
                                     activeTab === tab.id 
                                     ? "border-indigo-600 text-indigo-600" 
                                     : "border-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
@@ -741,6 +758,19 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                                 {tab.label}
                             </button>
                         ))}
+                    </div>
+                </div>
+
+                {/* Mobile Progress Bar */}
+                <div className="block sm:hidden h-1.5 w-full bg-zinc-100 dark:bg-zinc-800">
+                    <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${((currentTabIndex + 1) / TABS.length) * 100}%` }}
+                        className="h-full bg-indigo-600"
+                    />
+                    <div className="px-6 py-2 flex items-center justify-between text-[9px] font-black uppercase tracking-widest text-zinc-400 border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+                        <span>Phase {currentTabIndex + 1} of {TABS.length}</span>
+                        <span className="text-indigo-600">{Math.round(((currentTabIndex + 1) / TABS.length) * 100)}% Complete</span>
                     </div>
                 </div>
 
@@ -759,8 +789,8 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                                 <div className="space-y-12">
                                     <div className="space-y-8">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-1.5 h-8 bg-indigo-600 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.5)]"></div>
-                                            <h4 className="text-[18px] font-black text-black dark:text-white uppercase tracking-tight">Product Information</h4>
+                                            <div className="w-1 h-6 bg-indigo-600 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.3)]"></div>
+                                            <h4 className="text-[16px] font-bold text-black dark:text-white tracking-tight">Product Information</h4>
                                         </div>
                                         <div className="grid grid-cols-1 gap-8">
                                             <div className="space-y-3">
@@ -916,8 +946,8 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                                 <div className="space-y-12">
                                     <div className="space-y-8">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-1.5 h-8 bg-indigo-600 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.5)]"></div>
-                                            <h4 className="text-[18px] font-black text-black dark:text-white uppercase tracking-tight">Pricing Information</h4>
+                                            <div className="w-1 h-6 bg-indigo-600 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.3)]"></div>
+                                            <h4 className="text-[16px] font-bold text-black dark:text-white tracking-tight">Pricing Information</h4>
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
                                             <div className="space-y-3">
@@ -936,11 +966,15 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="p-8 bg-amber-50 dark:bg-amber-500/5 border border-amber-100 dark:border-amber-500/10 rounded-[40px] flex gap-6">
-                                        <div className="p-4 bg-white dark:bg-zinc-900 rounded-2xl text-amber-500 shadow-sm h-fit"><AlertCircle size={28} /></div>
+                                    <div className="p-6 sm:p-8 bg-amber-50 dark:bg-amber-500/5 border border-amber-100 dark:border-amber-500/10 rounded-[32px] sm:rounded-[40px] flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
+                                        <div className="p-3 bg-white dark:bg-zinc-900 rounded-xl sm:rounded-2xl text-amber-500 shadow-sm flex-shrink-0 animate-pulse">
+                                            <AlertCircle size={24} />
+                                        </div>
                                         <div>
-                                            <h5 className="text-[16px] font-black text-amber-900 dark:text-amber-400">Pricing Strategy Tip</h5>
-                                            <p className="text-[13px] text-amber-700/80 dark:text-amber-400/60 mt-2 leading-relaxed font-semibold">Setting a regular MRP higher than your Sale Price creates a "Discount" psychological trigger. This simple tactic can increase checkout conversions by up to 34%.</p>
+                                            <h5 className="text-[14px] sm:text-[16px] font-black text-amber-900 dark:text-amber-400">Pricing Strategy Tip</h5>
+                                            <p className="text-[12px] sm:text-[13px] text-amber-800/80 dark:text-amber-400/60 mt-1.5 sm:mt-2 leading-relaxed font-bold">
+                                                Setting a regular MRP higher than your Sale Price creates a <span className="text-amber-600 dark:text-amber-500 underline decoration-2 underline-offset-2">"Discount"</span> psychological trigger. This simple tactic can increase checkout conversions by up to 34%.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -950,8 +984,8 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                                 <div className="space-y-12">
                                      <div className="space-y-8">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-1.5 h-8 bg-indigo-600 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.5)]"></div>
-                                            <h4 className="text-[18px] font-black text-black dark:text-white uppercase tracking-tight">Stock & Shipping</h4>
+                                            <div className="w-1 h-6 bg-indigo-600 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.3)]"></div>
+                                            <h4 className="text-[16px] font-bold text-black dark:text-white tracking-tight">Stock & Shipping</h4>
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                                             <div className="space-y-3">
@@ -982,7 +1016,7 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                                     </div>
 
                                     <div className="space-y-8">
-                                        <h4 className="text-[14px] font-black text-zinc-400 uppercase tracking-widest italic ml-1">Physical Package Dimensions</h4>
+                                        <h4 className="text-[12px] font-bold text-zinc-400 capitalize tracking-wide italic ml-1">Physical Package Dimensions</h4>
                                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
                                             {[
                                                 { key: 'weight', label: 'Weight', unit: 'kg' },
@@ -1003,8 +1037,8 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                             {activeTab === "content" && (
                                 <div className="space-y-8">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-1.5 h-8 bg-indigo-600 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.5)]"></div>
-                                        <h4 className="text-[18px] font-black text-black dark:text-white uppercase tracking-tight">Product Storytelling</h4>
+                                        <div className="w-1 h-6 bg-indigo-600 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.3)]"></div>
+                                        <h4 className="text-[16px] font-bold text-black dark:text-white tracking-tight">Product Storytelling</h4>
                                     </div>
                                     <div className="space-y-3">
                                         <label className="text-[12px] font-bold text-zinc-400 capitalize ml-1">Detailed Description / Specifications</label>
@@ -1029,7 +1063,7 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                                                 </div>
                                             </div>
                                             <div className="max-w-md">
-                                                <h5 className="text-2xl font-black text-black dark:text-white tracking-tight">Enable Product Variations</h5>
+                                                <h5 className="text-xl font-bold text-black dark:text-white tracking-tight">Enable Product Variations</h5>
                                                 <p className="text-[13px] text-zinc-500 mt-3 font-semibold leading-relaxed">Boost your sales by offering different sizes, colors, or materials. Enabling variations will allow you to define multiple options for this product.</p>
                                                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
                                                     <button 
@@ -1047,8 +1081,8 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                                             <div className="space-y-10">
                                                 <div className="flex items-center justify-between px-2">
                                                     <div className="flex items-center gap-4">
-                                                        <div className="w-1.5 h-8 bg-indigo-600 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.5)]"></div>
-                                                        <h4 className="text-[18px] font-black text-black dark:text-white uppercase tracking-tight">Add Variants</h4>
+                                                        <div className="w-1 h-6 bg-indigo-600 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.3)]"></div>
+                                                        <h4 className="text-[16px] font-bold text-black dark:text-white tracking-tight">Add Variants</h4>
                                                     </div>
                                                     <button 
                                                         onClick={() => setForm(f => ({ ...f, attributes: [...f.attributes, { name: "", values: [] }] }))}
@@ -1281,14 +1315,14 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
 
                             {activeTab === "advanced" && (
                                 <div className="space-y-12">
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-1.5 h-8 bg-indigo-600 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.5)]"></div>
-                                            <h4 className="text-[18px] font-black text-black dark:text-white uppercase tracking-tight">Search Optimizer (SEO)</h4>
+                                            <div className="w-1 h-6 bg-indigo-600 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.3)]"></div>
+                                            <h4 className="text-[16px] font-bold text-black dark:text-white tracking-tight">Search Optimizer (SEO)</h4>
                                         </div>
-                                        <div className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-500/10 px-6 py-3 rounded-full border border-emerald-100 dark:border-emerald-500/20 shadow-sm">
-                                            <Zap size={18} className="text-emerald-500 fill-emerald-500" />
-                                            <span className="text-[12px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest leading-none">SEO Visibility Score: {form.seoScore}%</span>
+                                        <div className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-500/10 px-5 py-2.5 rounded-full border border-emerald-100 dark:border-emerald-500/20 shadow-sm w-fit">
+                                            <Zap size={14} className="text-emerald-500 fill-emerald-500" />
+                                            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 leading-none">SEO Visibility Score: {form.seoScore}%</span>
                                         </div>
                                     </div>
 
@@ -1379,9 +1413,61 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                                     </div>
                                 </div>
                             )}
+
+                            {/* Wizard Navigation Footer */}
+                            <div className="mt-16 sm:mt-24 pt-10 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between gap-4">
+                                <button
+                                    onClick={prevTab}
+                                    disabled={currentTabIndex === 0}
+                                    className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[12px] font-bold transition-all border ${
+                                        currentTabIndex === 0 
+                                        ? "opacity-50 cursor-not-allowed text-zinc-400 border-zinc-100 dark:border-zinc-800" 
+                                        : "text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                    }`}
+                                >
+                                    <ChevronLeft size={16} />
+                                    Phase Back
+                                </button>
+
+                                {currentTabIndex < TABS.length - 1 ? (
+                                    <button 
+                                        onClick={nextTab}
+                                        className="flex items-center gap-2 px-8 py-3 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-2xl text-[12px] font-black uppercase tracking-widest hover:opacity-90 shadow-lg transform active:scale-95 transition-all"
+                                    >
+                                        Save & Continue
+                                        <Plus size={16} className="rotate-[-45deg]" />
+                                    </button>
+                                ) : (
+                                    <PremiumButton 
+                                        onClick={save}
+                                        disabled={saving || uploading}
+                                        isLoading={saving}
+                                        className="px-10"
+                                        icon={Check}
+                                    >
+                                        {productId ? "Confirm Update" : "Finish & List Product"}
+                                    </PremiumButton>
+                                )}
+                            </div>
                         </motion.div>
                     </AnimatePresence>
                 </div>
+            </div>
+
+            {/* Sticky Mobile Summary Bar */}
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-t border-zinc-200 dark:border-zinc-800 z-50 flex items-center justify-between sm:hidden animate-in slide-in-from-bottom duration-500">
+                <div className="flex flex-col">
+                    <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Pricing</span>
+                    <span className="text-sm font-bold text-black dark:text-white">{currency} {form.price || '0.00'}</span>
+                </div>
+                <PremiumButton 
+                    onClick={save}
+                    disabled={saving || uploading}
+                    isLoading={saving}
+                    className="!py-2 !px-6 !rounded-xl !text-[11px]"
+                >
+                    {productId ? "Update" : "List Product"}
+                </PremiumButton>
             </div>
             
             <MediaPicker 

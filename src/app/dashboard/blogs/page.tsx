@@ -405,7 +405,7 @@ export default function BlogsPage() {
             <MediaLibraryModal 
                 isOpen={showMediaModal} 
                 onClose={() => setShowMediaModal(false)} 
-                onSelect={(url) => {
+                onSelect={(url, item) => {
                     setForm({...form, image: url})
                     setShowMediaModal(false)
                 }}

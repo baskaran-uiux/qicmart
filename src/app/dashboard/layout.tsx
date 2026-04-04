@@ -350,6 +350,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                                     group.href ? (
                                         <Link
                                             href={getTargetHref(group.href)}
+                                            onClick={() => setMobileMenuOpen(false)}
                                             className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all text-[14px] font-medium ${isActive(group.href) ? activeClass : inactiveClass}`}
                                         >
                                             <motion.div
@@ -520,17 +521,18 @@ function DashboardContent({ children }: { children: ReactNode }) {
                         {/* DEBUG DATA */}
                         <div className="hidden" id="debug-data" data-slug={slug} data-name={name} data-user-id={(session?.user as any)?.id} data-store-exists={!!slug}></div>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <span className={`px-2.5 py-1 text-nowrap rounded-full text-[12px] font-semibold ${dark ? 'bg-purple-500/10 border border-purple-500/20 text-purple-400' : 'bg-purple-50 border border-purple-200 text-purple-700'}`}>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <span className={`hidden md:inline-flex px-2.5 py-1 text-nowrap rounded-full text-[12px] font-semibold ${dark ? 'bg-purple-500/10 border border-purple-500/20 text-purple-400' : 'bg-purple-50 border border-purple-200 text-purple-700'}`}>
                             Standard Plan
                         </span>
                         {store.aiCredits !== undefined && (
-                            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-bold border shadow-sm ${dark ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-indigo-50 border-indigo-100 text-indigo-600'}`}>
+                            <div className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-bold border shadow-sm ${dark ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-indigo-50 border-indigo-100 text-indigo-600'}`}>
                                 <Zap size={12} fill="currentColor" className="animate-pulse" />
-                                <span>{store.aiCredits} AI Credits</span>
+                                <span className="hidden lg:inline">{store.aiCredits} AI Credits</span>
+                                <span className="lg:hidden">{store.aiCredits}</span>
                             </div>
                         )}
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1 sm:gap-2">
                             <Notifications ownerId={ownerId} />
                             <button
                                 onClick={toggleDark}
@@ -590,7 +592,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                         children
                     )}
                 </div>
-                {store.id && <AIGrowthGuru storeId={store.id} />}
+                {store.id && !pathname?.includes('/dashboard/products/') && <AIGrowthGuru storeId={store.id} />}
             </main>
         </div>
     )

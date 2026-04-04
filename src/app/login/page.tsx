@@ -17,16 +17,7 @@ function LoginForm() {
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false)
 
-    useEffect(() => {
-        const testEmail = searchParams.get("test-email")
-        if (testEmail) {
-            signIn("credentials", { 
-                email: testEmail, 
-                otp: "dummy", 
-                callbackUrl: searchParams.get("callbackUrl") || "/" 
-            })
-        }
-    }, [searchParams])
+    // Cleanup: Removed test-mode auto-login helpers to ensure production security.
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()

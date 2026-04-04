@@ -19,12 +19,13 @@ export default function MediaLibraryPage() {
     const [media, setMedia] = useState<MediaItem[]>([])
     const [loading, setLoading] = useState(true)
     const [uploading, setUploading] = useState(false)
+    const [bulkOptimizing, setBulkOptimizing] = useState(false)
     const [search, setSearch] = useState("")
     const [view, setView] = useState<"grid" | "list">("grid")
     const [copied, setCopied] = useState<string | null>(null)
     const [preview, setPreview] = useState<MediaItem | null>(null)
     const [currentPage, setCurrentPage] = useState(1)
-    const itemsPerPage = 50
+    const itemsPerPage = 20
 
     const fetchMedia = async () => {
         const params = new URLSearchParams(window.location.search)
@@ -74,6 +75,34 @@ export default function MediaLibraryPage() {
         setUploading(false)
     }
 
+    const handleBulkOptimize = async () => {
+        if (!confirm("This will convert all your existing JPEG/PNG images to optimized WebP. The original files will be replaced to save storage. Continue?")) return
+
+        const params = new URLSearchParams(window.location.search)
+        const ownerId = params.get("ownerId")
+        const url = ownerId ? `/api/dashboard/media?ownerId=${ownerId}` : "/api/dashboard/media"
+
+        setBulkOptimizing(true)
+        try {
+            const res = await fetch(url, {
+                method: "PATCH",
+                body: JSON.stringify({ action: "bulk-optimize" }),
+                headers: { "Content-Type": "application/json" }
+            })
+            const data = await res.json()
+            if (res.ok) {
+                alert(`Successfully optimized ${data.count} images!`)
+                fetchMedia()
+            } else {
+                throw new Error(data.error || "Optimization failed")
+            }
+        } catch (error: any) {
+            console.error("Bulk optimize error:", error)
+            alert(`Optimization failed: ${error.message}`)
+        }
+        setBulkOptimizing(false)
+    }
+
     const deleteMedia = async (id: string) => {
         // Optimistic UI Update: Remove from local state immediately
         setMedia(prev => prev.filter(m => m.id !== id))
@@ -117,7 +146,7 @@ export default function MediaLibraryPage() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
+        <div className="max-w-6xl mx-auto space-y-8 animate-fade-in min-h-[70vh]">
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                 <div>
@@ -139,6 +168,15 @@ export default function MediaLibraryPage() {
                             <List size={18} />
                         </button>
                     </div>
+                    <PremiumButton
+                        isLoading={bulkOptimizing}
+                        icon={bulkOptimizing ? Loader2 : ImageIcon}
+                        variant="outline"
+                        onClick={handleBulkOptimize}
+                        disabled={bulkOptimizing || uploading}
+                    >
+                        {bulkOptimizing ? "Optimizing..." : "Bulk Optimize"}
+                    </PremiumButton>
                     <PremiumButton
                         isLoading={uploading}
                         icon={uploading ? Loader2 : Upload}
@@ -227,6 +265,11 @@ export default function MediaLibraryPage() {
                                             onError={(e) => { e.currentTarget.style.display = "none" }} 
                                         />
                                     )}
+                                    {item.url.includes(".webp") && (
+                                        <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-indigo-600/90 text-white text-[9px] font-black rounded-lg backdrop-blur-sm z-20">
+                                            WEBP
+                                        </div>
+                                    )}
                                 </div>
                                 
                                 <div className="absolute inset-x-3 top-3 transition-all flex items-center justify-end gap-2 z-30">
@@ -300,8 +343,8 @@ export default function MediaLibraryPage() {
                 )}
             </div>
             ) : (
-                <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[32px] overflow-hidden shadow-xl">
-                    <table className="w-full text-sm text-zinc-500">
+                <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[32px] overflow-x-auto shadow-xl custom-scrollbar">
+                    <table className="w-full text-sm text-zinc-500 min-w-[700px]">
                         <thead className="bg-zinc-50 dark:bg-zinc-950/50 text-zinc-400 dark:text-zinc-500 text-[10px] capitalize font-bold tracking-wide border-b border-zinc-100 dark:border-zinc-800">
                             <tr>
                                 <th className="px-8 py-6 text-left">Internal Asset</th>
@@ -326,7 +369,8 @@ export default function MediaLibraryPage() {
                                             filter: "blur(5px)",
                                             transition: { duration: 0.4 }
                                         }}
-                                        className="group hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors"
+                                        className="group hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors cursor-pointer"
+                                        onClick={() => setPreview(item)}
                                     >
                                         <td className="px-8 py-5 flex items-center gap-4">
                                             <div className="w-14 h-14 rounded-2xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 shrink-0 shadow-sm">
@@ -384,31 +428,51 @@ export default function MediaLibraryPage() {
 
             {/* Preview Modal */}
             {preview && (
-                <div className="fixed inset-0 z-[60] bg-black/40 dark:bg-black/95 backdrop-blur-sm flex items-center justify-center p-6 animate-in fade-in duration-300" onClick={() => setPreview(null)}>
-                    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[40px] overflow-hidden max-w-3xl w-full shadow-2xl scale-in-center" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-10 py-8 border-b border-zinc-100 dark:border-zinc-800">
-                            <div>
-                                <h3 className="font-bold text-2xl text-slate-900 dark:text-white leading-none tracking-tighter">{preview.name}</h3>
-                                <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-3 font-semibold capitalize tracking-wide">{preview.type} • {formatSize(preview.size)} • {new Date(preview.createdAt).toLocaleString()}</p>
-                            </div>
-                            <button onClick={() => setPreview(null)} className="p-3 text-zinc-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-2xl transition-all"><X size={28} /></button>
-                        </div>
-                        <div className="p-10">
-                            <div className="bg-zinc-50 dark:bg-zinc-950 rounded-[32px] overflow-hidden flex items-center justify-center p-4 min-h-[350px] border border-zinc-100 dark:border-zinc-800 shadow-inner">
+                <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300" onClick={() => setPreview(null)}>
+                    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[32px] overflow-hidden max-w-[400px] w-full shadow-2xl scale-in-center relative" onClick={e => e.stopPropagation()}>
+                        {/* Close Button */}
+                        <button 
+                            onClick={() => setPreview(null)} 
+                            className="absolute top-4 right-4 z-[70] p-2 bg-black/20 hover:bg-black/40 dark:bg-white/10 dark:hover:bg-white/20 text-white rounded-full transition-all backdrop-blur-md"
+                        >
+                            <X size={20} />
+                        </button>
+
+                        <div className="flex flex-col">
+                            {/* Media Display */}
+                            <div className="aspect-square w-full bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center overflow-hidden border-b border-zinc-100 dark:border-zinc-800/50">
                                 {preview.type === "VIDEO" ? (
-                                    <video src={preview.url} controls className="max-h-[450px] w-full rounded-2xl" />
+                                    <video src={preview.url} controls className="w-full h-full object-contain" />
                                 ) : (
-                                    <img src={preview.url} alt={preview.name} className="max-h-[450px] object-contain transition-transform duration-700 hover:scale-105" />
+                                    <img src={preview.url} alt={preview.name} className="w-full h-full object-contain p-2 transition-transform duration-700 hover:scale-105" />
                                 )}
                             </div>
-                            <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                <button onClick={() => copyUrl(preview.url)} className="flex items-center gap-2 px-8 py-3.5 bg-indigo-600 dark:bg-white text-white dark:text-black rounded-2xl text-[12px] font-semibold capitalize hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-indigo-500/10">
-                                    {copied === preview.url ? <Check size={20} /> : <Copy size={20} />}
-                                    {copied === preview.url ? "Copied Link" : "Copy Direct URL"}
-                                </button>
-                                <button onClick={() => deleteMedia(preview.id)} className="flex items-center justify-center gap-3 px-8 py-5 bg-rose-50 dark:bg-red-500/10 hover:bg-rose-500 dark:hover:bg-red-500 text-rose-500 dark:text-red-500 hover:text-white font-semibold rounded-2xl border border-rose-200 dark:border-red-500/20 transition-all active:scale-95">
-                                    <Trash2 size={20} /> Delete Asset
-                                </button>
+
+                            {/* Details & Actions */}
+                            <div className="p-6 space-y-6">
+                                <div>
+                                    <h3 className="font-bold text-lg text-slate-900 dark:text-zinc-100 truncate">{preview.name}</h3>
+                                    <div className="flex items-center gap-2 mt-1.5 overflow-hidden">
+                                        <span className="px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded-md text-[9px] font-black uppercase text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 shrink-0">{preview.type.split('/')[1]}</span>
+                                        <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium truncate tracking-tight">{formatSize(preview.size)} • {new Date(preview.createdAt).toLocaleDateString()}</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button 
+                                        onClick={() => copyUrl(preview.url)} 
+                                        className="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 dark:bg-zinc-100 text-white dark:text-black rounded-xl text-[11px] font-bold capitalize hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-indigo-500/10"
+                                    >
+                                        {copied === preview.url ? <Check size={16} /> : <Copy size={16} />}
+                                        {copied === preview.url ? "Copied" : "Copy Link"}
+                                    </button>
+                                    <button 
+                                        onClick={() => deleteMedia(preview.id)} 
+                                        className="flex items-center justify-center gap-2 px-4 py-3 bg-rose-50 dark:bg-rose-500/10 text-rose-500 rounded-xl text-[11px] font-bold capitalize hover:bg-rose-500 hover:text-white transition-all active:scale-95 border border-rose-100 dark:border-rose-500/20"
+                                    >
+                                        <Trash2 size={16} /> Delete
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

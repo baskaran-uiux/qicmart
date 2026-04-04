@@ -33,7 +33,6 @@ export default function OptimizedImage({
             onError={() => {
                 if (!error) setError(true)
             }}
-            unoptimized={typeof imgSrc === 'string' && (imgSrc.startsWith('http') && !imgSrc.includes('cloudinary'))}
             {...props}
         />
     )

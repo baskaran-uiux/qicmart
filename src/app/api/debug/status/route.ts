@@ -6,6 +6,9 @@ import { authOptions } from "@/lib/auth"
 export async function GET() {
     try {
         const session = await getServerSession(authOptions)
+        if ((session?.user as any)?.role !== 'SUPER_ADMIN') {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        }
         
         const users = await prisma.user.findMany({
             select: { id: true, email: true, role: true, name: true }

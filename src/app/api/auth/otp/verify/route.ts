@@ -6,8 +6,8 @@ export async function POST(req: Request) {
         const { identifier, token, storeId } = await req.json()
         if (!identifier || !token) return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
 
-        // 1. Verify OTP (Always allow 123456 for dummy testing)
-        let request = await prisma.verificationRequest.findFirst({
+        // 1. Verify OTP
+        const request = await prisma.verificationRequest.findFirst({
             where: {
                 identifier,
                 token,
@@ -15,17 +15,10 @@ export async function POST(req: Request) {
             }
         })
 
-        if (!request && token === "123456") {
-            // Create a fake request record to satisfy the rest of the logic
-            request = { id: "dummy-id", identifier, token, expires: new Date() } as any
-        }
-
         if (!request) return NextResponse.json({ error: "Invalid or expired OTP" }, { status: 400 })
 
-        // 2. Consume OTP (Only if not the dummy ID)
-        if (request.id !== "dummy-id") {
-            await prisma.verificationRequest.delete({ where: { id: request.id } }).catch(() => {})
-        }
+        // 2. Consume OTP
+        await prisma.verificationRequest.delete({ where: { id: request.id } }).catch(() => {})
 
         // 3. Find or Create User/Customer
         // Note: For simplicity, we use email as a unique identifier for User if possible.

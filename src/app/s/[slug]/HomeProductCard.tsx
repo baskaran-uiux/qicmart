@@ -146,7 +146,7 @@ export default function HomeProductCard({
     return (
         <motion.div
             variants={cardVariants as any}
-            className="h-full group/card"
+            className="h-full group/card will-change-transform"
         >
             <style jsx global>{`
                 @keyframes shine {

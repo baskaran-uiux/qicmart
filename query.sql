@@ -1,1 +1,0 @@
-SELECT slug FROM Store LIMIT 1;

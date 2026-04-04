@@ -129,6 +129,31 @@ export async function GET(req: Request) {
             }
         })
 
+        // Fetch Total Sales by Region (State)
+        const allOrders = await prisma.order.findMany({
+            where: {
+                storeId: store.id,
+                status: { not: "CANCELLED" }
+            },
+            select: {
+                total: true,
+                customer: {
+                    select: { state: true }
+                }
+            }
+        })
+
+        const regionSales: Record<string, number> = {}
+        allOrders.forEach(order => {
+            const region = order.customer?.state || "Unknown"
+            regionSales[region] = (regionSales[region] || 0) + order.total
+        })
+
+        const salesByRegion = Object.entries(regionSales)
+            .map(([name, value]) => ({ name, value }))
+            .sort((a, b) => b.value - a.value)
+            .slice(0, 5) // Return top 5 regions
+
         return NextResponse.json({
             metrics: {
                 current: {
@@ -144,6 +169,7 @@ export async function GET(req: Request) {
                 returnProducts
             },
             analytics,
+            salesByRegion,
             topProducts: productsWithDetails,
             recentOrders: recentOrders.map(order => ({
                 id: order.id,

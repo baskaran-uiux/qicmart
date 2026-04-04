@@ -782,7 +782,7 @@ export default function MenuManagerPage() {
             <MediaLibraryModal 
                 isOpen={modalOpen}
                 onClose={() => setModalOpen(false)}
-                onSelect={(url) => {
+                onSelect={(url, item) => {
                     if (activeImageItemId?.startsWith('banner-')) {
                         setNewItem(f => ({ ...f, bannerImage: url }))
                         setModalOpen(false)

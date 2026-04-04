@@ -184,16 +184,18 @@ function Header({ storeInfo, slug, categories, version }: { storeInfo: StoreInfo
         <motion.header 
             initial={false}
             animate={{
-                width: shouldFloat ? (scrolled ? (isMobile ? "92%" : "85%") : "100%") : "100%",
-                y: shouldFloat && scrolled ? (isMobile ? 12 : 16) : 0,
-                borderRadius: shouldFloat && scrolled ? (isMobile ? 24 : 40) : 0,
+                width: isSports ? (isMobile ? "94%" : "88%") : (scrolled ? "100%" : "100%"),
+                y: isSports ? (isMobile ? 12 : 20) : 0,
+                borderRadius: isSports ? (isMobile ? 24 : 40) : 0,
                 backgroundColor: isSports 
-                    ? (scrolled ? "rgba(255,255,255,0.8)" : (isHomePage ? "rgba(255,255,255,0)" : "rgba(255,255,255,1)"))
-                    : (scrolled ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,1)"),
-                backdropFilter: (isSports && (scrolled || !isHomePage)) ? "blur(24px)" : (scrolled ? "blur(24px)" : "blur(0px)"),
-                borderWidth: shouldFloat && scrolled ? 1 : 0,
-                borderColor: isSports ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.1)",
-                boxShadow: scrolled ? "0 20px 50px rgba(0,0,0,0.3)" : "none",
+                    ? (scrolled ? "rgba(255,255,255,0.85)" : (isHomePage ? "rgba(244,244,245,0.15)" : "rgba(255,255,255,1)"))
+                    : (scrolled ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,1)"),
+                backdropFilter: isSports ? "blur(20px)" : (scrolled ? "blur(20px)" : "blur(0px)"),
+                borderWidth: isSports || scrolled ? 1 : 0,
+                borderColor: isSports 
+                    ? (isHomePage && !scrolled ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)")
+                    : "rgba(0,0,0,0.05)",
+                boxShadow: isSports || scrolled ? "0 20px 50px rgba(0,0,0,0.15)" : "none",
                 left: "50%",
                 x: "-50%"
             }}
@@ -473,16 +475,18 @@ function Header({ storeInfo, slug, categories, version }: { storeInfo: StoreInfo
             {(layoutStyle === 'nextgen' || layoutStyle === 'sports') && (
                 <motion.div 
                     animate={{
-                        width: shouldFloat ? (scrolled ? "80%" : "100%") : "100%",
-                        y: shouldFloat && scrolled ? 24 : 0,
-                        borderRadius: shouldFloat && scrolled ? 40 : 0,
+                        width: isSports ? (scrolled ? "75%" : "82%") : (scrolled ? "80%" : "100%"),
+                        y: isSports ? (scrolled ? 28 : 28) : (scrolled ? 24 : 0),
+                        borderRadius: isSports ? 40 : (scrolled ? 40 : 0),
                         backgroundColor: isSports 
-                            ? (isHomePage && scrolled ? "rgba(255,255,255,0.8)" : (isHomePage ? "rgba(255,255,255,0)" : "rgba(255,255,255,1)")) 
+                            ? (isHomePage && scrolled ? "rgba(255,255,255,0.85)" : (isHomePage ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,1)")) 
                             : "rgba(255,255,255,1)",
-                        backdropFilter: isSports && (isHomePage ? scrolled : true) ? "blur(12px)" : "blur(0px)",
+                        backdropFilter: isSports ? "blur(20px)" : "blur(0px)",
                         left: isMobile ? "0%" : "50%",
                         x: isMobile ? "0%" : "-50%",
-                        boxShadow: shouldFloat && scrolled ? "0 10px 30px rgba(0,0,0,0.2)" : "none"
+                        boxShadow: isSports || scrolled ? "0 10px 30px rgba(0,0,0,0.1)" : "none",
+                        borderWidth: isSports ? 1 : 0,
+                        borderColor: isSports ? "rgba(255,255,255,0.1)" : "transparent"
                     }}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     className={`${isSports ? 'fixed z-40' : 'relative'} hidden lg:block transition-all duration-500`}>

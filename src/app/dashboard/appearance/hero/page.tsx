@@ -148,9 +148,16 @@ export default function HeroBannerPage() {
         setMediaLibrary({ open: true, type, bannerId })
     }
 
-    const handleMediaSelect = (url: string) => {
+    const handleMediaSelect = (url: string, item: any) => {
         if (mediaLibrary.bannerId) {
-            const isVideo = url.match(/\.(mp4|webm|ogg|mov)$/i);
+            // Priority 1: Use the type from Media Library
+            let isVideo = item.type?.toLowerCase() === 'video';
+            
+            // Priority 2: Fallback to regex if type is unknown or for robustness
+            if (!isVideo) {
+                isVideo = !!url.match(/\.(mp4|webm|ogg|mov|mov)(\?|$)/i);
+            }
+
             const updated = banners.map(b => 
                 b.id === mediaLibrary.bannerId 
                     ? { ...b, image: url, type: (isVideo ? "video" : "image") as any } 

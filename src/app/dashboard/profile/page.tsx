@@ -68,7 +68,7 @@ export default function ProfilePage() {
 
     const update = (key: keyof typeof profile, val: string) => setProfile(p => ({ ...p, [key]: val }))
 
-    const handleMediaSelect = (url: string) => {
+    const handleMediaSelect = (url: string, item: any) => {
         update("image", url)
         setIsModalOpen(false)
     }

@@ -1166,10 +1166,11 @@ export default function SettingsPage() {
         setModalOpen(true)
     }
 
-    const handleMediaSelect = (url: string) => {
+    const handleMediaSelect = (url: string, item?: any) => {
         if (activeField === "newBanner" && editingBannerId) {
+            const isVideo = item?.type?.toLowerCase() === 'video' || !!url.match(/\.(mp4|webm|ogg|mov|mov)(\?|$)/i);
             const updatedBanners = settings.banners.map(b => 
-                b.id === editingBannerId ? { ...b, image: url } : b
+                b.id === editingBannerId ? { ...b, image: url, type: isVideo ? "video" : "image" } : b
             )
             update("banners", updatedBanners)
         } else if (activeField && activeField !== "newBanner") {

@@ -109,7 +109,7 @@ export default function PaymentPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3">
-                        <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize truncate">Payment Methods</h2>
+                        <h2 className="text-[20px] sm:text-[24px] font-bold tracking-tight text-black dark:text-white capitalize truncate">Payment Methods</h2>
                         <span className="hidden sm:inline-flex px-3 py-1 bg-emerald-500/10 text-emerald-500 rounded-full text-[10px] font-bold capitalize border border-emerald-500/20 whitespace-nowrap">
                             Secure Integration
                         </span>
@@ -144,14 +144,11 @@ export default function PaymentPage() {
                                 <QrCode size={24} />
                             </div>
                             <div>
-                                <h3 className="font-bold text-2xl text-black dark:text-white capitalize">UPI Payment Integration</h3>
-                                <p className="text-zinc-500 dark:text-zinc-400 text-xs font-medium capitalize">Accept direct payments via UPI QR</p>
+                                <h3 className="font-bold text-[18px] text-black dark:text-white tracking-tight">UPI Payment Integration</h3>
+                                <p className="text-zinc-500 dark:text-zinc-400 text-[11px] font-medium tracking-normal">Accept direct payments via UPI QR</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
-                            <span className={`px-4 py-1.5 rounded-full text-xs font-bold capitalize border transition-all ${settings.isUpiEnabled ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-zinc-100 text-zinc-400 border-zinc-200"}`}>
-                                {settings.isUpiEnabled ? "Active" : "Disabled"}
-                            </span>
                             <button 
                                 onClick={() => update("isUpiEnabled", !settings.isUpiEnabled)}
                                 className={`w-14 h-8 rounded-full transition-all relative flex items-center p-1 ${settings.isUpiEnabled ? "bg-indigo-600" : "bg-zinc-200 dark:bg-zinc-800"}`}
@@ -235,14 +232,11 @@ export default function PaymentPage() {
                                 <RefreshCw size={24} />
                             </div>
                             <div>
-                                <h3 className="font-bold text-2xl text-black dark:text-white capitalize">Razorpay Integration</h3>
-                                <p className="text-zinc-500 dark:text-zinc-400 text-xs font-medium capitalize">Connect your business to the world</p>
+                                <h3 className="font-bold text-[18px] text-black dark:text-white tracking-tight">Razorpay Integration</h3>
+                                <p className="text-zinc-500 dark:text-zinc-400 text-[11px] font-medium tracking-normal">Connect your business to the world</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
-                            <span className={`px-4 py-1.5 rounded-full text-xs font-bold capitalize border transition-all ${settings.isRazorpayEnabled ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-zinc-100 text-zinc-400 border-zinc-200"}`}>
-                                {settings.isRazorpayEnabled ? "Active" : "Disabled"}
-                            </span>
                             <button 
                                 onClick={() => update("isRazorpayEnabled", !settings.isRazorpayEnabled)}
                                 className={`w-14 h-8 rounded-full transition-all relative flex items-center p-1 ${settings.isRazorpayEnabled ? "bg-indigo-600" : "bg-zinc-200 dark:bg-zinc-800"}`}
@@ -335,14 +329,11 @@ export default function PaymentPage() {
                                 <Shield size={24} />
                             </div>
                             <div>
-                                <h3 className="font-bold text-2xl text-black dark:text-white capitalize">Cash on Delivery</h3>
-                                <p className="text-zinc-500 dark:text-zinc-400 text-xs font-medium capitalize">Allow customers to pay at their doorstep</p>
+                                <h3 className="font-bold text-[18px] text-black dark:text-white tracking-tight">Cash on Delivery</h3>
+                                <p className="text-zinc-500 dark:text-zinc-400 text-[11px] font-medium tracking-normal">Allow customers to pay at their doorstep</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
-                            <span className={`px-4 py-1.5 rounded-full text-xs font-bold capitalize border transition-all ${settings.isCodEnabled ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-zinc-100 text-zinc-400 border-zinc-200"}`}>
-                                {settings.isCodEnabled ? "Active" : "Disabled"}
-                            </span>
                             <button 
                                 onClick={() => update("isCodEnabled", !settings.isCodEnabled)}
                                 className={`w-14 h-8 rounded-full transition-all relative flex items-center p-1 ${settings.isCodEnabled ? "bg-indigo-600" : "bg-zinc-200 dark:bg-zinc-800"}`}

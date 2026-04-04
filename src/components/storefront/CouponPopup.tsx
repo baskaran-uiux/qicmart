@@ -75,27 +75,27 @@ export default function CouponPopup({ storeId, currency }: { storeId: string; cu
                                 <Sparkles size={32} />
                             </div>
 
-                            <h3 className="text-2xl font-black text-black dark:text-white tracking-tight italic mb-2">Special Offer!</h3>
-                            <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-8">Grab this limited time discount on your first order.</p>
+                            <h3 className="text-[24px] font-bold text-black dark:text-white tracking-tight mb-1">Exclusive Offer!</h3>
+                            <p className="text-zinc-500 dark:text-zinc-400 text-[14px] font-medium mb-8">Enjoy a special discount on your purchase today.</p>
 
-                            <div className="bg-zinc-50 dark:bg-zinc-950/50 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 mb-8 relative group">
+                            <div className="bg-zinc-50 dark:bg-zinc-950/50 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-[24px] p-6 mb-8 relative group">
                                 <div className="flex flex-col items-center gap-1 mb-4">
-                                    <span className="text-4xl font-black text-indigo-600 italic">
+                                    <span className="text-[42px] font-bold text-indigo-600 dark:text-indigo-400 tracking-tight">
                                         {coupon.discountType === 'PERCENTAGE' ? `${coupon.discountValue}%` : `${currency === 'MYR' ? 'RM' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '₹'}${coupon.discountValue}`}
                                     </span>
-                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Discount Applied</span>
+                                    <span className="text-[12px] font-bold text-zinc-400">Discount Applied</span>
                                 </div>
                                 
                                 <button 
                                     onClick={handleCopy}
-                                    className="w-full py-3.5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:opacity-90 transition-all active:scale-[0.98]"
+                                    className="w-full py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-2xl text-sm font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all active:scale-[0.98]"
                                 >
                                     {copied ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
                                     {copied ? "Copied to clipboard" : coupon.code}
                                 </button>
                             </div>
 
-                            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Use code at checkout to save</p>
+                            <p className="text-[11px] font-bold text-zinc-400">Use this code at checkout to save</p>
                         </div>
                     </motion.div>
                 </div>

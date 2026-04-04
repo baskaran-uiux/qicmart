@@ -65,58 +65,42 @@ export const authOptions: NextAuthOptions = {
                 } 
                 // 3. Verify OTP if provided (and no password)
                 else if (credentials.otp) {
-                    // --- TEST MODE BYPASS ---
-                    const isTestUser = sanitizedEmail === "venlo@gmail.com" && credentials.otp === "dummy"
-                    
-                    if (!isTestUser) {
-                        const verificationToken = await prisma.verificationToken.findFirst({
-                            where: { 
-                                identifier: sanitizedEmail,
-                                expires: { gte: new Date() }
-                            },
-                            orderBy: { expires: 'desc' }
+                    const verificationToken = await prisma.verificationToken.findFirst({
+                        where: { 
+                            identifier: sanitizedEmail,
+                            expires: { gte: new Date() }
+                        },
+                        orderBy: { expires: 'desc' }
+                    })
+
+                    if (!verificationToken) {
+                        throw new Error("OTP expired or not found. Please request a new one.")
+                    }
+
+                    const isCorrectOtp = await bcrypt.compare(credentials.otp, verificationToken.token)
+                    if (!isCorrectOtp) {
+                        throw new Error("Invalid OTP code")
+                    }
+
+                    // RESTRICTION: SUPER_ADMIN cannot login via OTP (Storefront)
+                    if (user && user.role === "SUPER_ADMIN") {
+                        throw new Error("Platform administrators cannot login via OTP. Please use the Admin Portal.")
+                    }
+
+                    // Clean up token
+                    await prisma.verificationToken.deleteMany({
+                        where: { identifier: sanitizedEmail }
+                    })
+
+                    // Auto-create user if not found for OTP (Shopper Auto-Registration)
+                    if (!user) {
+                        user = await prisma.user.create({
+                            data: {
+                                email: sanitizedEmail,
+                                name: sanitizedEmail.split('@')[0],
+                                role: "CUSTOMER"
+                            }
                         })
-
-                        if (!verificationToken) {
-                            throw new Error("OTP expired or not found. Please request a new one.")
-                        }
-
-                        const isCorrectOtp = await bcrypt.compare(credentials.otp, verificationToken.token)
-                        if (!isCorrectOtp) {
-                            throw new Error("Invalid OTP code")
-                        }
-
-                        // RESTRICTION: SUPER_ADMIN cannot login via OTP (Storefront)
-                        if (user && user.role === "SUPER_ADMIN") {
-                            throw new Error("Platform administrators cannot login via OTP. Please use the Admin Portal.")
-                        }
-
-                        // Clean up token
-                        await prisma.verificationToken.deleteMany({
-                            where: { identifier: sanitizedEmail }
-                        })
-
-                        // Auto-create user if not found for OTP (Shopper Auto-Registration)
-                        if (!user) {
-                            user = await prisma.user.create({
-                                data: {
-                                    email: sanitizedEmail,
-                                    name: sanitizedEmail.split('@')[0],
-                                    role: "CUSTOMER"
-                                }
-                            })
-                        }
-                    } else {
-                        // Dummy test user handling
-                        if (!user) {
-                            user = await prisma.user.create({
-                                data: {
-                                    email: sanitizedEmail,
-                                    name: "Test User",
-                                    role: "CUSTOMER"
-                                }
-                            })
-                        }
                     }
                 } else {
                     throw new Error("Password or OTP is required")

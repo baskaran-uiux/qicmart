@@ -7,6 +7,7 @@ import { getStoreForDashboard } from "@/lib/dashboard"
 import { appendFileSync } from "fs"
 import { join } from "path"
 import { supabase } from "@/lib/supabase"
+import sharp from "sharp"
 
 const log = (msg: string) => {
     try {
@@ -134,7 +135,7 @@ export async function POST(req: Request) {
         if (file) {
             console.log(`Uploading file to Supabase: ${file.name} (${file.size} bytes)`)
             const bytes = await file.arrayBuffer()
-            const buffer = Buffer.from(bytes)
+            const buffer = Buffer.from(bytes) as any
 
             // Better filename sanitization
             const cleanFileName = file.name.toLowerCase()
@@ -167,11 +168,38 @@ export async function POST(req: Request) {
                 console.warn("Could not verify/create bucket:", e)
             }
 
+            let uploadBuffer = buffer
+            let uploadFileName = fileName
+            let uploadType = file.type
+
+            // IMAGE OPTIMIZATION (sharp)
+            if (file.type.startsWith("image/") && !file.type.includes("svg")) {
+                try {
+                    console.log(`Optimizing image: ${file.name} to WebP...`)
+                    const optimizedBuffer = await sharp(buffer)
+                        .resize({ width: 1920, withoutEnlargement: true }) // Responsive limit
+                        .webp({ quality: 80 })
+                        .toBuffer()
+                    
+                    uploadBuffer = optimizedBuffer
+                    uploadType = "image/webp"
+                    
+                    // Change extension to .webp
+                    const nameWithoutExt = cleanFileName.replace(/\.[^/.]+$/, "")
+                    uploadFileName = `${Date.now()}-${nameWithoutExt}.webp`
+                    
+                    console.log(`Optimization success! Original: ${buffer.length}, New: ${optimizedBuffer.length}`)
+                } catch (optimError) {
+                    console.warn("Sharp optimization failed, falling back to original:", optimError)
+                    // Keep original buffer/filename if sharp fails
+                }
+            }
+
             // Upload to Supabase Storage
             const { data, error: uploadError } = await supabase.storage
                 .from('media')
-                .upload(fileName, buffer, {
-                    contentType: file.type,
+                .upload(uploadFileName, uploadBuffer, {
+                    contentType: uploadType,
                     upsert: true
                 })
 
@@ -183,12 +211,12 @@ export async function POST(req: Request) {
             // Get Public URL
             const { data: { publicUrl } } = supabase.storage
                 .from('media')
-                .getPublicUrl(fileName)
+                .getPublicUrl(uploadFileName)
 
             url = publicUrl
-            name = file.name
-            type = file.type.startsWith("video/") ? "VIDEO" : "IMAGE"
-            size = file.size
+            name = uploadFileName.split('-').slice(1).join('-') // Clean name for DB
+            type = uploadType.startsWith("video/") ? "VIDEO" : "IMAGE"
+            size = uploadBuffer.length
         } else if (urlParam) {
             console.log(`Saving external URL: ${urlParam}`)
             url = urlParam
@@ -295,4 +323,102 @@ export async function DELETE(req: Request) {
 
     await prisma.mediaLibrary.delete({ where: { id } })
     return NextResponse.json({ ok: true })
+}
+
+export async function PATCH(req: Request) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+    const { searchParams } = new URL(req.url)
+    const ownerId = searchParams.get("ownerId")
+    let targetUserId = (session.user as any).id
+
+    if (ownerId && (session.user as any).role === 'SUPER_ADMIN') {
+        targetUserId = ownerId
+    }
+
+    const dashboardType = searchParams.get("dashboardType") || "1"
+    const store = await getStoreForDashboard(targetUserId, dashboardType)
+    if (!store) return NextResponse.json({ error: "Store not found" }, { status: 404 })
+
+    const body = await req.json()
+    const { action } = body
+
+    if (action === "bulk-optimize") {
+        try {
+            const mediaList = await prisma.mediaLibrary.findMany({
+                where: { 
+                    storeId: store.id,
+                    type: "IMAGE",
+                    url: { not: { contains: ".webp" } } 
+                }
+            })
+
+            console.log(`Bulk optimizing ${mediaList.length} images for store ${store.id}`)
+            let optimizedCount = 0
+
+            for (const media of mediaList) {
+                try {
+                    // 1. Download original
+                    const res = await fetch(media.url)
+                    if (!res.ok) continue
+                    const buffer = Buffer.from(await res.arrayBuffer())
+
+                    // 2. Optimize
+                    const optimizedBuffer = await sharp(buffer)
+                        .resize({ width: 1920, withoutEnlargement: true })
+                        .webp({ quality: 80 })
+                        .toBuffer()
+
+                    // 3. Upload to Supabase (Replace filename)
+                    const oldFileName = media.url.split('/').pop()?.split('?')[0] || `optimized-${Date.now()}.webp`
+                    const nameWithoutExt = oldFileName.replace(/\.[^/.]+$/, "")
+                    const newFileName = `${Date.now()}-${nameWithoutExt}.webp`
+
+                    const { error: uploadError } = await supabase.storage
+                        .from('media')
+                        .upload(newFileName, optimizedBuffer, {
+                            contentType: "image/webp",
+                            upsert: true
+                        })
+
+                    if (uploadError) throw new Error(uploadError.message)
+
+                    // 4. Get New URL
+                    const { data: { publicUrl } } = supabase.storage
+                        .from('media')
+                        .getPublicUrl(newFileName)
+
+                    // 5. Update DB
+                    await prisma.mediaLibrary.update({
+                        where: { id: media.id },
+                        data: {
+                            url: publicUrl,
+                            size: optimizedBuffer.length,
+                            name: newFileName.split('-').slice(1).join('-')
+                        }
+                    })
+
+                    // 6. Cleanup old file (Since user agreed to REPLACE)
+                    try {
+                        if (oldFileName && !oldFileName.endsWith('.webp')) {
+                            await supabase.storage.from('media').remove([oldFileName])
+                        }
+                    } catch (e) {
+                         console.warn(`Failed to remove old file ${oldFileName}:`, e)
+                    }
+
+                    optimizedCount++
+                } catch (err) {
+                    console.error(`Failed to optimize media ${media.id}:`, err)
+                }
+            }
+
+            return NextResponse.json({ success: true, count: optimizedCount })
+        } catch (error: any) {
+            return NextResponse.json({ error: error.message }, { status: 500 })
+        }
+    }
+
+    return NextResponse.json({ error: "Invalid action" }, { status: 400 })
 }

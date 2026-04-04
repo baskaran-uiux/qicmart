@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { 
     BarChart2, TrendingUp, ShoppingCart, IndianRupee, Package, Users, 
     Download, Filter, ChevronDown, Search, ArrowUpRight, ArrowDownRight,
-    Star, RefreshCw, Box, ExternalLink, Calendar, MoreHorizontal
+    Star, RefreshCw, Box, ExternalLink, Calendar, MoreHorizontal, MapPin
 } from "lucide-react"
 import { useDashboardStore } from "@/components/DashboardStoreProvider"
 import { 
@@ -15,6 +15,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { KpiCardSkeleton, ChartSkeleton, TableSkeleton } from "@/components/dashboard/DashboardSkeletons"
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+const COLORS = ['#4f46e5', '#8b5cf6', '#ec4899', '#f97316', '#10b981'];
 
 export default function AnalyticsPage() {
     const { currency, t } = useDashboardStore()
@@ -128,6 +129,8 @@ export default function AnalyticsPage() {
         { name: 'Growth', value: growthPercent, fill: '#3b82f6' },
         { name: 'Remaining', value: 100 - growthPercent, fill: '#f1f5f9' }
     ]
+
+    const salesByRegion = data?.salesByRegion || []
 
     return (
         <div className="max-w-7xl mx-auto space-y-8 pb-20 animate-in fade-in duration-700">
@@ -413,6 +416,102 @@ export default function AnalyticsPage() {
                                         <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold capitalize ${revenueTrend >= 0 ? 'bg-indigo-500/10 text-indigo-600' : 'bg-rose-500/10 text-rose-600'}`}>{revenueTrend.toFixed(1)}%</span>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Top Regions Chart */}
+                        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[32px] p-8 shadow-sm flex flex-col group overflow-hidden">
+                            <div className="flex items-center justify-between mb-8">
+                                <div>
+                                    <h3 className="text-xl font-bold text-zinc-900 dark:text-white tracking-tight">Sales by Region</h3>
+                                    <p className="text-[10px] text-zinc-400 font-semibold tracking-wide uppercase mt-1">Geographic Performance</p>
+                                </div>
+                                <div className="w-10 h-10 bg-indigo-50 dark:bg-zinc-800 rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm">
+                                    <MapPin size={20} />
+                                </div>
+                            </div>
+
+                            <div className="flex-1 flex flex-col items-center justify-center py-4">
+                                {salesByRegion.length > 0 ? (
+                                    <>
+                                        <div className="h-56 w-full relative">
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <PieChart>
+                                                    <Pie
+                                                        data={salesByRegion}
+                                                        cx="50%"
+                                                        cy="50%"
+                                                        innerRadius={65}
+                                                        outerRadius={85}
+                                                        paddingAngle={6}
+                                                        dataKey="value"
+                                                        cornerRadius={12}
+                                                        animationBegin={200}
+                                                        animationDuration={1500}
+                                                    >
+                                                        {salesByRegion.map((entry: any, index: number) => (
+                                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                        ))}
+                                                    </Pie>
+                                                    <Tooltip 
+                                                        content={({ active, payload }) => {
+                                                            if (active && payload && payload.length) {
+                                                                return (
+                                                                    <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl shadow-2xl border border-zinc-100 dark:border-zinc-800 animate-in zoom-in-95 backdrop-blur-md bg-opacity-80">
+                                                                        <div className="flex items-center gap-2 mb-2">
+                                                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: payload[0].payload.fill }} />
+                                                                            <p className="text-[11px] font-bold text-zinc-900 dark:text-white uppercase tracking-wider">{payload[0].name}</p>
+                                                                        </div>
+                                                                        <p className="text-[14px] font-black text-indigo-600">{formatCurrency(payload[0].value as number)}</p>
+                                                                        <p className="text-[9px] font-bold text-zinc-400 mt-1">TOTAL REVENUE</p>
+                                                                    </div>
+                                                                )
+                                                            }
+                                                            return null
+                                                        }}
+                                                    />
+                                                </PieChart>
+                                            </ResponsiveContainer>
+                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                <div className="text-center">
+                                                    <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">{t("top" as any) || "TOP SET"}</p>
+                                                    <p className="text-[16px] font-black text-zinc-900 dark:text-white leading-none mt-1">{salesByRegion[0]?.name.split(' ')[0]}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="w-full space-y-3 mt-8">
+                                            {salesByRegion.map((region: any, i: number) => (
+                                                <div key={region.name} className="group/item">
+                                                    <div className="flex items-center justify-between mb-1.5">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                                                            <span className="text-[12px] font-bold text-zinc-600 dark:text-zinc-300 truncate max-w-[120px]">{region.name}</span>
+                                                        </div>
+                                                        <span className="text-[12px] font-black text-zinc-900 dark:text-white">{formatCurrency(region.value)}</span>
+                                                    </div>
+                                                    <div className="w-full h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                                        <motion.div 
+                                                            initial={{ width: 0 }}
+                                                            animate={{ width: `${(region.value / salesByRegion[0].value) * 100}%` }}
+                                                            transition={{ duration: 1, delay: 0.5 + (i * 0.1) }}
+                                                            className="h-full rounded-full" 
+                                                            style={{ backgroundColor: COLORS[i % COLORS.length] }} 
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="text-center py-10">
+                                        <div className="w-12 h-12 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-zinc-100 dark:border-zinc-800">
+                                            <BarChart2 size={24} className="text-zinc-300" />
+                                        </div>
+                                        <p className="text-sm font-bold text-zinc-900 dark:text-white">{t("noDataAvailable") || "No Regional Data"}</p>
+                                        <p className="text-[11px] text-zinc-500 mt-1 max-w-[180px] mx-auto italic">Receive orders with state info to see regional performance.</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </>

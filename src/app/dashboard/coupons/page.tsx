@@ -314,22 +314,22 @@ export default function CouponsPage() {
                             initial={{ opacity: 0, scale: 0.95, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            className="bg-white dark:bg-zinc-900 w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800"
+                            className="bg-white dark:bg-zinc-900 w-full max-w-3xl rounded-[40px] shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800"
                         >
                             <div className="p-8 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-950/50">
                                 <div>
-                                    <h3 className="text-xl font-bold text-black dark:text-white uppercase italic tracking-tight">{editingCoupon ? t('edit') : t('addNew')}</h3>
-                                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mt-1">{t('couponDetails')}</p>
+                                    <h3 className="text-[20px] sm:text-[24px] font-bold text-black dark:text-white tracking-tight">{editingCoupon ? t('edit') : t('addNew')}</h3>
+                                    <p className="text-zinc-500 dark:text-zinc-400 text-[13px] font-medium mt-1">Configure your discount and usage settings</p>
                                 </div>
-                                <button onClick={() => { setShowModal(false); setEditingCoupon(null); }} className="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-full transition-colors">
-                                    <X size={24} className="text-zinc-400" />
+                                <button onClick={() => { setShowModal(false); setEditingCoupon(null); }} className="p-3 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-full transition-all hover:rotate-90">
+                                    <X size={20} className="text-zinc-400" />
                                 </button>
                             </div>
 
-                            <form onSubmit={handleSave} className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
-                                <div className="space-y-2 md:col-span-2">
-                                    <div className="flex items-center justify-between">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t('couponCode')}</label>
+                            <form onSubmit={handleSave} className="p-10 grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8 max-h-[80vh] overflow-y-auto custom-scrollbar">
+                                <div className="space-y-3 md:col-span-2">
+                                    <div className="flex items-center justify-between px-1">
+                                        <label className="text-[12px] font-bold text-zinc-500 dark:text-zinc-400 tracking-tight">{t('couponCode')}</label>
                                         <button 
                                             type="button"
                                             onClick={() => {
@@ -339,90 +339,91 @@ export default function CouponsPage() {
                                                 const prefix = prefixes[Math.floor(Math.random() * prefixes.length)]
                                                 setForm({ ...form, code: `${prefix}${random}` })
                                             }}
-                                            className="text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:text-indigo-700 transition-colors flex items-center gap-1"
+                                            className="text-[12px] font-bold text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 transition-colors flex items-center gap-2 group/auto"
                                         >
-                                            <TrendingUp size={12} /> Auto-Generate
+                                            <TrendingUp size={14} className="group-hover/auto:scale-110 transition-transform" /> 
+                                            <span>Auto-Generate</span>
                                         </button>
                                     </div>
                                     <input 
                                         required
                                         type="text" 
-                                        className="w-full px-5 py-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-sm font-bold tracking-tight text-indigo-600 uppercase focus:ring-4 focus:ring-indigo-500/5 outline-none"
-                                        placeholder="e.g. WELCOME10"
+                                        className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-[16px] font-bold tracking-tight text-indigo-600 dark:text-indigo-400 focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all placeholder:text-zinc-300"
+                                        placeholder="E.G. WELCOME10"
                                         value={form.code}
                                         onChange={e => setForm({...form, code: e.target.value.toUpperCase()})}
                                     />
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t('discountType')}</label>
-                                    <div className="flex bg-zinc-50 dark:bg-zinc-800 p-1.5 rounded-2xl border border-zinc-200 dark:border-zinc-700">
+                                <div className="space-y-3 md:col-span-2 pb-2">
+                                    <label className="text-[12px] font-bold text-zinc-500 dark:text-zinc-400 px-1">{t('discountType')}</label>
+                                    <div className="flex bg-zinc-50 dark:bg-zinc-800 p-2 rounded-2xl border border-zinc-200 dark:border-zinc-700">
                                         <button 
                                             type="button"
                                             onClick={() => setForm({...form, discountType: 'PERCENTAGE'})}
-                                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all ${form.discountType === 'PERCENTAGE' ? "bg-white dark:bg-zinc-700 text-indigo-600 shadow-sm" : "text-zinc-500 hover:bg-white/50 dark:hover:bg-zinc-700/50"}`}
+                                            className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-xl text-sm font-bold transition-all ${form.discountType === 'PERCENTAGE' ? "bg-white dark:bg-zinc-700 text-indigo-600 dark:text-indigo-400 shadow-md ring-1 ring-zinc-200/50" : "text-zinc-500 hover:bg-white/50 dark:hover:bg-zinc-700/50"}`}
                                         >
-                                            <Percent size={14} /> Percentage
+                                            <Percent size={16} /> Percentage
                                         </button>
                                         <button 
                                             type="button"
                                             onClick={() => setForm({...form, discountType: 'FIXED'})}
-                                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all ${form.discountType === 'FIXED' ? "bg-white dark:bg-zinc-700 text-indigo-600 shadow-sm" : "text-zinc-500 hover:bg-white/50 dark:hover:bg-zinc-700/50"}`}
+                                            className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-xl text-sm font-bold transition-all ${form.discountType === 'FIXED' ? "bg-white dark:bg-zinc-700 text-indigo-600 dark:text-indigo-400 shadow-md ring-1 ring-zinc-200/50" : "text-zinc-500 hover:bg-white/50 dark:hover:bg-zinc-700/50"}`}
                                         >
-                                            <IndianRupee size={14} /> Fixed Price
+                                            <IndianRupee size={16} /> Fixed Price
                                         </button>
                                     </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t('discountValue')}</label>
+                                <div className="space-y-3">
+                                    <label className="text-[12px] font-bold text-zinc-500 dark:text-zinc-400 px-1">{t('discountValue')}</label>
                                     <input 
                                         required
                                         type="number" 
-                                        className="w-full px-5 py-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/5 outline-none"
+                                        className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-[15px] font-bold focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all"
                                         placeholder="10"
                                         value={form.discountValue}
                                         onChange={e => setForm({...form, discountValue: e.target.value})}
                                     />
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t('usageLimit')}</label>
+                                <div className="space-y-3">
+                                    <label className="text-[12px] font-bold text-zinc-500 dark:text-zinc-400 px-1">{t('usageLimit')}</label>
                                     <input 
                                         type="number" 
-                                        className="w-full px-5 py-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/5 outline-none"
-                                        placeholder="No limit"
+                                        className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-[15px] font-bold focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all"
+                                        placeholder="Unrestricted"
                                         value={form.usageLimit}
                                         onChange={e => setForm({...form, usageLimit: e.target.value})}
                                     />
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t('minPurchase')}</label>
+                                <div className="space-y-3">
+                                    <label className="text-[12px] font-bold text-zinc-500 dark:text-zinc-400 px-1">{t('minPurchase')}</label>
                                     <input 
                                         type="number" 
-                                        className="w-full px-5 py-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/5 outline-none"
+                                        className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-[15px] font-bold focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all"
                                         placeholder="0.00"
                                         value={form.minOrderValue}
                                         onChange={e => setForm({...form, minOrderValue: e.target.value})}
                                     />
                                 </div>
 
-                                <div className="space-y-2 md:col-span-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic">{t('expiryDate')}</label>
+                                <div className="space-y-3">
+                                    <label className="text-[12px] font-bold text-zinc-500 dark:text-zinc-400 px-1">{t('expiryDate')}</label>
                                     <input 
                                         type="date" 
-                                        className="w-full px-5 py-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/5 outline-none"
+                                        className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-[15px] font-bold focus:ring-4 focus:ring-indigo-500/5 outline-none text-black dark:text-white [color-scheme:dark] transition-all"
                                         value={form.expiresAt}
                                         onChange={e => setForm({...form, expiresAt: e.target.value})}
                                     />
                                 </div>
 
-                                <div className="md:col-span-2 pt-4">
+                                <div className="md:col-span-2 pt-6">
                                     <PremiumButton 
                                         type="submit"
                                         isLoading={saving}
-                                        className="w-full"
+                                        className="w-full py-4 text-[16px]"
                                     >
                                         {saving ? t('savingChanges') : editingCoupon ? t('saveChanges') : t('addCoupon')}
                                     </PremiumButton>

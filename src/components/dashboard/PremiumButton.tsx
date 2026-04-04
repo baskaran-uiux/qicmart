@@ -85,7 +85,7 @@ export default function PremiumButton({
             {/* Shine Sweep Effect */}
             <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[-20deg] z-10" />
             
-            <div className={`relative h-5 overflow-hidden z-20 ${isLoading || isSaved ? 'w-full text-center' : ''}`}>
+            <div className={`relative h-6 overflow-hidden z-20 ${isLoading || isSaved ? 'w-full text-center' : ''}`}>
                 <motion.div
                     initial={false}
                     animate={{ y: "0%" }}
