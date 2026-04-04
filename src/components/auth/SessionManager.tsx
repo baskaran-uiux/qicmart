@@ -60,6 +60,11 @@ export function SessionManager() {
                 body: JSON.stringify({ requestId, action })
             })
             setPendingRequests(prev => prev.filter(r => r.id !== requestId))
+
+            // If approved, we logout IMMEDIATELY for a better UX
+            if (action === "APPROVED") {
+                signOut({ callbackUrl: "/login?message=AccountTakenOver" })
+            }
         } catch (err) {
             console.error("Action error:", err)
         } finally {
