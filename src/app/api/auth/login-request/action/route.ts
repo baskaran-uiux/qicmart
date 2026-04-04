@@ -29,6 +29,15 @@ export async function POST(req: NextRequest) {
             data: { status: action }
         })
 
+        // IMPORTANT: If approved, we MUST reset the owner's lastActiveAt 
+        // to allow the requester's next login attempt to succeed.
+        if (action === "APPROVED") {
+            await prisma.user.update({
+                where: { id: loginRequest.userId },
+                data: { lastActiveAt: null }
+            })
+        }
+
         // If approved, we could optionally invalidate the CURRENT session here,
         // but we'll let the Heartbeat/SessionGuard handle it for a smoother UX.
         
