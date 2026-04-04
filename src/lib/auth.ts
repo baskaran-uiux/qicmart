@@ -106,6 +106,27 @@ export const authOptions: NextAuthOptions = {
                     throw new Error("Password or OTP is required")
                 }
 
+                // 4. Session Restriction Check
+                if (user && user.role !== "CUSTOMER") { // Only restrict staff and owners
+                    const now = new Date()
+                    const activeWindow = new Date(now.getTime() - 2 * 60 * 1000) // 2 minutes
+                    const isAlreadyActive = user.lastActiveAt && user.lastActiveAt > activeWindow
+
+                    if (isAlreadyActive) {
+                        // Create a pending login request
+                        const loginRequest = await prisma.loginRequest.create({
+                            data: {
+                                userId: user.id,
+                                requesterIp: typeof window !== 'undefined' ? "Local" : "Remote", // IP detection can be enhanced
+                                status: "PENDING"
+                            }
+                        })
+                        
+                        console.log("LOGIN_PENDING_APPROVAL for request:", loginRequest.id)
+                        throw new Error(`PENDING_APPROVAL:${loginRequest.id}`)
+                    }
+                }
+
                 console.log("Authorize Success - Returning user:", user.id, user.email, user.role)
                 return {
                     id: user.id,
@@ -124,6 +145,16 @@ export const authOptions: NextAuthOptions = {
                 token.id = user.id
                 token.role = (user as any).role
                 token.address = (user as any).address
+                token.sessionId = Math.random().toString(36).substring(2, 15) // Unique session ID
+                
+                // Update User with this session ID and timestamp
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: { 
+                        currentSessionId: token.sessionId as string,
+                        lastActiveAt: new Date()
+                    }
+                })
             }
             return token
         },
@@ -133,6 +164,7 @@ export const authOptions: NextAuthOptions = {
                 ; (session.user as any).id = token.id
                     ; (session.user as any).role = token.role
                     ; (session.user as any).address = token.address
+                    ; (session.user as any).sessionId = token.sessionId
             }
             return session
         },

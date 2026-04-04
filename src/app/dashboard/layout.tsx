@@ -14,6 +14,7 @@ import { Notifications } from "@/components/dashboard/Notifications"
 import PremiumButton from "@/components/dashboard/PremiumButton"
 import DigitalLoader from "@/components/ui/DigitalLoader"
 import AIGrowthGuru from "@/components/dashboard/AIGrowthGuru"
+import { SessionManager } from "@/components/auth/SessionManager"
 
 const navGroups = [
     {
@@ -593,6 +594,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                     )}
                 </div>
                 {store.id && !pathname?.includes('/dashboard/products/') && <AIGrowthGuru storeId={store.id} />}
+                <SessionManager />
             </main>
         </div>
     )

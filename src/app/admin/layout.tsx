@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { usePathname } from "next/navigation";
+import { SessionManager } from "@/components/auth/SessionManager";
 
 function SidebarNav() {
     const { theme, toggleTheme } = useTheme();
@@ -124,6 +125,7 @@ export default function AdminLayout({
                 <main className="flex-1 overflow-auto p-8">
                     {children}
                 </main>
+                <SessionManager />
             </div>
         </ThemeProvider>
     );

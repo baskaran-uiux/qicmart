@@ -16,6 +16,8 @@ function LoginForm() {
     const [showPassword, setShowPassword] = useState(false)
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false)
+    const [pendingRequestId, setPendingRequestId] = useState<string | null>(null)
+    const [approvalStatus, setApprovalStatus] = useState<"PENDING" | "APPROVED" | "REJECTED">("PENDING")
 
     // Cleanup: Removed test-mode auto-login helpers to ensure production security.
 
@@ -32,21 +34,60 @@ function LoginForm() {
 
         if (res?.error) {
             setLoading(false)
-            setError("Invalid email or password")
-        } else {
-            const sessionRes = await fetch("/api/auth/session")
-            const session = await sessionRes.json()
-            const role = session?.user?.role
-
-            if (role === "SUPER_ADMIN") {
-                router.push("/admin")
-            } else if (role === "STORE_OWNER" || role === "STAFF") {
-                router.push("/dashboard")
+            if (res.error.startsWith("PENDING_APPROVAL:")) {
+                const requestId = res.error.split(":")[1]
+                setPendingRequestId(requestId)
             } else {
-                router.push("/")
+                setError("Invalid email or password")
             }
+        } else {
+            handleLoginSuccess()
         }
     }
+
+    const handleLoginSuccess = async () => {
+        const sessionRes = await fetch("/api/auth/session")
+        const session = await sessionRes.json()
+        const role = session?.user?.role
+
+        if (role === "SUPER_ADMIN") {
+            router.push("/admin")
+        } else if (role === "STORE_OWNER" || role === "STAFF") {
+            router.push("/dashboard")
+        } else {
+            router.push("/")
+        }
+    }
+
+    // Polling for Approval
+    useEffect(() => {
+        if (!pendingRequestId || approvalStatus !== "PENDING") return
+
+        const interval = setInterval(async () => {
+            try {
+                const res = await fetch(`/api/auth/login-request/status/${pendingRequestId}`)
+                const data = await res.json()
+                
+                if (data.status === "APPROVED") {
+                    setApprovalStatus("APPROVED")
+                    clearInterval(interval)
+                    // Complete login after approval
+                    await signIn("credentials", { email, password, redirect: false })
+                    handleLoginSuccess()
+                } else if (data.status === "REJECTED") {
+                    setApprovalStatus("REJECTED")
+                    clearInterval(interval)
+                    setError("Login request was denied by the account owner.")
+                    setPendingRequestId(null)
+                    setLoading(false)
+                }
+            } catch (err) {
+                console.error("Polling error:", err)
+            }
+        }, 2000)
+
+        return () => clearInterval(interval)
+    }, [pendingRequestId, approvalStatus, email, password])
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -183,6 +224,47 @@ function LoginForm() {
                                 )}
                             </motion.button>
                         </form>
+
+                        <AnimatePresence>
+                            {pendingRequestId && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-white/80 backdrop-blur-md"
+                                >
+                                    <div className="bg-white rounded-3xl p-10 max-w-sm w-full shadow-2xl border border-zinc-100 space-y-8 text-center">
+                                        <div className="relative mx-auto w-20 h-20">
+                                            <div className="absolute inset-0 bg-indigo-100 rounded-full animate-ping opacity-40" />
+                                            <div className="relative flex items-center justify-center w-20 h-20 bg-indigo-50 rounded-full border-2 border-indigo-100">
+                                                <ShieldCheck className="w-10 h-10 text-indigo-600" />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-3">
+                                            <h3 className="text-2xl font-bold text-zinc-900">Waiting for Approval</h3>
+                                            <p className="text-zinc-500 font-medium leading-relaxed">
+                                                Someone is currently using this account. We've sent them a request to allow your login.
+                                            </p>
+                                        </div>
+                                        <div className="flex flex-col gap-4">
+                                            <div className="h-1.5 w-full bg-zinc-100 rounded-full overflow-hidden">
+                                                <motion.div 
+                                                    className="h-full bg-indigo-600"
+                                                    animate={{ width: ["0%", "100%"] }}
+                                                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                                                />
+                                            </div>
+                                            <button 
+                                                onClick={() => { setPendingRequestId(null); setLoading(false); }}
+                                                className="text-sm font-bold text-zinc-400 hover:text-red-500 transition-colors pt-2"
+                                            >
+                                                Cancel Request
+                                            </button>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </motion.div>
                 </div>
 
