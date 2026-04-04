@@ -107,23 +107,39 @@ export const authOptions: NextAuthOptions = {
                 }
 
                 // 4. Session Restriction Check
-                if (user && user.role !== "CUSTOMER") { // Only restrict staff and owners
-                    const now = new Date()
-                    const activeWindow = new Date(now.getTime() - 2 * 60 * 1000) // 2 minutes
-                    const isAlreadyActive = user.lastActiveAt && user.lastActiveAt > activeWindow
+                if (user && user.role !== "CUSTOMER") {
+                    // First, check if there's a recently APPROVED request for this user
+                    const approvedRequest = await prisma.loginRequest.findFirst({
+                        where: {
+                            userId: user.id,
+                            status: "APPROVED",
+                            updatedAt: { gte: new Date(Date.now() - 5 * 60 * 1000) } // Approved in last 5 mins
+                        }
+                    })
 
-                    if (isAlreadyActive) {
-                        // Create a pending login request
-                        const loginRequest = await prisma.loginRequest.create({
-                            data: {
-                                userId: user.id,
-                                requesterIp: typeof window !== 'undefined' ? "Local" : "Remote", // IP detection can be enhanced
-                                status: "PENDING"
-                            }
+                    if (!approvedRequest) {
+                        const now = new Date()
+                        const activeWindow = new Date(now.getTime() - 2 * 60 * 1000) // 2 minutes
+                        const isAlreadyActive = user.lastActiveAt && user.lastActiveAt > activeWindow
+
+                        if (isAlreadyActive) {
+                            // Create a pending login request
+                            const loginRequest = await prisma.loginRequest.create({
+                                data: {
+                                    userId: user.id,
+                                    requesterIp: typeof window !== 'undefined' ? "Local" : "Remote",
+                                    status: "PENDING"
+                                }
+                            })
+                            
+                            console.log("LOGIN_PENDING_APPROVAL for request:", loginRequest.id)
+                            throw new Error(`PENDING_APPROVAL:${loginRequest.id}`)
+                        }
+                    } else {
+                        // Optimization: Delete the fulfilled request
+                        await prisma.loginRequest.deleteMany({
+                            where: { userId: user.id, status: "APPROVED" }
                         })
-                        
-                        console.log("LOGIN_PENDING_APPROVAL for request:", loginRequest.id)
-                        throw new Error(`PENDING_APPROVAL:${loginRequest.id}`)
                     }
                 }
 
