@@ -59,6 +59,10 @@ export const authOptions: NextAuthOptions = {
                         throw new Error("This account does not have a password set. Try another method.")
                     }
                     const isCorrectPassword = await bcrypt.compare(credentials.password, user.password)
+                    console.log("[AUTH_DEBUG] User found:", user.email)
+                    console.log("[AUTH_DEBUG] Entered password:", credentials.password)
+                    console.log("[AUTH_DEBUG] DB Hash:", user.password)
+                    console.log("[AUTH_DEBUG] Password Correct:", isCorrectPassword)
                     if (!isCorrectPassword) {
                         throw new Error("Invalid password")
                     }
