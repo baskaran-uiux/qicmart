@@ -20,6 +20,7 @@ import SmoothScroll from "@/components/landing/SmoothScroll"
 import PricingSection from "@/components/landing/PricingSection"
 import FAQSection from "@/components/landing/FAQSection"
 import ContactSection from "@/components/landing/ContactSection"
+import Testimonials from "@/components/landing/Testimonials"
 
 // Staggered Text Component for Kzero Effect
 const StaggeredText = ({ text, className }: { text: string, className?: string }) => {
@@ -549,6 +550,8 @@ export default async function RootPage() {
                 </div>
             </section>
 
+            <Testimonials />
+
             <PricingSection />
 
             <FAQSection />
@@ -570,9 +573,9 @@ export default async function RootPage() {
                             / INITIALIZE_SUCCESS_STORY
                             <span className="h-px w-8 bg-indigo-500/30" />
                         </div>
-                        <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 md:mb-12 italic uppercase leading-[0.9] text-white">
+                        <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 md:mb-12 italic uppercase leading-[1.3] text-white px-4 py-4">
                             Own your <br /> 
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-indigo-600 to-purple-500 drop-shadow-[0_0_30px_rgba(79,70,229,0.5)]">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-indigo-500 to-indigo-200 drop-shadow-[0_0_30px_rgba(79,70,229,0.6)] py-4 px-2">
                                 RETAIL EMPIRE
                             </span> today.
                         </h2>

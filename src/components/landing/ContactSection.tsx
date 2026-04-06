@@ -45,14 +45,14 @@ const ContactSection = () => {
                     whatsapp: '',
                     message: ''
                 })
-                toast.success('Transmission Received / HQ Aware')
+                toast.success('Message Sent! We\'ll contact you soon.')
                 setTimeout(() => setIsSent(false), 5000)
             } else {
-                toast.error(result.error || 'System Failure: Communication Channel Blocked')
+                toast.error(result.error || 'Failed to send message. Please try again.')
             }
         } catch (error) {
             console.error('Contact Error:', error)
-            toast.error('Tactical Error: Network Interference Detected')
+            toast.error('Network error. Please check your connection.')
         } finally {
             setIsSubmitting(false)
         }
@@ -74,14 +74,14 @@ const ContactSection = () => {
                 >
                     <div className="mono-label mb-4 flex items-center justify-center gap-4">
                         <span className="h-px w-8 bg-indigo-500/30" />
-                        / DIRECT_CHANNEL_HQ
+                        / CONTACT_OUR_EXPERTS
                         <span className="h-px w-8 bg-indigo-500/30" />
                     </div>
-                    <h2 className="text-3xl md:text-6xl font-black italic tracking-tighter text-white mb-6">
-                        Establish <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-600">Contact</span>.
+                    <h2 className="text-3xl md:text-6xl font-black italic tracking-tighter text-white mb-6 leading-[1.4] px-6 py-4">
+                        Get in <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-indigo-500 to-indigo-200 drop-shadow-[0_0_30px_rgba(79,70,229,0.5)] inline-block py-4 px-2 relative z-10">Touch</span>.
                     </h2>
                     <p className="text-zinc-500 font-medium max-w-xl mx-auto text-sm md:text-base">
-                        Need technical support or custom infrastructure? Our command center is standing by to assist with your deployment.
+                        Want to grow your business or need help launching your store? Our team is ready to help you scale.
                     </p>
                 </Motion.div>
 
@@ -104,14 +104,14 @@ const ContactSection = () => {
                                 <CheckCircle2 size={40} />
                             </div>
                             <div>
-                                <h3 className="text-2xl font-bold text-white mb-2">Transmission Received</h3>
-                                <p className="text-zinc-500">Your message has been encrypted and sent to the command center.</p>
+                                <h3 className="text-2xl font-bold text-white mb-2">Message Sent Successfully!</h3>
+                                <p className="text-zinc-500">We've received your request. Our business expert will call or WhatsApp you shortly.</p>
                             </div>
                             <button 
                                 onClick={() => setIsSent(false)}
                                 className="text-sm font-mono text-indigo-400 hover:text-indigo-300 transition-colors"
                             >
-                                / SEND_NEW_MESSAGE
+                                / SEND_ANOTHER_INQUIRY
                             </button>
                         </Motion.div>
                     ) : (
@@ -244,11 +244,11 @@ const ContactSection = () => {
                     <div className="flex items-center gap-6">
                         <div className="mono-label !text-zinc-500 flex items-center gap-2 text-[10px]">
                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                            SECURE_CHANNEL_READY
+                            SUPPORT_AVAILABLE_24/7
                         </div>
                         <div className="mono-label !text-zinc-500 flex items-center gap-2 text-[10px]">
                             <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
-                            ENCRYPTION: AES-256_ACTIVE
+                            DATA_PRIVACY_GUARANTEED
                         </div>
                     </div>
                 </div>
