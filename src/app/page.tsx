@@ -26,7 +26,7 @@ import Testimonials from "@/components/landing/Testimonials"
 const StaggeredText = ({ text, className }: { text: string, className?: string }) => {
     const words = text.split(" ");
     return (
-        <span className={className}>
+        <span className="flex flex-wrap justify-center md:justify-start">
             {words.map((word, i) => (
                 <Motion.span
                     key={i}
@@ -37,7 +37,7 @@ const StaggeredText = ({ text, className }: { text: string, className?: string }
                         delay: i * 0.1,
                         ease: [0.2, 0.65, 0.3, 0.9],
                     }}
-                    className="inline-block mr-[0.25em]"
+                    className={`inline-block mr-[0.1em] px-[0.15em] ${className}`}
                 >
                     {word}
                 </Motion.span>
@@ -187,10 +187,13 @@ export default async function RootPage() {
                     </div>
 
                     <h1 className="text-[2.8rem] sm:text-6xl md:text-8xl font-black tracking-[calc(-0.04em)] mb-6 leading-[0.9] uppercase italic">
-                        <StaggeredText text="LAUNCH YOUR" className="block text-white" />
+                        <StaggeredText 
+                            text="LAUNCH YOUR" 
+                            className="text-white" 
+                        />
                         <StaggeredText 
                             text="ONLINE STORE" 
-                            className="block text-transparent bg-clip-text bg-[linear-gradient(to_right,#6366f1,#a855f7,#fff,#6366f1)] bg-[length:200%_auto] animate-gradient-slow" 
+                            className="text-transparent bg-clip-text bg-[linear-gradient(to_right,#6366f1,#a855f7,#6366f1)] bg-[length:200%_auto] animate-gradient-slow" 
                         />
                     </h1>
 
@@ -550,9 +553,9 @@ export default async function RootPage() {
                 </div>
             </section>
 
-            <Testimonials />
-
             <PricingSection />
+
+            <Testimonials />
 
             <FAQSection />
 

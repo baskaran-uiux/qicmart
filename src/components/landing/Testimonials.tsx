@@ -7,31 +7,31 @@ import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
 const testimonials = [
     {
         name: "Arjun Mehta",
-        role: "Founder, Urban Threads",
+        role: "Owner, Mehta Saree House (Surat)",
         content: "Qicmart transformed our local boutique into a national brand. The AI tools for product descriptions saved us weeks of work.",
         rating: 5,
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop"
+        image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d"
     },
     {
-        name: "Sarah Jenkins",
-        role: "CEO, Glow Kitchen",
+        name: "Ananya Iyer",
+        role: "CEO, Kitchen Bloom (Chennai)",
         content: "The mobile speed is incredible. Our conversion rate jumped by 40% in the first month after switching to Qicmart's infrastructure.",
         rating: 5,
-        image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop"
+        image: "https://images.unsplash.com/photo-1621184455862-c163dfb30e0f"
     },
     {
-        name: "Vikram Singh",
-        role: "Director, TechGadget India",
+        name: "Rohan Das",
+        role: "Director, Das Electronics (Kolkata)",
         content: "Managing 10,000+ SKUs used to be a nightmare. Qicmart's dashboard is modern, fast, and actually fun to use.",
         rating: 5,
-        image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop"
+        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d"
     },
     {
         name: "Priya Sharma",
-        role: "Artisan, Handcrafted Bliss",
+        role: "Artisan, Jaipur Handlooms",
         content: "I started with zero coding knowledge. Within 30 minutes, my store was live and accepting UPI payments. Truly revolutionary.",
         rating: 5,
-        image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop"
+        image: "https://images.unsplash.com/photo-1589156229687-496a31ad1d1f"
     }
 ];
 
