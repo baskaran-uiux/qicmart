@@ -1,6 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Montserrat:wght@400;600;700;800;900&family=Open+Sans:wght@400;600;700;800&family=Ubuntu:wght@400;500;700&family=Lato:wght@400;700;900&family=Outfit:wght@400;600;700;900&display=swap');
 @import "tailwindcss";
 @config "../../tailwind.config.js";
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-outfit), var(--font-inter), sans-serif;
+  letter-spacing: -0.01em;
+}
 
 html {
   scroll-behavior: smooth;
@@ -10,15 +16,8 @@ html {
   --background: #fdfdfd;
   --foreground: #0f172a;
 
-  /* Font Variables - Required by layouts */
-  --font-inter: 'Inter', sans-serif;
-  --font-poppins: 'Poppins', sans-serif;
-  --font-playfair: 'Playfair Display', serif;
-  --font-montserrat: 'Montserrat', sans-serif;
-  --font-opensans: 'Open Sans', sans-serif;
-  --font-ubuntu: 'Ubuntu', sans-serif;
-  --font-lato: 'Lato', sans-serif;
-  --font-outfit: 'Outfit', sans-serif;
+  /* Font Variables - Linked to next/font in layout.tsx */
+  /* We use the variable names defined in Outfit({ variable: '--font-outfit' }) */
   --font-main: var(--font-inter);
 }
 
@@ -30,6 +29,20 @@ html {
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  
+  /* Update Tailwind's default fonts to use our custom variables */
+  --font-sans: var(--font-outfit), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  
+  /* Expose specific font families for utility usage */
+  --font-outfit: var(--font-outfit);
+  --font-inter: var(--font-inter);
+  --font-poppins: var(--font-poppins);
+  --font-montserrat: var(--font-montserrat);
+  --font-playfair: var(--font-playfair);
+  --font-opensans: var(--font-opensans);
+  --font-ubuntu: var(--font-ubuntu);
+  --font-lato: var(--font-lato);
 }
 
 @layer utilities {
