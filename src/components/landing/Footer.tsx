@@ -77,13 +77,12 @@ const Footer = () => {
                                 </div>
                                 <span className="text-sm font-medium">+91 8072171027</span>
                             </div>
-                            <div className="flex items-start gap-3 text-zinc-400 hover:text-indigo-500 transition-colors group cursor-pointer">
-                                <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center mt-1 group-hover:bg-indigo-500/10 transition-colors shrink-0">
+                            <div className="flex items-center gap-3 text-zinc-400 hover:text-indigo-500 transition-colors group cursor-pointer">
+                                <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center group-hover:bg-indigo-500/10 transition-colors shrink-0">
                                     <MapPin size={14} className="text-indigo-500" />
                                 </div>
                                 <span className="text-sm font-medium leading-relaxed text-left">
-                                    Bagula Bus Stand, near PNB Bank ATM, <br />
-                                    Bagula, Nadia, West Bengal 741502, India
+                                    Krishnampalayam, Erode - 638 003.
                                 </span>
                             </div>
                         </div>

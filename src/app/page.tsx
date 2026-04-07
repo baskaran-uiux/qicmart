@@ -182,7 +182,7 @@ export default async function RootPage() {
                 >
                     <div className="flex items-center justify-center gap-3 mb-8">
                         <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
-                        <span className="mono-label !text-indigo-400">/ GROW YOUR BUSINESS ONLINE</span>
+                        <span className="mono-label !text-indigo-400">GROW YOUR BUSINESS ONLINE</span>
                         <span className="h-px w-12 bg-indigo-500/30" />
                         <span className="mono-label">NO CODING REQUIRED</span>
                     </div>
@@ -268,7 +268,7 @@ export default async function RootPage() {
                             transition={{ duration: 0.8 }}
                             className="text-left"
                         >
-                            <div className="mono-label mb-4">/ THE QICMART ADVANTAGE</div>
+                            <div className="mono-label mb-4">THE QICMART ADVANTAGE</div>
                             <h2 className="text-4xl md:text-6xl font-black uppercase italic leading-none">Everything you need <br /> to <span className="text-indigo-500">Succeed</span>.</h2>
                         </Motion.div>
                         <div className="mono-label text-right opacity-30 hidden md:block">
@@ -335,7 +335,7 @@ export default async function RootPage() {
                         transition={{ duration: 0.8 }}
                         className="text-center mb-24"
                     >
-                        <div className="mono-label mb-4">/ THREE_SIMPLE_STEPS</div>
+                        <div className="mono-label mb-4">THREE SIMPLE STEPS</div>
                         <h2 className="text-4xl md:text-7xl font-black uppercase italic leading-none">The <span className="text-indigo-500 text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-600">Roadmap</span> for Success.</h2>
                     </Motion.div>
 
@@ -394,7 +394,7 @@ export default async function RootPage() {
                             viewport={{ once: true }}
                             transition={{ duration: 0.8 }}
                         >
-                            <div className="mono-label mb-6">/ ALL_IN_ONE_DASHBOARD</div>
+                            <div className="mono-label mb-6">ALL IN ONE DASHBOARD</div>
                             <h2 className="text-4xl md:text-6xl font-black uppercase italic leading-[0.9] mb-10">
                                 Manage Everything <br /> <span className="text-indigo-500">In One Place</span>.
                             </h2>
@@ -451,7 +451,7 @@ export default async function RootPage() {
                                 transition={{ delay: 0.5 }}
                                 className="mb-4 relative"
                             >
-                                <div className="mono-label mb-6 !text-indigo-400">/ QICMART_OPERATIONS</div>
+                                <div className="mono-label mb-6 !text-indigo-400">QICMART OPERATIONS</div>
                                 <h2 className="text-3xl md:text-7xl font-black uppercase italic leading-none max-w-4xl mx-auto drop-shadow-[0_0_30px_rgba(79,70,229,0.5)]">
                                     Commerce powered by the <br />
                                     <span className="text-white text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-400 to-indigo-600">Global Edge</span>.
@@ -528,7 +528,7 @@ export default async function RootPage() {
                             transition={{ duration: 0.8 }}
                             className="order-1 lg:order-2"
                         >
-                            <div className="mono-label mb-6">/ MOBILE_FIRST_DESIGN</div>
+                            <div className="mono-label mb-6">MOBILE FIRST DESIGN</div>
                             <h2 className="text-4xl md:text-6xl font-black uppercase italic leading-[0.9] mb-10">
                                 Perfect on Every <br /> <span className="text-indigo-500">Mobile Screen</span>.
                             </h2>
@@ -575,7 +575,7 @@ export default async function RootPage() {
                     >
                         <div className="mono-label mb-6 md:mb-10 flex items-center justify-center gap-4">
                             <span className="h-px w-8 bg-indigo-500/30" />
-                            / INITIALIZE_SUCCESS_STORY
+                            INITIALIZE SUCCESS STORY
                             <span className="h-px w-8 bg-indigo-500/30" />
                         </div>
                         <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 md:mb-12 italic uppercase leading-[1.3] text-white px-4 py-4">

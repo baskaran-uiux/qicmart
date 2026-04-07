@@ -104,13 +104,6 @@ const Navbar = () => {
                 {/* Right Side Actions */}
                 <div className="flex items-center gap-6">
                     <div className="hidden md:flex items-center gap-6">
-                        {!isScrolled && (
-                            <div className="hidden lg:flex items-center gap-6 mr-6 opacity-40">
-                                <span className="mono-label text-[9px] tracking-widest uppercase">/ SECURE_SHELL</span>
-                                <div className="h-3 w-px bg-white/20" />
-                                <span className="mono-label text-[9px] tracking-widest uppercase">v2.0.4</span>
-                            </div>
-                        )}
                         <PremiumGetStartedButton />
                     </div>
 
@@ -166,7 +159,6 @@ const Navbar = () => {
                             </button>
 
                             <div className="flex flex-col gap-8 flex-1">
-                                <div className="mono-label text-[10px] text-indigo-500/60 mb-2">/ NAVIGATION_CLUSTER</div>
                                 {navLinks.map((item, i) => (
                                     <motion.div
                                         key={item.name}
@@ -196,17 +188,6 @@ const Navbar = () => {
                                 >
                                     <PremiumGetStartedButton />
                                 </motion.div>
-
-                                <div className="flex flex-col gap-2 opacity-30">
-                                    <div className="flex items-center justify-between">
-                                        <span className="mono-label text-[9px]">ENCRYPTED_ID</span>
-                                        <span className="mono-label text-[9px]">v2.0.4</span>
-                                    </div>
-                                    <div className="flex items-center justify-between text-indigo-400">
-                                        <span className="mono-label text-[9px]">STABLE_CONNECTION</span>
-                                        <span className="mono-label text-[9px]">MKXXVI</span>
-                                    </div>
-                                </div>
                             </div>
                         </motion.div>
                     </>
