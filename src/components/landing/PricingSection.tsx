@@ -8,21 +8,21 @@ import { PricingInquiryModal } from "@/components/landing/PricingInquiryModal"
 
 const plans = [
     {
-        name: "Professional Plan",
-        desc: "Optimized for Scaling Businesses",
-        monthlyPrice: "LAUNCHING",
-        yearlyPrice: "COMING SOON",
-        icon: Rocket,
-        features: ["AI Magic Studio", "Priority Node Access", "Advanced Fraud Shield", "Custom Domain Integration", "Multi-Currency Support"],
-        color: "purple"
-    },
-    {
         name: "Starter Plan",
-        desc: "Perfect for Small Teams and Startups",
+        desc: "Everything you need to grow your brand.",
         monthlyPrice: "₹399",
         yearlyPrice: "₹3,990",
         icon: User,
-        features: ["Unlimited Product Listings", "Advanced Order Management", "Inventory Tracking", "Detailed Analytics", "Coupons & CRM"],
+        features: [
+            "Unlimited Product Listings", 
+            "AI Magic Studio (Pro Feature)", 
+            "Custom Domain Integration", 
+            "Inventory & Order Tracking", 
+            "Detailed Sales Analytics", 
+            "Advanced Fraud Shield",
+            "Multi-Currency Support",
+            "Coupons & CRM Tools"
+        ],
         highlight: true,
         color: "indigo"
     },
@@ -32,7 +32,13 @@ const plans = [
         monthlyPrice: "Custom",
         yearlyPrice: "Custom",
         icon: Globe,
-        features: ["Unlimited Node Access", "Dedicated Hardware", "24/7 Rapid Response", "Custom Infrastructure", "SLA Guarantee"],
+        features: [
+            "Unlimited Node Access", 
+            "Dedicated Infrastructure", 
+            "24/7 Priority Support", 
+            "Custom Feature Development", 
+            "99.99% SLA Guarantee"
+        ],
         color: "emerald"
     }
 ]
@@ -52,7 +58,7 @@ export default function PricingSection() {
 
     return (
         <section id="pricing" className="py-16 md:py-32 relative overflow-hidden bg-[#020205]">
-            <div className="max-w-7xl mx-auto px-6 relative z-10">
+            <div className="max-w-5xl mx-auto px-6 relative z-10">
                 <Motion.div 
                     initial={{ opacity: 0, y: 40 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -76,7 +82,7 @@ export default function PricingSection() {
                         transition={{ delay: 0.1 }}
                         className="text-4xl md:text-7xl font-bold text-white mb-6"
                     >
-                        Flexible Pricing Plans
+                        Simple & Powerful Plans
                     </Motion.h2>
                     <Motion.p
                         initial={{ opacity: 0, y: 20 }}
@@ -85,7 +91,7 @@ export default function PricingSection() {
                         transition={{ delay: 0.2 }}
                         className="text-zinc-500 max-w-2xl mx-auto mb-12 text-lg leading-relaxed"
                     >
-                        Transparent pricing for businesses of all sizes. Scale your infrastructure as you grow with our planetary-scale edge network.
+                        Choose the best model for your business growth. Scale your infrastructure as you grow with our planetary-scale edge network.
                     </Motion.p>
  
                     {/* Toggle */}
@@ -116,7 +122,7 @@ export default function PricingSection() {
                     </div>
                 </Motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch justify-center">
                     {plans.map((plan, i) => (
                         <Motion.div
                             key={plan.name}

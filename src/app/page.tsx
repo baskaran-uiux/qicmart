@@ -187,7 +187,7 @@ export default async function RootPage() {
                         <span className="mono-label">NO CODING REQUIRED</span>
                     </div>
 
-                    <h1 className="text-[2.8rem] sm:text-6xl md:text-8xl font-black tracking-[calc(-0.04em)] mb-6 leading-[0.9] uppercase italic">
+                    <h1 className="text-4xl sm:text-6xl md:text-8xl font-black tracking-[calc(-0.04em)] mb-6 leading-[1.1] md:leading-[0.9] uppercase italic">
                         <StaggeredText 
                             text="LAUNCH YOUR" 
                             className="text-white" 
@@ -232,7 +232,7 @@ export default async function RootPage() {
                             viewport={{ once: true }}
                             whileHover={{ y: -10 }}
                             transition={{ delay: i * 0.1, duration: 0.8 }}
-                            className="relative p-6 sm:p-10 md:p-16 bg-[#0a0a0c] border border-white/5 beveled-sm text-center group hover:border-indigo-500/50 hover:bg-[#0f0f12] transition-all duration-300"
+                            className="relative p-4 sm:p-10 md:p-16 bg-[#0a0a0c] border border-white/5 beveled-sm text-center group hover:border-indigo-500/50 hover:bg-[#0f0f12] transition-all duration-300"
                         >
                             <div className="absolute top-0 left-0 w-1 h-12 bg-indigo-500/0 group-hover:bg-indigo-500/50 transition-all" />
                             
@@ -440,7 +440,7 @@ export default async function RootPage() {
             </section>
 
             {/* Performance Showcase: Global Edge Network */}
-            <section className="py-12 relative overflow-hidden bg-zinc-950/50 border-y border-white/5">
+            <section className="hidden md:block py-12 relative overflow-hidden bg-zinc-950/50 border-y border-white/5">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="relative rounded-[60px] overflow-hidden border border-white/5 group bg-zinc-950 flex flex-col">
                         {/* Centered Heading Overlaying Glow */}
@@ -579,13 +579,13 @@ export default async function RootPage() {
                             <span className="h-px w-8 bg-indigo-500/30" />
                         </div>
                         <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 md:mb-12 italic uppercase leading-[1.3] text-white px-4 py-4">
-                            Start your <br /> 
-                            <span className="text-[#7670FE] drop-shadow-[0_0_30px_rgba(118,112,254,0.6)] py-4 px-2">
-                                BUSINESS JOURNEY
-                            </span> today.
+                            Ready to Launch <br /> 
+                            Your <span className="text-[#7670FE] drop-shadow-[0_0_30px_rgba(118,112,254,0.6)] py-4 px-2">
+                                SUCCESS STORY
+                            </span> today?
                         </h2>
                         
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 md:gap-10">
+                        <div className="flex flex-col items-center justify-center gap-12">
                             <Motion.div 
                                 whileHover={{ scale: 1.05 }} 
                                 whileTap={{ scale: 0.95 }}
@@ -594,14 +594,32 @@ export default async function RootPage() {
                                 <div className="absolute -inset-4 bg-indigo-500/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                 <a href="#pricing" className="relative group/btn bg-white text-black px-12 py-5 rounded-full font-black text-lg uppercase tracking-tighter shadow-[0_20px_50px_rgba(255,255,255,0.2)] hover:shadow-[0_20px_70px_rgba(255,255,255,0.4)] transition-all flex items-center gap-3">
                                     <Rocket className="w-6 h-6" />
-                                    Get Started
+                                    Get Started Now
                                     <ArrowRight className="w-6 h-6 group-hover/btn:translate-x-2 transition-transform" />
                                 </a>
                             </Motion.div>
                             
-                            <div className="space-y-4 text-center">
-                                <p className="mono-label !text-zinc-500 text-[10px] uppercase tracking-[0.2em]">
-                                    Join 250+ Entrepreneurs worldwide.
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12 w-full max-w-3xl">
+                                {[
+                                    'No Coding Required',
+                                    'Setup in 5 Minutes',
+                                    '24/7 Expert Support',
+                                    'No Hidden Charges'
+                                ].map((point) => (
+                                    <div key={point} className="flex flex-col items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-500">
+                                            <Check size={16} />
+                                        </div>
+                                        <span className="text-[10px] md:text-xs font-black uppercase tracking-wider text-zinc-400 text-center leading-tight">
+                                            {point}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="pt-4">
+                                <p className="mono-label !text-zinc-600 text-[10px] uppercase tracking-[0.2em]">
+                                    Join 250+ Business Owners scaling with Qicmart.
                                 </p>
                             </div>
                         </div>

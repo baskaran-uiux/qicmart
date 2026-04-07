@@ -46,16 +46,16 @@ const Navbar = () => {
             <motion.div
                 initial={{ y: -120, opacity: 0, scale: 0.9 }}
                 animate={{
-                    width: isMobileMenuOpen ? "100%" : (isMobile ? "calc(100% - 32px)" : (isScrolled ? "min(90%, 1000px)" : "min(95%, 1200px)")),
-                    y: (isScrolled || isMobile) ? 24 : 12,
+                    width: isMobileMenuOpen ? "100%" : (isMobile ? "calc(100% - 24px)" : (isScrolled ? "min(90%, 1000px)" : "min(95%, 1200px)")),
+                    y: isMobile ? (isScrolled ? 12 : 12) : (isScrolled ? 24 : 12),
                     opacity: 1,
                     scale: 1,
                     borderRadius: isMobileMenuOpen ? "0px" : "9999px",
                     backgroundColor: isScrolled ? "rgba(15, 15, 20, 0.4)" : "rgba(10, 10, 15, 0.6)",
                     backdropFilter: "blur(20px)",
-                    paddingLeft: isScrolled ? "2rem" : "2.5rem",
-                    paddingRight: isScrolled ? "1.5rem" : "2.5rem",
-                    height: isScrolled ? "64px" : "80px",
+                    paddingLeft: isMobile ? "1rem" : (isScrolled ? "2rem" : "2.5rem"),
+                    paddingRight: isMobile ? "1rem" : (isScrolled ? "1.5rem" : "2.5rem"),
+                    height: isMobile ? "56px" : (isScrolled ? "64px" : "80px"),
                 }}
                 className={`
                     flex items-center justify-between border border-white/10 
