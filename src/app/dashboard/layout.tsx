@@ -6,7 +6,7 @@ import { usePathname as usePN, useSearchParams } from "next/navigation"
 import { signOut, useSession } from "next-auth/react"
 import {
     LayoutDashboard, Package, ShoppingCart, Users, Settings, LogOut,
-    Tag, FolderOpen, Sun, Moon, ChevronLeft, Menu, BarChart2, ExternalLink, Image as ImageIcon, Search, Zap, ShieldAlert, Layout, Globe, Star, CreditCard, ChevronDown, Ticket, Mail, PenTool, Truck, Palette, RotateCcw, MapPin
+    Tag, FolderOpen, Sun, Moon, ChevronLeft, Menu, BarChart2, ExternalLink, Image as ImageIcon, Search, Zap, ShieldAlert, Layout, Globe, Star, CreditCard, ChevronDown, Ticket, Mail, PenTool, Truck, Palette, RotateCcw, MapPin, Puzzle, Blocks, ShoppingBag
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { DashboardStoreProvider, useDashboardStore } from "@/components/DashboardStoreProvider"
@@ -77,6 +77,15 @@ const navGroups = [
         items: [
             { label: "Payments", key: "payments", href: "/dashboard/payment", icon: CreditCard },
             { label: "My Plan", key: "myPlan", href: "/dashboard/plans", icon: Zap },
+        ]
+    },
+    {
+        label: "Plugins",
+        key: "plugins",
+        icon: Blocks,
+        items: [
+            { label: "App Store", key: "allPlugins", href: "/dashboard/plugins", icon: ShoppingBag },
+            { label: "Installed", key: "installed", href: "/dashboard/plugins/installed", icon: Package },
         ]
     },
     {

@@ -12,8 +12,11 @@ import { WishlistProvider, useWishlist } from "@/context/WishlistContext"
 import { Providers } from "@/components/Providers"
 import { LanguageProvider, useLanguage } from "@/context/LanguageContext"
 import { formatPrice } from "./utils"
-import CouponPopup from "@/components/storefront/CouponPopup"
-import AIChatbot from "@/components/storefront/AIChatbot"
+import dynamic from "next/dynamic"
+import Image from "next/image"
+
+const CouponPopup = dynamic(() => import("@/components/storefront/CouponPopup"), { ssr: false })
+const AIChatbot = dynamic(() => import("@/components/storefront/AIChatbot"), { ssr: false })
 
 interface StoreCategory {
     id: string
@@ -183,27 +186,20 @@ function Header({ storeInfo, slug, categories, version, scrolled, announcementHe
         <motion.header 
             initial={false}
             animate={{
-                width: isSports ? (isMobile ? "94%" : "88%") : (scrolled ? "100%" : "100%"),
+                width: isSports ? (isMobile ? "94%" : "88%") : "100%",
                 y: announcementHeight + (isSports ? (isMobile ? 12 : 20) : 0),
-                borderRadius: isSports ? (isMobile ? 24 : 40) : 0,
-                backgroundColor: isSports 
-                    ? (scrolled ? "rgba(255,255,255,0.85)" : (isHomePage ? "rgba(244,244,245,0.15)" : "rgba(255,255,255,1)"))
-                    : (scrolled ? (isAura ? "rgba(9,9,11,0.95)" : "rgba(255,255,255,0.95)") : (isAura ? "transparent" : "white")),
+                borderRadius: isSports ? (isMobile ? 24 : 40) : (scrolled ? 0 : 0),
+                backgroundColor: isAura 
+                    ? (scrolled ? "rgba(9,9,11,0.95)" : "transparent") 
+                    : (scrolled ? "rgba(255,255,255,1)" : "rgba(255,255,255,1)"),
                 backdropFilter: isSports || scrolled ? "blur(20px)" : "blur(0px)",
-                borderWidth: isSports || scrolled ? 1 : 0,
-                borderColor: isSports 
-                    ? (isHomePage && !scrolled ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)")
-                    : "rgba(0,0,0,0.05)",
-                boxShadow: isSports || scrolled ? "0 20px 50px rgba(0,0,0,0.15)" : "none",
+                borderBottom: scrolled || !isAura ? "1px solid rgba(0,0,0,0.05)" : "none",
+                boxShadow: scrolled ? "0 10px 30px rgba(0,0,0,0.05)" : "none",
                 left: "50%",
                 x: "-50%"
             }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className={`fixed top-0 z-50 transition-all duration-700 
-            ${!isSports && scrolled 
-                ? (isAura ? 'bg-zinc-950 border-white/5 shadow-2xl' : 'bg-white/90 backdrop-blur-xl dark:bg-zinc-950 border-b border-zinc-100 shadow-xl') 
-                : (!isSports && !scrolled ? (isAura ? 'bg-transparent' : 'bg-white shadow-none') : '')
-            }`}>
+            className={`fixed top-0 z-50 transition-all duration-700`}>
                 <nav className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                         {menuType === 'side' && (
@@ -213,9 +209,16 @@ function Header({ storeInfo, slug, categories, version, scrolled, announcementHe
                         )}
                         <div className="flex-shrink-0">
                             <Link href={`/s/${slug}`} className="group flex items-center">
-                                <div className={`h-10 sm:h-12 w-auto flex items-center justify-center group-hover:scale-105 transition-transform duration-500 overflow-hidden`}>
+                                <div className={`h-10 sm:h-12 w-32 relative flex items-center justify-center group-hover:scale-105 transition-transform duration-500 overflow-hidden`}>
                                     {storeInfo?.logo ? (
-                                        <img src={`${storeInfo.logo}${storeInfo.logo.includes('?') ? '&' : '?'}v=${version}`} alt={storeInfo.name} className={`h-full w-auto object-contain ${isAura ? 'brightness-0 invert' : ''}`} />
+                                        <Image 
+                                            src={`${storeInfo.logo}${storeInfo.logo.includes('?') ? '&' : '?'}v=${version}`} 
+                                            alt={storeInfo.name} 
+                                            fill
+                                            className={`object-contain ${isAura ? 'brightness-0 invert' : ''}`} 
+                                            sizes="128px"
+                                            priority
+                                        />
                                     ) : (
                                         <span className={`text-xl font-black tracking-tighter italic uppercase ${isAura ? 'text-white' : isSports ? (isHomePage && !scrolled ? 'text-white' : 'text-zinc-900') : 'text-zinc-900'}`}>{storeInfo?.name || "Store"}</span>
                                     )}
@@ -393,24 +396,9 @@ function Header({ storeInfo, slug, categories, version, scrolled, announcementHe
                     </div>
                 </nav>
 
-            {/* Row 2: Menu Bar (for Nextgen/Modern/Sports) */}
+            {/* Row 2: Menu Bar (Part of the same header container) */}
             {(layoutStyle === 'nextgen' || layoutStyle === 'sports' || storeTheme === 'modern') && (
-                <motion.div 
-                    animate={{
-                        width: isSports ? (scrolled ? "75%" : "82%") : (scrolled ? "100%" : "100%"),
-                        y: isSports ? (scrolled ? 28 : 28) : (scrolled ? 0 : 0),
-                        borderRadius: isSports ? 40 : (scrolled ? 20 : 0),
-                        backgroundColor: isSports 
-                            ? (isHomePage && scrolled ? "rgba(255,255,255,0.85)" : (isHomePage ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,1)")) 
-                            : scrolled ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,1)",
-                        backdropFilter: isSports || scrolled ? "blur(20px)" : "blur(0px)",
-                        left: isMobile ? "0%" : "50%",
-                        x: isMobile ? "0%" : "-50%",
-                        boxShadow: isSports || scrolled ? "0 4px 20px rgba(0,0,0,0.05)" : "none",
-                        borderTop: !isSports && !scrolled ? "1px solid rgba(0,0,0,0.05)" : "none"
-                    }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    className={`${isSports ? 'fixed z-40' : 'relative'} hidden lg:block transition-all duration-500`}>
+                <div className="hidden lg:block border-t border-zinc-100/50">
                     <div className={`max-w-7xl mx-auto px-8 h-12 flex items-center gap-10 relative ${
                         menuAlignment === 'left' ? 'justify-start' : 
                         menuAlignment === 'right' ? 'justify-end' : 
@@ -480,7 +468,7 @@ function Header({ storeInfo, slug, categories, version, scrolled, announcementHe
                             </>
                         )}
                     </div>
-                </motion.div>
+                </div>
             )}
 
             {/* Side Menu Drawer */}
@@ -1155,8 +1143,8 @@ export default function StoreLayout({
                             {/* Plugin Third-Party Scripts */}
                             {config.isGoogleAnalyticsEnabled && config.googleAnalyticsId && (
                                 <>
-                                    <Script src={`https://www.googletagmanager.com/gtag/js?id=${config.googleAnalyticsId}`} strategy="afterInteractive" />
-                                    <Script id="google-analytics" strategy="afterInteractive">
+                                    <Script src={`https://www.googletagmanager.com/gtag/js?id=${config.googleAnalyticsId}`} strategy="lazyOnload" />
+                                    <Script id="google-analytics" strategy="lazyOnload">
                                         {`
                                             window.dataLayer = window.dataLayer || [];
                                             function gtag(){dataLayer.push(arguments);}
@@ -1169,7 +1157,7 @@ export default function StoreLayout({
                                 </>
                             )}
                             {config.isFacebookPixelEnabled && config.facebookPixelId && (
-                                <Script id="facebook-pixel" strategy="afterInteractive">
+                                <Script id="facebook-pixel" strategy="lazyOnload">
                                     {`
                                         !function(f,b,e,v,n,t,s)
                                         {if(f.fbq)return;n=f.fbq=function(){n.callMethod?

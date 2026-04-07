@@ -127,13 +127,13 @@ export default function HomeProductCard({
     }
 
     const cardVariants = {
-        hidden: { opacity: 0, y: 30 },
+        hidden: { opacity: 0, y: 20 },
         visible: { 
             opacity: 1, 
             y: 0,
             transition: {
-                duration: 0.8,
-                ease: [0.16, 1, 0.3, 1]
+                duration: 0.5,
+                ease: "easeOut"
             }
         }
     }
@@ -145,6 +145,9 @@ export default function HomeProductCard({
 
     return (
         <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
             variants={cardVariants as any}
             className="h-full group/card will-change-transform"
         >

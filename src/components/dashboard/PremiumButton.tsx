@@ -44,7 +44,7 @@ export default function PremiumButton({
         lg: "px-5 py-3 text-[14px]"
     }
 
-    const baseClasses = `group relative inline-flex items-center justify-center gap-2 rounded-xl font-medium tracking-tight transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] overflow-hidden border border-white/10 shadow-lg ${sizeClasses[size]} ${className}`
+    const baseClasses = `group relative inline-flex items-center justify-center gap-2 rounded-xl font-medium tracking-tight transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] overflow-hidden border border-white/10 shadow-lg ${sizeClasses[size]}`
     
     const variantClasses = variant === "primary" 
         ? "bg-gradient-to-br from-indigo-600 to-purple-700 dark:from-indigo-500 dark:to-purple-600 text-white hover:shadow-[0_10px_30px_rgba(124,58,237,0.2)]"
@@ -105,7 +105,7 @@ export default function PremiumButton({
 
     if (href) {
         return (
-            <Link href={href} className={`${baseClasses} ${variantClasses}`}>
+            <Link href={href} className={`${baseClasses} ${variantClasses} ${className}`}>
                 {content}
             </Link>
         )
@@ -116,7 +116,7 @@ export default function PremiumButton({
             type={type}
             onClick={onClick} 
             disabled={disabled || isLoading}
-            className={`${baseClasses} ${variantClasses} ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+            className={`${baseClasses} ${variantClasses} ${disabled ? "opacity-50 cursor-not-allowed" : ""} ${className}`}
         >
             {content}
         </button>

@@ -9,6 +9,7 @@ import { useDashboardStore } from "@/components/DashboardStoreProvider"
 import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
 import PremiumButton from "@/components/dashboard/PremiumButton"
+import { GridSkeleton } from "@/components/dashboard/DashboardSkeletons"
 
 interface StoreSettings {
     storeTheme: string
@@ -87,9 +88,16 @@ function ThemesContent() {
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
-                <Loader2 className="animate-spin text-indigo-600" size={40} />
-                <p className="text-sm font-bold text-zinc-400 uppercase tracking-widest">{t("loadingSettings")}</p>
+            <div className="max-w-6xl mx-auto space-y-12 animate-in fade-in duration-500 pb-20">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
+                    <div className="space-y-3">
+                        <div className="h-8 w-48 bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse" />
+                        <div className="h-4 w-64 bg-zinc-50 dark:bg-zinc-800/50 rounded animate-pulse" />
+                    </div>
+                </div>
+                <div className="max-w-4xl">
+                    <GridSkeleton />
+                </div>
             </div>
         )
     }
@@ -245,7 +253,7 @@ function ThemesContent() {
                         <h3 className="text-3xl font-bold text-white max-w-md leading-tight">Want a fully custom unique layout for your brand?</h3>
                         <p className="text-indigo-100 text-sm font-medium opacity-80 max-w-sm">Contact our design experts to build a bespoke storefront experience tailored to your specific needs.</p>
                     </div>
-                    <PremiumButton className="bg-white text-indigo-600 hover:bg-zinc-50 border-none shadow-2xl py-6 px-10">
+                    <PremiumButton variant="outline" className="bg-white dark:bg-white text-indigo-600 dark:text-indigo-600 hover:bg-zinc-50 dark:hover:bg-zinc-50 border-none shadow-2xl py-6 px-10 font-bold">
                         Request Custom Theme
                     </PremiumButton>
                 </div>
