@@ -2849,3 +2849,287 @@
 2026-04-07T18:04:43.819Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
 2026-04-07T18:04:44.545Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
 2026-04-07T18:04:44.545Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:05:13.826Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:05:14.671Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:05:14.672Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:05:43.831Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:05:44.631Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:05:44.631Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:06:13.819Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:06:14.621Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:06:14.622Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:06:43.838Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:06:44.647Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:06:44.647Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:07:13.831Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:07:14.713Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:07:14.713Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:07:43.833Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:07:44.676Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:07:44.677Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:08:13.839Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:08:14.652Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:08:14.653Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:08:43.855Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:08:44.711Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:08:44.712Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:09:13.820Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:09:14.593Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:09:14.593Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:09:43.832Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:09:45.103Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:09:45.104Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:10:13.807Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:10:14.705Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:10:14.715Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:10:43.844Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:10:44.628Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:10:44.629Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:11:13.824Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:11:14.619Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:11:14.620Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:11:43.821Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:11:44.671Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:11:44.675Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:12:13.835Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:12:14.554Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:12:14.556Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:12:43.832Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:12:44.654Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:12:44.656Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:13:13.832Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:13:14.586Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:13:14.586Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:13:43.852Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:13:44.601Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:13:44.602Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:14:13.836Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:14:14.590Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:14:14.591Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:15:35.847Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:15:37.236Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:15:37.237Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:15:46.643Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:15:47.422Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:15:47.423Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:15:49.095Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:15:49.847Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:15:49.848Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:15:49.900Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:15:50.656Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:15:50.656Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:15:53.044Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:15:53.770Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:15:53.770Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:15:54.196Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:15:54.971Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:15:54.972Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:15:56.617Z - [getStoreForDashboard] userId: cmnou9cxu0000dl4td0rzxcqf, type: 1
+2026-04-07T18:15:57.391Z - [getStoreForDashboard] Found 1 stores for user cmnou9cxu0000dl4td0rzxcqf
+2026-04-07T18:15:57.391Z - [getStoreForDashboard] Store[0] ID: cmnov8n6g000f14k9y7ja5ctb, Name: Super Admin Store
+2026-04-07T18:15:57.810Z - [getStoreForDashboard] userId: cmnou9cxu0000dl4td0rzxcqf, type: 1
+2026-04-07T18:15:58.564Z - [getStoreForDashboard] Found 1 stores for user cmnou9cxu0000dl4td0rzxcqf
+2026-04-07T18:15:58.564Z - [getStoreForDashboard] Store[0] ID: cmnov8n6g000f14k9y7ja5ctb, Name: Super Admin Store
+2026-04-07T18:16:00.954Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:16:01.719Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:16:01.719Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:16:02.137Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:16:02.893Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:16:02.893Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:16:03.240Z - [getStoreForDashboard] userId: cmnou9cxu0000dl4td0rzxcqf, type: 1
+2026-04-07T18:16:03.993Z - [getStoreForDashboard] Found 1 stores for user cmnou9cxu0000dl4td0rzxcqf
+2026-04-07T18:16:03.994Z - [getStoreForDashboard] Store[0] ID: cmnov8n6g000f14k9y7ja5ctb, Name: Super Admin Store
+2026-04-07T18:16:04.396Z - [getStoreForDashboard] userId: cmnou9cxu0000dl4td0rzxcqf, type: 1
+2026-04-07T18:16:05.151Z - [getStoreForDashboard] Found 1 stores for user cmnou9cxu0000dl4td0rzxcqf
+2026-04-07T18:16:05.164Z - [getStoreForDashboard] Store[0] ID: cmnov8n6g000f14k9y7ja5ctb, Name: Super Admin Store
+2026-04-07T18:16:12.018Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:16:12.026Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:16:12.995Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:16:12.997Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:16:13.236Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:16:13.237Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:16:13.577Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:16:13.766Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:16:13.963Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:16:14.560Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:16:14.561Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:16:14.637Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:16:14.637Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:16:14.692Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:16:14.692Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:16:17.644Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:16:18.401Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:16:18.402Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:16:18.772Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:16:19.550Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:16:19.553Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:16:26.457Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:16:27.166Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:16:27.167Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:16:27.210Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:16:27.941Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:16:27.942Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:16:28.649Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:16:29.406Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:16:29.407Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:16:29.456Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:16:30.122Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:16:30.123Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:16:34.406Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:16:35.211Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:16:35.212Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:16:37.792Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:16:38.562Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:16:38.563Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:16:39.029Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:16:39.775Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:16:39.777Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:16:43.767Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:16:44.595Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:16:44.597Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:16:44.690Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:16:45.473Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:16:45.475Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:16:47.389Z - [Media POST] Creating library entry for store cmnou9ez30006dl4t7yfvmkft
+2026-04-07T18:16:47.773Z - [Media POST] Success: cmnoxy1bd0007ckg41hwq79lx
+2026-04-07T18:16:50.679Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:16:51.361Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:16:51.371Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:16:58.283Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:16:58.983Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:16:58.985Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:17:13.841Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:17:14.503Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:17:14.504Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:17:46.480Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:17:46.483Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:17:46.484Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:17:47.169Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:17:47.170Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:17:47.181Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:17:47.181Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:17:47.249Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:17:47.249Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:18:14.828Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:18:15.689Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:18:15.690Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:18:44.828Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:18:45.618Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:18:45.619Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:19:14.815Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:19:15.628Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:19:15.629Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:19:44.844Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:19:45.529Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:19:45.529Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:20:14.835Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:20:15.625Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:20:15.626Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:20:45.904Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:20:47.383Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:20:47.383Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:20:49.427Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:20:49.624Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:20:49.627Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:20:51.237Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:20:51.237Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:20:51.242Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:20:51.243Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:20:51.246Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:20:51.246Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:21:19.837Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:21:20.624Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:21:20.625Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:31:36.214Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:31:36.224Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:31:36.235Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:31:36.952Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:31:36.952Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:31:36.966Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:31:36.967Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:31:37.029Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:31:37.030Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:32:03.952Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:32:03.975Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:32:03.989Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:32:05.933Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:32:05.934Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:32:05.936Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:32:05.936Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:32:05.942Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:32:05.943Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:32:33.829Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:32:34.762Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:32:34.762Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:33:03.829Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:33:04.646Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:33:04.647Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:33:33.840Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:33:34.707Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:33:34.708Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:33:47.645Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:33:47.658Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:33:47.660Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:33:49.423Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:33:49.423Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:33:49.434Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:33:49.435Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:33:49.440Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:33:49.441Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:34:17.867Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:34:18.799Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:34:18.800Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:34:47.829Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:34:48.621Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:34:48.622Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:35:13.827Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:35:14.289Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:35:14.623Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:35:14.624Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:35:15.117Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:35:15.119Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:35:15.596Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:35:16.327Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:35:16.328Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:35:17.421Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:35:18.187Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:35:18.188Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:35:20.025Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:35:20.764Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:35:20.765Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:35:47.836Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:35:48.552Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:35:48.564Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:36:17.833Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:36:18.585Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:36:18.586Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:36:47.824Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:36:48.622Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:36:48.622Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:37:07.472Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:37:07.474Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:37:07.487Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:37:08.904Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:37:08.905Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:37:09.341Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:37:09.342Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:37:09.344Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:37:09.344Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:37:34.835Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:37:35.657Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:37:35.657Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:38:04.973Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:38:05.743Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:38:05.744Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:38:34.833Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:38:35.535Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:38:35.536Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:39:04.894Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:39:05.725Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:39:05.725Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:39:34.873Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:39:35.743Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:39:35.744Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store
+2026-04-07T18:40:05.299Z - [getStoreForDashboard] userId: cmnou9d9m0001dl4tljbrrf8t, type: 1
+2026-04-07T18:40:06.043Z - [getStoreForDashboard] Found 1 stores for user cmnou9d9m0001dl4tljbrrf8t
+2026-04-07T18:40:06.044Z - [getStoreForDashboard] Store[0] ID: cmnou9ez30006dl4t7yfvmkft, Name: Demo SaaS Store

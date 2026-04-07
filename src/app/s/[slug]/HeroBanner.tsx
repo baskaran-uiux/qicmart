@@ -214,6 +214,7 @@ export default function HeroBanner({ slug, banners = [], layoutStyle = "default"
                                                         alt={s.title}
                                                         fill
                                                         priority={current === 0}
+                                                        unoptimized={true}
                                                         className={`w-full h-full object-cover animate-zoom-banner`}
                                                     />
                                                 </div>

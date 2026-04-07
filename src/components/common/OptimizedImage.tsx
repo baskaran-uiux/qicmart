@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 
 interface OptimizedImageProps extends Omit<ImageProps, "onLoad"> {
     fallback?: string
+    unoptimized?: boolean
 }
 
 export default function OptimizedImage({ 
@@ -12,6 +13,7 @@ export default function OptimizedImage({
     alt, 
     className, 
     fallback = "/placeholder-image.png",
+    unoptimized = false,
     ...props 
 }: OptimizedImageProps) {
     // Ensure src is a valid type for next/image (string or object) and never an array
@@ -30,6 +32,7 @@ export default function OptimizedImage({
             src={error ? fallback : (imgSrc || fallback)}
             alt={alt || "Image"}
             className={className}
+            unoptimized={unoptimized}
             onError={() => {
                 if (!error) setError(true)
             }}
