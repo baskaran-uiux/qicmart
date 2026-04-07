@@ -258,6 +258,8 @@ export default function CategoriesPage() {
                 <PremiumButton
                     onClick={openAdd}
                     icon={Plus}
+                    size="md"
+                    className="min-h-[38px]"
                 >
                     {t('createCategory')}
                 </PremiumButton>
@@ -269,7 +271,7 @@ export default function CategoriesPage() {
                     value={search} 
                     onChange={e => setSearch(e.target.value)} 
                     placeholder={t('searchCategories')} 
-                    className="w-full pl-11 pr-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none text-black dark:text-white transition-all shadow-sm md:w-64" 
+                    className="w-full pl-11 pr-4 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-[12px] focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none text-black dark:text-white transition-all shadow-sm md:w-64 min-h-[38px]" 
                 />
             </div>
 
@@ -284,18 +286,18 @@ export default function CategoriesPage() {
                         <div className="space-y-6">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-semibold text-zinc-400 capitalize">{t('categoryName')}</label>
-                                <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder={t('placeholderCategoryName')} className="w-full px-4 py-3.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-semibold text-black dark:text-white focus:ring-2 focus:ring-black/5 outline-none" />
+                                <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder={t('placeholderCategoryName')} className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-[12px] font-medium text-black dark:text-white focus:ring-2 focus:ring-black/5 outline-none" />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-[10px] font-semibold text-zinc-400 capitalize">{t('description')}</label>
-                                <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder={t('placeholderCategoryDesc')} rows={3} className="w-full px-4 py-3.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-semibold text-black dark:text-white focus:ring-2 focus:ring-black/5 outline-none resize-none" />
+                                <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder={t('placeholderCategoryDesc')} rows={3} className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-[12px] font-medium text-black dark:text-white focus:ring-2 focus:ring-black/5 outline-none resize-none" />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-[10px] font-semibold text-zinc-400 capitalize">{t('parentCategory')}</label>
                                 <select 
                                     value={form.parentId} 
                                     onChange={e => setForm(f => ({ ...f, parentId: e.target.value }))}
-                                    className="w-full px-4 py-3.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-semibold text-black dark:text-white focus:ring-2 focus:ring-black/5 outline-none appearance-none"
+                                    className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-[12px] font-medium text-black dark:text-white focus:ring-2 focus:ring-black/5 outline-none appearance-none"
                                 >
                                     <option value="">{t('noneTopLevel')}</option>
                                     {categories

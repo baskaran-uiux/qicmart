@@ -90,8 +90,8 @@ export default function HeroBanner({ slug, banners = [], layoutStyle = "default"
             onMouseLeave={() => setPaused(false)}
         >
             <div className={`relative overflow-hidden transition-all duration-700 
-                ${isSports ? 'h-[550px] sm:h-[850px] w-full' : isNextgen ? 'h-[420px] sm:h-[680px] rounded-[32px] sm:rounded-[64px] shadow-2xl' : 
-                  'h-[380px] sm:h-[700px]'}`}>
+                ${isSports ? 'h-[450px] sm:h-[650px] w-full' : isNextgen ? 'h-[380px] sm:h-[520px] rounded-xl sm:rounded-3xl shadow-2xl' : 
+                  'h-[350px] sm:h-[500px]'}`}>
                 <style jsx>{`
                     @keyframes zoomOut {
                         from { transform: scale(1.15); }
@@ -230,10 +230,10 @@ export default function HeroBanner({ slug, banners = [], layoutStyle = "default"
                                         
                                         {s.title && (
                                             <motion.h2 
-                                                initial={{ opacity: 0, x: -30 }}
-                                                animate={{ opacity: 1, x: 0 }}
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
                                                 transition={{ delay: 0.2, duration: 0.8 }}
-                                                className={`text-4xl sm:text-5xl lg:text-7xl font-black italic tracking-tighter mb-2 sm:mb-4 leading-[0.9] max-w-4xl drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] uppercase`}
+                                                className={`text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-2 sm:mb-4 leading-tight max-w-4xl`}
                                                 style={{ color: isSports ? '#ffffff' : s.titleColor || '#ffffff' }}
                                             >
                                                 {s.title}
@@ -242,10 +242,10 @@ export default function HeroBanner({ slug, banners = [], layoutStyle = "default"
                                         
                                         {s.subtitle && (
                                             <motion.p 
-                                                initial={{ opacity: 0, x: -20 }}
-                                                animate={{ opacity: 1, x: 0 }}
+                                                initial={{ opacity: 0, y: 15 }}
+                                                animate={{ opacity: 1, y: 0 }}
                                                 transition={{ delay: 0.4, duration: 0.8 }}
-                                                className={`text-[12px] sm:text-[14px] max-w-xl mb-4 sm:mb-10 font-black italic uppercase tracking-widest opacity-90 leading-6 sm:leading-7 text-white`}
+                                                className={`text-[13px] sm:text-[16px] max-w-xl mb-6 sm:mb-10 font-medium tracking-wide opacity-90 leading-relaxed text-white`}
                                                 style={{ color: isSports ? '#ffffff' : s.subtitleColor || 'rgba(255,255,255,0.9)' }}
                                             >
                                                 {s.subtitle}
@@ -260,7 +260,7 @@ export default function HeroBanner({ slug, banners = [], layoutStyle = "default"
                                             >
                                                 <Link
                                                     href={s.buttonLink.startsWith('/s/') ? s.buttonLink : `/s/${slug}${s.buttonLink.startsWith('/') ? s.buttonLink : `/${s.buttonLink}`}`}
-                                                    className={`inline-flex items-center gap-2 sm:gap-4 px-8 sm:px-12 py-3.5 sm:py-5 font-black italic rounded-full transition-all shadow-xl hover:scale-105 active:scale-95 text-[11px] sm:text-[13px] group uppercase tracking-[0.2em] 
+                                                    className={`inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 font-medium rounded-xl transition-all shadow-xl hover:scale-105 active:scale-95 text-[12px] sm:text-[14px] group tracking-tight 
                                                         ${isSports ? 'sports-neon-btn' : isNextgen ? (s.btnColor && s.btnColor !== '#ffffff' ? 'premium-custom-btn' : 'premium-orange-btn') : ''}`}
                                                     style={!isSports && isNextgen && (!s.btnColor || s.btnColor === '#ffffff') ? { 
                                                         backgroundColor: 'var(--primary-color)',
@@ -270,7 +270,7 @@ export default function HeroBanner({ slug, banners = [], layoutStyle = "default"
                                                         color: s.btnTextColor || '#000000'
                                                     } : {}}
                                                 >
-                                                    <span>
+                                                    <span className="flex items-center justify-center gap-2">
                                                         {s.buttonText} 
                                                         <ArrowRight className="w-4 h-4 sm:w-5 h-5 group-hover:translate-x-1.5 transition-transform shrink-0" />
                                                     </span>

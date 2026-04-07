@@ -230,9 +230,9 @@ export default function ProductsPage() {
                                 setBulkStocks(initial)
                             }
                         }}
-                        className={`flex-1 sm:flex-none px-4 sm:px-6 py-3 ${isBulkMode ? "bg-amber-500 text-white shadow-lg shadow-amber-500/20" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300"} rounded-2xl text-[11px] font-bold capitalize flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95 whitespace-nowrap min-h-[46px]`}
+                        className={`flex-1 sm:flex-none px-4 sm:px-5 py-2 ${isBulkMode ? "bg-amber-500 text-white shadow-lg shadow-amber-500/20" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300"} rounded-xl text-[12px] font-medium capitalize flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95 whitespace-nowrap min-h-[38px]`}
                     >
-                        <RefreshCw size={16} className={isBulkMode ? "animate-spin" : ""} /> 
+                        <RefreshCw size={14} className={isBulkMode ? "animate-spin" : ""} /> 
                         <span>{isBulkMode ? t("cancelBulkEdit") : t("bulkStockEdit")}</span>
                     </button>
                     {isBulkMode && (
@@ -256,21 +256,22 @@ export default function ProductsPage() {
                                     console.error("Bulk update failed:", error)
                                 }
                             }}
-                            className="flex-1 sm:flex-none px-4 sm:px-6 py-3 bg-emerald-600 text-white rounded-2xl text-[11px] font-bold capitalize flex items-center justify-center gap-2 transition-all hover:bg-emerald-700 active:scale-95 shadow-xl shadow-emerald-600/20 whitespace-nowrap min-h-[46px]"
+                            className="flex-1 sm:flex-none px-4 sm:px-5 py-2 bg-emerald-600 text-white rounded-xl text-[12px] font-medium capitalize flex items-center justify-center gap-2 transition-all hover:bg-emerald-700 active:scale-95 shadow-xl shadow-emerald-600/20 whitespace-nowrap min-h-[38px]"
                         >
-                            <Check size={16} /> <span>{t("applyChanges")}</span>
+                            <Check size={14} /> <span>{t("applyChanges")}</span>
                         </button>
                     )}
                     <button 
                         onClick={handleExport}
-                        className="flex-1 sm:flex-none px-4 sm:px-6 py-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-2xl text-[11px] font-bold capitalize flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all whitespace-nowrap min-h-[46px]"
+                        className="flex-1 sm:flex-none px-4 sm:px-5 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-xl text-[12px] font-medium capitalize flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all whitespace-nowrap min-h-[38px]"
                     >
-                        <Download size={16} /> <span>{t("export")}</span>
+                        <Download size={14} /> <span>{t("export")}</span>
                     </button>
                     <PremiumButton 
                         onClick={() => openAdd()}
                         icon={Package}
-                        className="min-h-[46px]"
+                        className="min-h-[38px]"
+                        size="md"
                     >
                         {t("addProduct")}
                     </PremiumButton>

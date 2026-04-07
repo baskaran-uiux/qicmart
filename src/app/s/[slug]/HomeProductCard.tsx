@@ -150,12 +150,12 @@ export default function HomeProductCard({
         >
             <style jsx global>{`
                 @keyframes shine {
-                    0% { transform: translateX(-150%) skewX(-20deg); }
-                    20%, 100% { transform: translateX(250%) skewX(-20deg); }
+                    0% { transform: translateX(-200%) skewX(-20deg); }
+                    100% { transform: translateX(300%) skewX(-20deg); }
                 }
                 .animate-shine {
-                    animation: shine 4s infinite linear;
-                    width: 50%;
+                    animation: shine 3s infinite ease-in-out;
+                    width: 40%;
                 }
                 .animate-shine-once {
                     animation: shine 0.8s ease-in-out forwards;
@@ -211,21 +211,32 @@ export default function HomeProductCard({
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                     </div>
 
-                    {/* Badges */}
+                    {/* Badges - Only for Dress Shop (Nextgen) */}
                     <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
-                        {product.isBestSeller && (
-                            <div className={`relative px-3 py-1.5 ${isSports ? 'bg-[var(--primary-color)] text-white' : 'bg-[var(--primary-color)] text-white'} text-[9px] font-semibold rounded-full shadow-lg flex items-center gap-1.5 border border-white/20 overflow-hidden group/badge`} style={{ boxShadow: `0 10px 20px rgba(var(--primary-rgb), 0.2)` }}>
-                                <Star className="w-2.5 h-2.5 fill-current" />
-                                <span className="relative z-10">Best seller</span>
-                                <div className="absolute inset-0 -translate-x-full group-hover/badge:animate-shine-once pointer-events-none bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-[-20deg]" />
-                                <div className="absolute inset-0 animate-shine pointer-events-none bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-[-20deg]" />
-                            </div>
-                        )}
-                        {(isNextgen || isSports) && !product.isBestSeller && (
-                            <div className={`px-3 py-1.5 ${isSports ? 'bg-white text-black' : 'bg-white/90 backdrop-blur-xl text-black'} text-[9px] font-semibold rounded-full shadow-sm flex items-center gap-2 border border-zinc-100`}>
-                                <span className="w-1.5 h-1.5 bg-[var(--primary-color)] rounded-full animate-pulse"></span>
-                                New
-                            </div>
+                        {isNextgen && (
+                            <>
+                                {product.isBestSeller && (
+                                    <div className="relative px-3 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[9px] font-black rounded-full shadow-lg flex items-center gap-1.5 border border-white/20 overflow-hidden group/badge">
+                                        <Star className="w-2.5 h-2.5 fill-current text-white" />
+                                        <span className="relative z-10 uppercase tracking-widest">Best seller</span>
+                                        <div className="absolute inset-0 -translate-x-full animate-shine pointer-events-none bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-[-20deg]" />
+                                    </div>
+                                )}
+                                
+                                {discount && discount > 0 && (
+                                    <div className="px-3 py-1.5 bg-[var(--primary-color)] text-white text-[9px] font-bold rounded-full shadow-lg flex items-center gap-2 border border-white/20">
+                                        <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+                                        -{discount}%
+                                    </div>
+                                )}
+
+                                {!product.isBestSeller && (!discount || discount <= 0) && (
+                                    <div className="px-3 py-1.5 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white text-[9px] font-bold rounded-full shadow-sm flex items-center gap-2 border border-zinc-100 dark:border-white/10">
+                                        <span className="w-1.5 h-1.5 bg-[var(--primary-color)] rounded-full animate-pulse"></span>
+                                        New arrival
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
                     
@@ -283,11 +294,6 @@ export default function HomeProductCard({
                                     <span className={`text-[11px] font-medium line-through opacity-70 ${isAura ? 'text-zinc-500' : 'text-zinc-400'}`}>
                                         {formatPrice(product.compareAtPrice, currency)}
                                     </span>
-                                    {discount && (
-                                        <span className={`text-[10px] font-bold tracking-wider ${isSports ? 'text-emerald-600' : 'text-[var(--primary-color)]'}`}>
-                                            -{discount}%
-                                        </span>
-                                    )}
                                 </div>
                             )}
                             <span className={`leading-none tracking-tighter block 

@@ -143,7 +143,7 @@ function BrandingTab({ settings, update, openMediaLibrary }: any) {
                                     value={settings.name} 
                                     onChange={e => update("name", e.target.value)}
                                     placeholder="e.g. Minimalist Home Decors"
-                                    className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-[13px] font-bold text-black dark:text-white focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
+                                    className="w-full px-5 py-2.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-[12px] font-medium text-black dark:text-white focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -153,7 +153,7 @@ function BrandingTab({ settings, update, openMediaLibrary }: any) {
                                     onChange={e => update("description", e.target.value)}
                                     placeholder="Briefly describe your store's mission..."
                                     rows={4}
-                                    className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-[13px] font-bold text-black dark:text-white focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all resize-none leading-relaxed"
+                                    className="w-full px-5 py-2.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-[12px] font-medium text-black dark:text-white focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all resize-none leading-relaxed"
                                 />
                             </div>
                             <div className="space-y-3 pt-2">
@@ -208,7 +208,7 @@ function BrandingTab({ settings, update, openMediaLibrary }: any) {
                                     value={settings.city || ""} 
                                     onChange={e => update("city", e.target.value)}
                                     placeholder="Chennai"
-                                    className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-[13px] font-bold focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
+                                    className="w-full px-5 py-2.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-[12px] font-medium focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -217,7 +217,7 @@ function BrandingTab({ settings, update, openMediaLibrary }: any) {
                                     value={settings.state || ""} 
                                     onChange={e => update("state", e.target.value)}
                                     placeholder="Tamil Nadu"
-                                    className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-[13px] font-bold focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
+                                    className="w-full px-5 py-2.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-[12px] font-medium focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -226,7 +226,7 @@ function BrandingTab({ settings, update, openMediaLibrary }: any) {
                                     value={settings.pincode || ""} 
                                     onChange={e => update("pincode", e.target.value)}
                                     placeholder="600001"
-                                    className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-[13px] font-bold focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
+                                    className="w-full px-5 py-2.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-[12px] font-medium focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
                                 />
                             </div>
                         </div>
@@ -386,7 +386,7 @@ function FeaturesTab({ settings, update }: any) {
                             <textarea 
                                 value={settings.announcementText}
                                 onChange={(e) => update("announcementText", e.target.value)}
-                                className="w-full px-5 py-3.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 outline-none h-20 resize-none"
+                                className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-[12px] font-medium focus:ring-4 focus:ring-indigo-500/10 outline-none h-20 resize-none"
                             />
                         </div>
                         <div className="grid grid-cols-2 gap-8">
@@ -436,7 +436,7 @@ function FeaturesTab({ settings, update }: any) {
                                         update("whatsappNumber", "91" + val);
                                     }}
                                     placeholder="9876543210"
-                                    className="w-full pl-14 pr-5 py-3.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 outline-none"
+                                    className="w-full pl-14 pr-5 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-[12px] font-medium focus:ring-4 focus:ring-emerald-500/10 outline-none"
                                 />
                             </div>
                         <div className="space-y-2">
@@ -444,7 +444,7 @@ function FeaturesTab({ settings, update }: any) {
                             <input 
                                 value={settings.whatsappMessage} 
                                 onChange={e => update("whatsappMessage", e.target.value)}
-                                className="w-full px-5 py-3.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 outline-none"
+                                className="w-full px-5 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-[12px] font-medium focus:ring-4 focus:ring-emerald-500/10 outline-none"
                             />
                         </div>
                     </div>
@@ -470,7 +470,7 @@ function FeaturesTab({ settings, update }: any) {
                                 <input 
                                     value={(settings as any)[link.id]} 
                                     onChange={e => update(link.id as any, e.target.value)}
-                                    className="w-full pl-12 pr-4 py-3.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[13px] font-bold outline-none focus:ring-2 focus:ring-zinc-500/10"
+                                    className="w-full pl-12 pr-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-[12px] font-medium outline-none focus:ring-2 focus:ring-zinc-500/10"
                                 />
                             </div>
                         </div>
@@ -719,7 +719,7 @@ function PaymentsTab({ settings, update }: any) {
                                     value={settings.upiId || ""} 
                                     onChange={e => update("upiId", e.target.value)}
                                     placeholder="success@okaxis"
-                                    className="w-full px-5 py-3.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 outline-none"
+                                    className="w-full px-5 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-[12px] font-medium focus:ring-4 focus:ring-emerald-500/10 outline-none"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -728,7 +728,7 @@ function PaymentsTab({ settings, update }: any) {
                                     value={settings.upiName || ""} 
                                     onChange={e => update("upiName", e.target.value)}
                                     placeholder="Full Name as per Bank"
-                                    className="w-full px-5 py-3.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 outline-none"
+                                    className="w-full px-5 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-[12px] font-medium focus:ring-4 focus:ring-emerald-500/10 outline-none"
                                 />
                             </div>
                         </div>

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { 
     Clock, CheckCircle, Truck, Package, XCircle, Search, 
     MoreVertical, Eye, FileText, Loader2, ArrowRight, TruckIcon, MapPin, Calendar, 
-    ChevronDown, ChevronUp, History as HistoryIcon, ExternalLink, Plus, ChevronLeft, ChevronRight, QrCode, Mail, MessageCircle, Filter
+    ChevronDown, ChevronUp, History as HistoryIcon, ExternalLink, Plus, ChevronLeft, ChevronRight, QrCode, Mail, MessageCircle, Filter, Download as DownloadIcon, TrendingUp, IndianRupee
 } from "lucide-react"
 import { useDashboardStore } from "@/components/DashboardStoreProvider"
 import { motion, AnimatePresence } from "framer-motion"
@@ -116,20 +116,20 @@ export default function OrdersPage() {
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                     <div className="relative group w-full sm:w-auto">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-indigo-500 transition-colors" size={14} />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-indigo-500 transition-colors" size={12} />
                         <input 
                             type="text" 
                             placeholder="Search order ID or customer..." 
                             value={search}
                             onChange={e => setSearch(e.target.value)}
-                            className="w-full sm:w-64 pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-[12px] font-medium focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none transition-all shadow-sm" 
+                            className="w-full sm:w-60 pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-[12px] font-medium focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none transition-all shadow-sm min-h-[38px]" 
                         />
                     </div>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-[12px] font-bold capitalize tracking-wide hover:bg-indigo-700 transition-all active:scale-95 shadow-lg shadow-indigo-600/20">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-[12px] font-medium capitalize tracking-wide hover:bg-indigo-700 transition-all active:scale-95 shadow-lg shadow-indigo-600/20 min-h-[38px]">
                         <Filter size={14} /> {t("filter") || "Filter"}
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-[12px] font-bold capitalize tracking-wide text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95 shadow-sm">
-                        <Download size={14} className="text-emerald-500" /> {t("export") || "Export"}
+                    <button className="flex items-center gap-2 px-4 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-[12px] font-medium capitalize tracking-wide text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95 shadow-sm min-h-[38px]">
+                        <DownloadIcon size={14} className="text-emerald-500" /> {t("export") || "Export"}
                     </button>
                 </div>
             </div>
@@ -276,13 +276,13 @@ export default function OrdersPage() {
                             >
                                 <ChevronLeft size={16} />
                             </button>
-                            <button 
-                                disabled={currentPage === totalPages}
-                                onClick={() => setCurrentPage(p => p + 1)}
-                                className="p-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-30 transition-all active:scale-95 shadow-sm"
-                            >
-                                <ChevronRight size={16} />
-                            </button>
+                                <button 
+                                    disabled={currentPage === totalPages}
+                                    onClick={() => setCurrentPage(p => p + 1)}
+                                    className="p-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-30 transition-all active:scale-95 shadow-sm"
+                                >
+                                    <ChevronRight size={16} />
+                                </button>
                         </div>
                     </div>
                 )}
@@ -291,50 +291,3 @@ export default function OrdersPage() {
     )
 }
 
-function Download({ size, className }: { size: number, className?: string }) {
-    return <ArrowDownRight size={size} className={className} />
-}
-
-function IndianRupee({ size, className }: { size: number, className?: string }) {
-    return <span className={className} style={{ fontSize: size }}>₹</span>
-}
-
-function TrendingUp({ size, className }: { size: number, className?: string }) {
-    return (
-        <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width={size} 
-            height={size} 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            className={className}
-        >
-            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-            <polyline points="16 7 22 7 22 13" />
-        </svg>
-    )
-}
-
-function ArrowDownRight({ size, className }: { size: number, className?: string }) {
-    return (
-        <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width={size} 
-            height={size} 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            className={className}
-        >
-            <line x1="7" y1="7" x2="17" y2="17" />
-            <polyline points="17 7 17 17 7 17" />
-        </svg>
-    )
-}

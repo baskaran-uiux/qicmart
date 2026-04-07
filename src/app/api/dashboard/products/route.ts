@@ -124,25 +124,18 @@ export async function PUT(req: Request) {
         return NextResponse.json({ error: "Product name cannot be empty" }, { status: 400 })
     }
 
-    // Forcefully handle isBestSeller if present, bypass Prisma client types if necessary
-    if (data.isBestSeller !== undefined) {
-        try {
-            await (prisma as any).$executeRawUnsafe(
-                `UPDATE Product SET isBestSeller = ${data.isBestSeller ? 1 : 0} WHERE id = '${id}' AND storeId = '${store.id}'`
-            )
-        } catch (e) {
-            console.error("Raw update failed, trying regular update:", e)
-        }
-    }
-
     const product = await prisma.product.update({ 
         where: { id, storeId: store.id }, 
-        data: (() => {
-            const { isBestSeller, ...rest } = data;
-            return rest;
-        })() 
+        data: {
+            ...data,
+            // Ensure proper types for numeric/boolean fields if they come from loose body
+            stock: data.stock !== undefined ? parseInt(String(data.stock)) : undefined,
+            price: data.price !== undefined ? parseFloat(String(data.price)) : undefined,
+            compareAtPrice: data.compareAtPrice !== undefined ? parseFloat(String(data.compareAtPrice)) : undefined,
+        }
     })
-    return NextResponse.json({ ...product, isBestSeller: data.isBestSeller ?? (product as any).isBestSeller })
+
+    return NextResponse.json(product)
 }
 
 export async function DELETE(req: Request) {

@@ -440,7 +440,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                 <div className={`mt-auto ${sidebarOpen ? "px-4 py-6" : "px-2 pb-6"} border-t ${dark ? "border-white/5" : "border-zinc-200"}`}>
                     {sidebarOpen ? (
                         <>
-                            <div className={`p-4 rounded-2xl ${dark ? "bg-purple-500/10 border border-purple-500/20" : "bg-purple-50 border border-purple-200 shadow-sm"} relative overflow-hidden group`}>
+                            <div className={`p-4 rounded-xl ${dark ? "bg-purple-500/10 border border-purple-500/20" : "bg-purple-50 border border-purple-200 shadow-sm"} relative overflow-hidden group`}>
                                 <div className="absolute -right-4 -top-4 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-400/20 transition-all duration-500" />
 
                                 <div className="relative z-10 flex flex-col gap-3">
@@ -448,10 +448,10 @@ function DashboardContent({ children }: { children: ReactNode }) {
                                         <div className="p-1.5 rounded-lg bg-purple-500 text-white shadow-lg shadow-purple-500/20">
                                             <Zap size={14} fill="currentColor" />
                                         </div>
-                                        <span className="text-[12px] font-bold uppercase tracking-wider text-purple-500">{subscription?.plan || "Free"} Plan</span>
+                                        <span className="text-[11px] font-bold uppercase tracking-wider text-purple-500">{subscription?.plan || "Free"} Plan</span>
                                     </div>
 
-                                    <p className={`text-[11px] leading-relaxed ${dark ? "text-zinc-400" : "text-zinc-500"} font-medium`}>
+                                    <p className={`text-[10px] leading-relaxed ${dark ? "text-zinc-400" : "text-zinc-500"} font-medium`}>
                                         Manage your store and grow your business. Pro features coming soon!
                                     </p>
 
@@ -501,7 +501,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                         <div className="hidden" id="debug-data" data-slug={slug} data-name={name} data-user-id={(session?.user as any)?.id} data-store-exists={!!slug}></div>
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3">
-                        <span className={`hidden md:inline-flex px-2.5 py-1 text-nowrap rounded-full text-[12px] font-semibold ${dark ? 'bg-purple-500/10 border border-purple-500/20 text-purple-400' : 'bg-purple-50 border border-purple-200 text-purple-700'}`}>
+                        <span className={`hidden md:inline-flex px-2.5 py-1 text-nowrap rounded-full text-[11px] font-semibold ${dark ? 'bg-purple-500/10 border border-purple-500/20 text-purple-400' : 'bg-purple-50 border border-purple-200 text-purple-700'}`}>
                             Standard Plan
                         </span>
                         {store.aiCredits !== undefined && (
@@ -515,7 +515,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                             <Notifications ownerId={ownerId} />
                             <button
                                 onClick={toggleDark}
-                                className={`p-2 rounded-xl relative ${dark ? "bg-zinc-800 hover:bg-zinc-700 text-zinc-300" : "bg-slate-100 hover:bg-slate-200 text-slate-600"} transition-all`}
+                                className={`p-1.5 rounded-lg relative ${dark ? "bg-zinc-800 hover:bg-zinc-700 text-zinc-300" : "bg-slate-100 hover:bg-slate-200 text-slate-600"} transition-all`}
                                 title={dark ? "Switch to Light Mode" : "Switch to Dark Mode"}
                             >
                                 {dark ? <Sun size={16} /> : <Moon size={16} />}
@@ -529,7 +529,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                             {!isAuto && (
                                 <button
                                     onClick={resetToAuto}
-                                    className={`px-2 py-1.5 text-[10px] font-bold rounded-lg border tracking-wide transition-all ${dark ? "bg-zinc-950 border-zinc-800 text-zinc-500 hover:text-indigo-400" : "bg-white border-zinc-200 text-zinc-400 hover:text-indigo-500"}`}
+                                    className={`px-2 py-1 text-[10px] font-medium rounded-lg border tracking-wide transition-all ${dark ? "bg-zinc-950 border-zinc-800 text-zinc-500 hover:text-indigo-400" : "bg-white border-zinc-200 text-zinc-400 hover:text-indigo-500"}`}
                                     title="Reset to Automatic Theme"
                                 >
                                     Auto

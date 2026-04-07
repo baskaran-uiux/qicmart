@@ -38,7 +38,7 @@ interface CustomPage {
 }
 
 // ─── Header ───────────────────────────────────────────────────────────────────
-function Header({ storeInfo, slug, categories, version, scrolled }: { storeInfo: StoreInfo; slug: string; categories: StoreCategory[]; version: number; scrolled: boolean }) {
+function Header({ storeInfo, slug, categories, version, scrolled, announcementHeight = 0 }: { storeInfo: StoreInfo; slug: string; categories: StoreCategory[]; version: number; scrolled: boolean; announcementHeight?: number }) {
     const router = useRouter()
     const { t } = useLanguage()
     const { totalItems } = useCart()
@@ -184,12 +184,12 @@ function Header({ storeInfo, slug, categories, version, scrolled }: { storeInfo:
             initial={false}
             animate={{
                 width: isSports ? (isMobile ? "94%" : "88%") : (scrolled ? "100%" : "100%"),
-                y: isSports ? (isMobile ? 12 : 20) : 0,
+                y: announcementHeight + (isSports ? (isMobile ? 12 : 20) : 0),
                 borderRadius: isSports ? (isMobile ? 24 : 40) : 0,
                 backgroundColor: isSports 
                     ? (scrolled ? "rgba(255,255,255,0.85)" : (isHomePage ? "rgba(244,244,245,0.15)" : "rgba(255,255,255,1)"))
-                    : (scrolled ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,1)"),
-                backdropFilter: isSports ? "blur(20px)" : (scrolled ? "blur(20px)" : "blur(0px)"),
+                    : (scrolled ? (isAura ? "rgba(9,9,11,0.95)" : "rgba(255,255,255,0.95)") : (isAura ? "transparent" : "white")),
+                backdropFilter: isSports || scrolled ? "blur(20px)" : "blur(0px)",
                 borderWidth: isSports || scrolled ? 1 : 0,
                 borderColor: isSports 
                     ? (isHomePage && !scrolled ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)")
@@ -393,8 +393,8 @@ function Header({ storeInfo, slug, categories, version, scrolled }: { storeInfo:
                     </div>
                 </nav>
 
-            {/* Row 2: Menu Bar (for Nextgen/Modern) */}
-            {(layoutStyle === 'nextgen' || layoutStyle === 'sports') && (
+            {/* Row 2: Menu Bar (for Nextgen/Modern/Sports) */}
+            {(layoutStyle === 'nextgen' || layoutStyle === 'sports' || storeTheme === 'modern') && (
                 <motion.div 
                     animate={{
                         width: isSports ? (scrolled ? "75%" : "82%") : (scrolled ? "100%" : "100%"),
@@ -411,7 +411,11 @@ function Header({ storeInfo, slug, categories, version, scrolled }: { storeInfo:
                     }}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     className={`${isSports ? 'fixed z-40' : 'relative'} hidden lg:block transition-all duration-500`}>
-                    <div className="max-w-7xl mx-auto px-8 h-12 flex items-center justify-center gap-10 relative">
+                    <div className={`max-w-7xl mx-auto px-8 h-12 flex items-center gap-10 relative ${
+                        menuAlignment === 'left' ? 'justify-start' : 
+                        menuAlignment === 'right' ? 'justify-end' : 
+                        'justify-center'
+                    }`}>
                         {visibleItems.length > 0 ? (
                             visibleItems.map((item: any) => (
                                 <div key={item.id} className="group py-2">
@@ -1146,7 +1150,7 @@ export default function StoreLayout({
                     <WishlistProvider>
                         <div className={`min-h-screen flex flex-col storefront-fonts ${isAura ? "bg-zinc-950 text-white" : "bg-white"} ${isVisiblePage ? "pb-24 lg:pb-0" : ""}`} style={{ '--font-heading': heading, '--font-body': body, '--primary-color': primaryColorHex, '--primary-rgb': primaryColorRgb } as any}>
                             <ScrollingAnnouncementBar themeConfig={config} />
-                            {slug && <Header storeInfo={storeInfo} slug={slug} categories={categories} version={version} scrolled={scrolled} />}
+                            {slug && <Header storeInfo={storeInfo} slug={slug} categories={categories} version={version} scrolled={scrolled} announcementHeight={config.showAnnouncement && !scrolled ? 36 : 0} />}
                             
                             {/* Plugin Third-Party Scripts */}
                             {config.isGoogleAnalyticsEnabled && config.googleAnalyticsId && (
@@ -1182,10 +1186,15 @@ export default function StoreLayout({
                             )}
 
                             <CouponPopup storeId={storeInfo.id} currency={storeInfo.currency} />
-                            <main className={`relative flex-1 
+                            <main 
+                                className={`relative flex-1 transition-all duration-300
                                 ${isSports && !isHomePage ? 'pt-24 lg:pt-40' : 
                                   layoutStyle === 'nextgen' ? 'pt-20 lg:pt-36' : 
-                                  !isSports && !isAura ? 'pt-20' : ''}`}>
+                                  !isSports && !isAura ? 'pt-20' : ''}`}
+                                style={{
+                                    paddingTop: config.showAnnouncement && !scrolled ? `calc(${(!isSports && !isAura ? '80px' : '0px')} + 36px)` : undefined
+                                }}
+                            >
                                 {/* Ambient Glows */}
                                 <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
                                     <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[var(--primary-color)]/5 blur-[120px] rounded-full animate-pulse" />
