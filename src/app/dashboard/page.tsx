@@ -216,19 +216,16 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
                         </div>
                         <div className="flex items-end gap-3 mb-2">
                             <p className="text-[28px] sm:text-[32px] font-bold text-white tracking-tighter">{currencySymbol}{(totalSales._sum.total || 0).toLocaleString()}</p>
-                            <span className="mb-1.5 px-2 py-0.5 bg-white/20 backdrop-blur-md rounded-lg text-[10px] font-bold text-white flex items-center gap-0.5">
-                                <ArrowUpRight size={10} /> 12.5%
-                            </span>
                         </div>
-                        <p className="text-xs font-medium text-blue-100/50 italic">{t("lastMonth")}: {currencySymbol}{( (totalSales._sum.total || 0) * 0.8 ).toLocaleString()}</p>
+                        <p className="text-xs font-medium text-blue-100/50 italic opacity-80">Verified aggregate revenue</p>
                     </div>
                 </Motion.div>
 
                 {/* Other KPI Cards */}
                 {[
-                    { label: t("totalOrders"), value: totalOrders.toLocaleString(), last: (totalOrders - 12), trend: 8.4, icon: ShoppingCart, color: "bg-zinc-950 text-white", iconColor: "text-zinc-400" },
-                    { label: t("totalProducts"), value: totalProducts.toLocaleString(), last: (totalProducts - 5), trend: 4.2, icon: Package, color: "bg-blue-500 text-white", iconColor: "text-blue-200" },
-                    { label: t("totalCustomers"), value: newCustomers.toLocaleString(), last: (newCustomers - 8), trend: 15.1, icon: Users, color: "bg-indigo-500 text-white", iconColor: "text-indigo-200" },
+                    { label: t("totalOrders"), value: totalOrders.toLocaleString(), sub: `${ordersToday} today`, icon: ShoppingCart, color: "bg-zinc-950 text-white", iconColor: "text-zinc-400" },
+                    { label: t("totalProducts"), value: totalProducts.toLocaleString(), sub: "Active items", icon: Package, color: "bg-blue-500 text-white", iconColor: "text-blue-200" },
+                    { label: t("totalCustomers"), value: newCustomers.toLocaleString(), sub: "Verified accounts", icon: Users, color: "bg-indigo-500 text-white", iconColor: "text-indigo-200" },
                 ].map((kpi, i) => (
                     <Motion.div 
                         key={kpi.label} 
@@ -246,11 +243,8 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
                         </div>
                         <div className="flex items-end gap-3 mb-2">
                             <p className="text-[28px] sm:text-[32px] font-bold text-zinc-900 dark:text-white tracking-tighter">{kpi.value}</p>
-                            <span className={`mb-1.5 px-2 py-0.5 rounded-lg text-[10px] font-bold flex items-center gap-0.5 ${kpi.trend > 0 ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400' : 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400'}`}>
-                                {kpi.trend > 0 ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />} {Math.abs(kpi.trend)}%
-                            </span>
                         </div>
-                        <p className="text-xs font-medium text-zinc-400 italic">{t("lastMonth")}: {kpi.last}</p>
+                        <p className="text-xs font-medium text-zinc-400 italic">{kpi.sub}</p>
                     </Motion.div>
                 ))}
             </div>

@@ -4,7 +4,7 @@ import { ReactNode, useState, useEffect, useCallback, use } from "react"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import Script from "next/script"
-import { ShoppingCart, Heart, User, Menu, X, Search, ChevronDown, Home, ShoppingBag, Loader2, Instagram, Facebook, Twitter, Linkedin, Youtube, Lock } from "lucide-react"
+import { ShoppingCart, Heart, User, Menu, X, Search, ChevronDown, Home, ShoppingBag, Loader2, Instagram, Facebook, Twitter, Linkedin, Youtube, Lock, Star } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { motion, AnimatePresence } from "framer-motion"
 import { CartProvider, useCart } from "@/context/CartContext"
@@ -38,7 +38,7 @@ interface CustomPage {
 }
 
 // ─── Header ───────────────────────────────────────────────────────────────────
-function Header({ storeInfo, slug, categories, version }: { storeInfo: StoreInfo; slug: string; categories: StoreCategory[]; version: number }) {
+function Header({ storeInfo, slug, categories, version, scrolled }: { storeInfo: StoreInfo; slug: string; categories: StoreCategory[]; version: number; scrolled: boolean }) {
     const router = useRouter()
     const { t } = useLanguage()
     const { totalItems } = useCart()
@@ -57,7 +57,6 @@ function Header({ storeInfo, slug, categories, version }: { storeInfo: StoreInfo
     const menuItems = themeConfig.menuItems || []
     const visibleItems = menuItems.filter((i: any) => i.isVisible)
     const [isMenuOpen, setIsMenuOpen] = useState(false)
-    const [scrolled, setScrolled] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
 
     useEffect(() => {
@@ -66,13 +65,8 @@ function Header({ storeInfo, slug, categories, version }: { storeInfo: StoreInfo
         }
         handleResize()
         window.addEventListener("resize", handleResize)
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 10)
-        }
-        window.addEventListener("scroll", handleScroll)
         return () => {
             window.removeEventListener("resize", handleResize)
-            window.removeEventListener("scroll", handleScroll)
         }
     }, [])
 
@@ -585,14 +579,7 @@ function Header({ storeInfo, slug, categories, version }: { storeInfo: StoreInfo
                             ))}
                         </div>
 
-                        {/* New Products Link */}
-                        <Link 
-                            href={formatHref("/products?sort=newest")}
-                            className={`shrink-0 flex items-center gap-2 text-[10px] font-black uppercase tracking-tighter hover:opacity-80 transition-opacity ${isSports ? (isHomePage && !scrolled ? 'text-white' : 'text-zinc-900') : 'text-[var(--primary-color)]'}`}
-                        >
-                            <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${isSports ? (isHomePage && !scrolled ? 'bg-white' : 'bg-black') : 'bg-[var(--primary-color)]'}`}></span>
-                            New Season arrivals
-                        </Link>
+                        {/* Removed Arrivals link as per storefront cleanup goals */}
                     </div>
                 </motion.div>
             )}
@@ -1213,8 +1200,49 @@ export default function StoreLayout({
             </div>
         )
     }
+    const [scrolled, setScrolled] = useState(false)
 
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 20)
+        }
+        window.addEventListener("scroll", handleScroll)
+        return () => window.removeEventListener("scroll", handleScroll)
+    }, [])
 
+    const ScrollingAnnouncementBar = ({ themeConfig }: { themeConfig: any }) => {
+        if (!themeConfig.showAnnouncement || scrolled) return null
+
+        return (
+            <div 
+                className="w-full py-2 flex items-center overflow-hidden h-9 z-[60] bg-zinc-950 text-white relative border-b border-white/5"
+                style={{ 
+                    backgroundColor: themeConfig.announcementBg || '#000000', 
+                    color: themeConfig.announcementColor || '#ffffff' 
+                }}
+            >
+                <div className="flex items-center gap-12 whitespace-nowrap animate-marquee">
+                    {[...Array(10)].map((_, i) => (
+                        <div key={i} className="flex items-center gap-4">
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">{themeConfig.announcementText || "Welcome to our store!"}</span>
+                            <Star size={10} fill="currentColor" className="opacity-40" />
+                        </div>
+                    ))}
+                </div>
+                <style jsx>{`
+                    .animate-marquee {
+                        display: flex;
+                        width: max-content;
+                        animation: marquee 40s linear infinite;
+                    }
+                    @keyframes marquee {
+                        from { transform: translateX(0); }
+                        to { transform: translateX(-50%); }
+                    }
+                `}</style>
+            </div>
+        )
+    }
 
     return (
         <Providers>
@@ -1222,7 +1250,8 @@ export default function StoreLayout({
                 <CartProvider>
                     <WishlistProvider>
                         <div className={`min-h-screen flex flex-col storefront-fonts ${isAura ? "bg-zinc-950 text-white" : "bg-white"} ${isVisiblePage ? "pb-24 lg:pb-0" : ""}`} style={{ '--font-heading': heading, '--font-body': body, '--primary-color': primaryColorHex, '--primary-rgb': primaryColorRgb } as any}>
-                            {slug && <Header storeInfo={storeInfo} slug={slug} categories={categories} version={version} />}
+                            <ScrollingAnnouncementBar themeConfig={config} />
+                            {slug && <Header storeInfo={storeInfo} slug={slug} categories={categories} version={version} scrolled={scrolled} />}
                             
                             {/* Plugin Third-Party Scripts */}
                             {config.isGoogleAnalyticsEnabled && config.googleAnalyticsId && (

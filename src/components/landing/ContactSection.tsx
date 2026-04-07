@@ -78,7 +78,7 @@ const ContactSection = () => {
                         <span className="h-px w-8 bg-indigo-500/30" />
                     </div>
                     <h2 className="text-3xl md:text-6xl font-black italic tracking-tighter text-white mb-6 leading-[1.4] px-6 py-4">
-                        Get in <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-indigo-500 to-indigo-200 drop-shadow-[0_0_30px_rgba(79,70,229,0.5)] inline-block py-4 px-2 relative z-10">Touch</span>.
+                        Get in <span className="text-[#7670FE] drop-shadow-[0_0_30px_rgba(118,112,254,0.5)] inline-block py-4 px-2 relative z-10">Touch</span>.
                     </h2>
                     <p className="text-zinc-500 font-medium max-w-xl mx-auto text-sm md:text-base">
                         Want to grow your business or need help launching your store? Our team is ready to help you scale.

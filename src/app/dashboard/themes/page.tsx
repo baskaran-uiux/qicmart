@@ -119,7 +119,6 @@ function ThemesContent() {
                 {[
                     { id: 'modern', name: 'Modern Flat', desc: 'Minimalist clean aesthetic with spacious layouts.', color: 'bg-zinc-100 text-zinc-900', icon: Layout, category: 'general' },
                     { id: 'nextgen', name: 'Dress Shop Theme', desc: 'Premium fashion layout with elegant accents.', color: 'bg-indigo-500 text-white', icon: ShoppingBag, category: 'dress' },
-                    { id: 'sports', name: 'Sports Shop Theme', desc: 'High-performance dark UI for athletic brands.', color: 'bg-emerald-400 text-black', icon: Zap, category: 'sports' },
                 ].map((theme) => (
                     <button 
                         key={theme.id} 

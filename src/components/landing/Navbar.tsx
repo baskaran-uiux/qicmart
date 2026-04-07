@@ -44,23 +44,24 @@ const Navbar = () => {
     return (
         <nav className="fixed top-0 left-0 w-full z-[100] flex justify-center pointer-events-none">
             <motion.div
-                initial={{ y: -120, opacity: 0, scale: 0.98 }}
+                initial={{ y: -120, opacity: 0, scale: 0.9 }}
                 animate={{
-                    width: (isScrolled || isMobile) ? (isMobileMenuOpen ? "100%" : (isMobile ? "calc(100% - 32px)" : "min(90%, 850px)")) : "100%",
-                    y: (isScrolled || isMobile) ? 16 : 0,
+                    width: isMobileMenuOpen ? "100%" : (isMobile ? "calc(100% - 32px)" : (isScrolled ? "min(90%, 1000px)" : "min(95%, 1200px)")),
+                    y: (isScrolled || isMobile) ? 24 : 12,
                     opacity: 1,
                     scale: 1,
-                    borderRadius: (isScrolled || isMobile) && !isMobileMenuOpen ? (isMobile ? "24px" : "9999px") : "0px",
-                    backgroundColor: (isScrolled || isMobile) ? "rgba(10, 10, 12, 0.85)" : "rgba(0, 0, 0, 0.95)",
-                    paddingLeft: (isScrolled || isMobile) ? (isMobile ? "1.5rem" : "2rem") : "5%",
-                    paddingRight: (isScrolled || isMobile) ? (isMobile ? "1rem" : "2rem") : "5%",
-                    height: (isScrolled || isMobile) ? (isMobile ? "60px" : "68px") : "96px",
+                    borderRadius: isMobileMenuOpen ? "0px" : "9999px",
+                    backgroundColor: isScrolled ? "rgba(15, 15, 20, 0.4)" : "rgba(10, 10, 15, 0.6)",
+                    backdropFilter: "blur(20px)",
+                    paddingLeft: isScrolled ? "2rem" : "2.5rem",
+                    paddingRight: isScrolled ? "1.5rem" : "2.5rem",
+                    height: isScrolled ? "64px" : "80px",
                 }}
                 className={`
-                    flex items-center justify-between backdrop-blur-3xl 
-                    border-b border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.8)] pointer-events-auto
-                    ${(isScrolled || isMobile) ? 'border border-white/20 ring-1 ring-white/10 shadow-indigo-500/10' : ''}
-                    transition-all duration-500
+                    flex items-center justify-between border border-white/10 
+                    shadow-[0_20px_50px_rgba(0,0,0,0.5)] 
+                    hover:border-white/20 transition-all duration-700 pointer-events-auto
+                    ring-1 ring-white/5
                 `}
             >
                 {/* Left Side: Logo & Main Nav */}

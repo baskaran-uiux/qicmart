@@ -62,7 +62,7 @@ export default function FAQSection() {
                                     className="text-5xl md:text-6xl font-bold text-white leading-tight"
                                 >
                                     Frequently asked <br />
-                                    <span className="text-zinc-600">questions</span>
+                                    <span className="text-[#7670FE]">questions</span>
                                 </Motion.h2>
                             </div>
                         </Motion.div>

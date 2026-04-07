@@ -49,25 +49,16 @@ const navGroups = [
         href: "/dashboard/analytics"
     },
     {
-        label: "Payouts",
-        key: "payouts",
-        icon: CreditCard,
+        label: "Store Design",
+        key: "storeDesign",
+        icon: Palette,
         items: [
-            { label: "Payments", key: "payments", href: "/dashboard/payment", icon: CreditCard },
-            { label: "My Plan", key: "myPlan", href: "/dashboard/plans", icon: Zap },
+            { label: "Themes & Layout", key: "themes", href: "/dashboard/themes", icon: Palette },
+            { label: "Hero Banners", key: "heroBanners", href: "/dashboard/appearance/hero", icon: ImageIcon },
+            { label: "Menu Manager", key: "menuManager", href: "/dashboard/menu", icon: Layout },
+            { label: "Custom Pages", key: "customPages", href: "/dashboard/pages", icon: Layout },
+            { label: "SEO Manager", key: "seoManager", href: "/dashboard/seo", icon: Globe },
         ]
-    },
-    {
-        label: "Coupons",
-        key: "coupons",
-        icon: Ticket,
-        href: "/dashboard/coupons"
-    },
-    {
-        label: "Shipping Management",
-        key: "shippingManagement",
-        icon: Truck,
-        href: "/dashboard/delivery/shipping"
     },
     {
         label: "Audience",
@@ -80,25 +71,12 @@ const navGroups = [
         ]
     },
     {
-        label: "Appearance",
-        key: "appearance",
-        icon: Palette,
+        label: "Payouts",
+        key: "payouts",
+        icon: CreditCard,
         items: [
-            { label: "Hero Banners", key: "heroBanners", href: "/dashboard/appearance/hero", icon: Palette },
-            { label: "Themes", key: "themes", href: "/dashboard/themes", icon: Palette },
-            { label: "Menu Manager", key: "menuManager", href: "/dashboard/menu", icon: Layout },
-            { label: "Custom Pages", key: "customPages", href: "/dashboard/pages", icon: Layout },
-            { label: "Blogs/Articles", key: "blogs", href: "/dashboard/blogs", icon: PenTool },
-            { label: "SEO Manager", key: "seoManager", href: "/dashboard/seo", icon: Globe },
-        ]
-    },
-    {
-        label: "Plugins",
-        key: "plugins",
-        icon: Zap,
-        items: [
-            { label: "All Plugins", key: "allPlugins", href: "/dashboard/plugins", icon: Layout },
-            { label: "Installed", key: "installed", href: "/dashboard/plugins/installed", icon: Package },
+            { label: "Payments", key: "payments", href: "/dashboard/payment", icon: CreditCard },
+            { label: "My Plan", key: "myPlan", href: "/dashboard/plans", icon: Zap },
         ]
     },
     {

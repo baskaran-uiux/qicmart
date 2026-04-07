@@ -21,6 +21,7 @@ import PricingSection from "@/components/landing/PricingSection"
 import FAQSection from "@/components/landing/FAQSection"
 import ContactSection from "@/components/landing/ContactSection"
 import Testimonials from "@/components/landing/Testimonials"
+import Footer from "@/components/landing/Footer"
 
 // Staggered Text Component for Kzero Effect
 const StaggeredText = ({ text, className }: { text: string, className?: string }) => {
@@ -181,9 +182,9 @@ export default async function RootPage() {
                 >
                     <div className="flex items-center justify-center gap-3 mb-8">
                         <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
-                        <span className="mono-label !text-indigo-400">/ THE ALL_IN_ONE PLATFORM</span>
+                        <span className="mono-label !text-indigo-400">/ GROW YOUR BUSINESS ONLINE</span>
                         <span className="h-px w-12 bg-indigo-500/30" />
-                        <span className="mono-label">READY TO LAUNCH</span>
+                        <span className="mono-label">NO CODING REQUIRED</span>
                     </div>
 
                     <h1 className="text-[2.8rem] sm:text-6xl md:text-8xl font-black tracking-[calc(-0.04em)] mb-6 leading-[0.9] uppercase italic">
@@ -193,13 +194,13 @@ export default async function RootPage() {
                         />
                         <StaggeredText 
                             text="ONLINE STORE" 
-                            className="text-transparent bg-clip-text bg-[linear-gradient(to_right,#6366f1,#a855f7,#6366f1)] bg-[length:200%_auto] animate-gradient-slow" 
+                            className="text-transparent bg-clip-text bg-[linear-gradient(to_right,#6366f1,#a855f7)] bg-[length:200%_auto] animate-gradient-slow" 
                         />
                     </h1>
 
                     <p className="text-zinc-400 text-base md:text-2xl max-w-2xl mx-auto mb-10 font-medium leading-relaxed drop-shadow-md px-4">
-                        <span className="hidden sm:inline">No coding required. Qicmart is the ultimate platform to build your website, manage inventory, process payments, and scale your business globally in minutes.</span>
-                        <span className="sm:hidden">Build, manage, and scale your online store in minutes. No coding required.</span>
+                        <span className="hidden sm:inline">Build, manage, and scale your online store in just 2 minutes. No coding required—just everything you need to succeed.</span>
+                        <span className="sm:hidden">Build, manage, and scale your online store in just 2 minutes. No coding required.</span>
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
@@ -220,8 +221,8 @@ export default async function RootPage() {
                 <div className="relative z-10 mt-16 md:mt-32 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
                     {[
                         { label: 'Secure Uptime', value: '99.99%', icon: ShieldCheck },
-                        { label: 'Stores Created', value: '5,000+', icon: BarChart3 },
-                        { label: 'Monthly Sales', value: '₹450Cr+', icon: Cpu },
+                        { label: 'Stores Created', value: '250+', icon: BarChart3 },
+                        { label: 'Monthly Revenue', value: '₹25L+', icon: Cpu },
                         { label: 'Setup Time', value: '< 2 Min', icon: Zap },
                     ].map((stat, i) => (
                         <Motion.div
@@ -267,8 +268,8 @@ export default async function RootPage() {
                             transition={{ duration: 0.8 }}
                             className="text-left"
                         >
-                            <div className="mono-label mb-4">/ TACTICAL_ADVANTAGE</div>
-                            <h2 className="text-4xl md:text-6xl font-black uppercase italic leading-none">Everything you need <br /> to <span className="text-indigo-500">Dominate</span>.</h2>
+                            <div className="mono-label mb-4">/ THE QICMART ADVANTAGE</div>
+                            <h2 className="text-4xl md:text-6xl font-black uppercase italic leading-none">Everything you need <br /> to <span className="text-indigo-500">Succeed</span>.</h2>
                         </Motion.div>
                         <div className="mono-label text-right opacity-30 hidden md:block">
                             [SCROLL TO EXPLORE_MODULES]
@@ -277,12 +278,12 @@ export default async function RootPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {[
-                            { icon: Shield, title: 'Secure Payments', desc: 'Accept credit cards, UPI, and global wallets instantly. Bank-grade encryption protects every transaction.' },
-                            { icon: Layout, title: 'Beautiful Themes', desc: 'Choose from premium, high-converting templates that look stunning on phones, tablets, and desktops.' },
-                            { icon: Database, title: 'Easy Inventory', desc: 'Track your products, manage stock levels, and organize variants like sizes and colors effortlessly.' },
-                            { icon: Rocket, title: 'Unlimited Growth', desc: 'Whether you sell one product or 10,000, our system scales automatically with zero slowdowns.' },
-                            { icon: Cpu, title: 'AI Store Builder', desc: 'Let our AI automatically write product descriptions and pick the perfect layout for your brand.' },
-                            { icon: Activity, title: '24/7 Support', desc: 'Real human experts available around the clock to help your business launch and succeed.' }
+                            { icon: Shield, title: 'Accept UPI & Cards', desc: 'Accept credit cards, UPI, and all payment methods instantly. Safe and secure for every transaction.' },
+                            { icon: Layout, title: 'Premium Themes', desc: 'Choose from stunning, high-converting templates that look perfect on phones, tablets, and desktops.' },
+                            { icon: Database, title: 'Easy Inventory', desc: 'Manage your products, track stock levels, and organize variants like sizes and colors effortlessly.' },
+                            { icon: Rocket, title: 'Limitless Growth', desc: 'Whether you sell one product or 10,000, our system scales automatically with your business.' },
+                            { icon: Cpu, title: 'Smart Store AI', desc: 'Let AI automatically write product descriptions and pick the perfect layout for your unique brand.' },
+                            { icon: Activity, title: '24/7 Expert Support', desc: 'Real experts available around the clock to help your business grow and succeed.' }
                         ].map((item, i) => (
                             <Motion.div
                                 key={item.title}
@@ -334,8 +335,8 @@ export default async function RootPage() {
                         transition={{ duration: 0.8 }}
                         className="text-center mb-24"
                     >
-                        <div className="mono-label mb-4">/ THREE_EASY_STEPS</div>
-                        <h2 className="text-4xl md:text-7xl font-black uppercase italic leading-none">The <span className="text-indigo-500 text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-600">Blueprint</span> for Success.</h2>
+                        <div className="mono-label mb-4">/ THREE_SIMPLE_STEPS</div>
+                        <h2 className="text-4xl md:text-7xl font-black uppercase italic leading-none">The <span className="text-indigo-500 text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-600">Roadmap</span> for Success.</h2>
                     </Motion.div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-0 relative">
@@ -349,9 +350,9 @@ export default async function RootPage() {
                         </div>
                         
                         {[
-                            { step: '01', title: 'ADD PRODUCTS', desc: 'Securely upload your product images, set your prices, and add descriptions through our simple interface.', icon: Plus },
-                            { step: '02', title: 'LAUNCH STORE', desc: 'Select a premium design theme, connect your custom domain, and go live to the world in a single click.', icon: Rocket },
-                            { step: '03', title: 'START SELLING', desc: 'Accept global payments securely, pack orders, and track your daily revenue from one powerful dashboard.', icon: Activity }
+                            { step: '01', title: 'ADD ITEMS', desc: 'Upload your product images, set prices, and add descriptions through our easy-to-use manager.', icon: Plus },
+                            { step: '02', title: 'GO LIVE', desc: 'Select a premium design, connect your domain, and launch your store in a single click.', icon: Rocket },
+                            { step: '03', title: 'GET ORDERS', desc: 'Accept payments securely, manage orders, and track your profit from one simple dashboard.', icon: Activity }
                         ].map((item, i) => (
                             <Motion.div
                                 key={item.step}
@@ -525,6 +526,7 @@ export default async function RootPage() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.8 }}
+                            className="order-1 lg:order-2"
                         >
                             <div className="mono-label mb-6">/ MOBILE_FIRST_DESIGN</div>
                             <h2 className="text-4xl md:text-6xl font-black uppercase italic leading-[0.9] mb-10">
@@ -554,7 +556,7 @@ export default async function RootPage() {
             </section>
 
             <PricingSection />
-
+            
             <Testimonials />
 
             <FAQSection />
@@ -577,9 +579,9 @@ export default async function RootPage() {
                             <span className="h-px w-8 bg-indigo-500/30" />
                         </div>
                         <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 md:mb-12 italic uppercase leading-[1.3] text-white px-4 py-4">
-                            Own your <br /> 
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-indigo-500 to-indigo-200 drop-shadow-[0_0_30px_rgba(79,70,229,0.6)] py-4 px-2">
-                                RETAIL EMPIRE
+                            Start your <br /> 
+                            <span className="text-[#7670FE] drop-shadow-[0_0_30px_rgba(118,112,254,0.6)] py-4 px-2">
+                                BUSINESS JOURNEY
                             </span> today.
                         </h2>
                         
@@ -599,7 +601,7 @@ export default async function RootPage() {
                             
                             <div className="space-y-4 text-center">
                                 <p className="mono-label !text-zinc-500 text-[10px] uppercase tracking-[0.2em]">
-                                    Join 5,000+ infrastructure commanders worldwide.
+                                    Join 250+ Entrepreneurs worldwide.
                                 </p>
                             </div>
                         </div>
@@ -609,92 +611,7 @@ export default async function RootPage() {
 
             <ContactSection />
 
-            {/* Operational Hub (Footer) */}
-            <footer className="py-16 md:py-32 px-6 border-t border-white/5 bg-zinc-950 relative z-20">
-                <div className="max-w-7xl mx-auto">
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-16 mb-24">
-                        {/* Branding & Status */}
-                        <div className="col-span-2 lg:col-span-2">
-                            <div className="flex items-center gap-4 mb-10">
-                                <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/20 overflow-hidden">
-                                    <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
-                                </div>
-                                <span className="text-3xl font-black tracking-[-0.07em] uppercase italic leading-[0.9]">
-                                    Qic<span className="text-indigo-500">Mart</span>
-                                </span>
-                            </div>
-                            <p className="text-zinc-500 max-w-sm mb-10 font-medium leading-relaxed">
-                                Deploying high-performance commerce infrastructure across the global planetary grid. 
-                                Join the retail sovereignty movement today.
-                            </p>
-                            <div className="flex items-center gap-4">
-                                {[Twitter, Github, Linkedin, Mail].map((Icon, i) => (
-                                    <Link key={i} href="#" className="w-10 h-10 rounded-xl bg-zinc-900 border border-white/5 flex items-center justify-center text-zinc-500 hover:bg-indigo-600 hover:text-white hover:border-indigo-400 transition-all">
-                                        <Icon size={20} />
-                                    </Link>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Link Clusters */}
-                        <div>
-                            <div className="mono-label !text-zinc-400 mb-8 tracking-[0.3em]">/ PRODUCT</div>
-                            <ul className="space-y-4">
-                                {['Storefronts', 'Dashboard', 'AI Guru', 'Global Edge', 'Infrastructure'].map(item => (
-                                    <li key={item}>
-                                        <Link href="#" className="text-sm font-medium text-zinc-500 hover:text-indigo-500 transition-colors tracking-tight">{item}</Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        <div>
-                            <div className="mono-label !text-zinc-400 mb-8 tracking-[0.3em]">/ SUPPORT</div>
-                            <ul className="space-y-4">
-                                {['Documentation', 'API Status', 'Change Log', 'Security Cluster', 'Help Desk'].map(item => (
-                                    <li key={item}>
-                                        <Link href="#" className="text-sm font-medium text-zinc-500 hover:text-indigo-500 transition-colors tracking-tight">{item}</Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        <div>
-                            <div className="mono-label !text-zinc-400 mb-8 tracking-[0.3em]">/ COMPANY</div>
-                            <ul className="space-y-4">
-                                {['About Project', 'Tactical HQ', 'Press Node', 'Legal Assets', 'Privacy.sh'].map(item => (
-                                    <li key={item}>
-                                        <Link href="#" className="text-sm font-medium text-zinc-500 hover:text-indigo-500 transition-colors tracking-tight">{item}</Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-8">
-                        <div className="mono-label !text-zinc-600 flex items-center gap-2">
-                            <div className="w-2 h-2 bg-emerald-500 animate-pulse rounded-full" />
-                            ALL_SYSTEMS_OPERATIONAL / MKXXVI
-                        </div>
-                        
-                        <div className="mono-label !text-zinc-600">
-                            &copy; QICMART_GLOBAL / SECURE_PLANETARY_COMMERCE
-                        </div>
-
-                        <div className="flex items-center gap-8">
-                            <Link href="#" className="mono-label hover:text-indigo-500 transition-colors">PRIVACY_POLICY</Link>
-                            <Link href="#" className="mono-label hover:text-indigo-500 transition-colors">LEGAL_RESOURCES</Link>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Massive Background Watermark */}
-                <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-full overflow-hidden pointer-events-none select-none z-0 opacity-5 flex justify-center">
-                    <span className="text-[20vw] font-black tracking-[-0.07em] uppercase italic leading-none whitespace-nowrap text-white">
-                        QICMART
-                    </span>
-                </div>
-            </footer>
+            <Footer />
         </div>
         </SmoothScroll>
     )
