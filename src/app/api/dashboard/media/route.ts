@@ -35,11 +35,11 @@ export async function GET(req: Request) {
     const [products, categories, libraryMedia] = await Promise.all([
         prisma.product.findMany({
             where: { storeId: storeObj.id },
-            select: { images: true, name: true, updatedAt: true }
+            select: { id: true, images: true, name: true, updatedAt: true }
         }),
         prisma.category.findMany({
             where: { storeId: storeObj.id },
-            select: { image: true, name: true, updatedAt: true }
+            select: { id: true, image: true, name: true, updatedAt: true }
         }),
         prisma.mediaLibrary.findMany({
             where: { storeId: storeObj.id },

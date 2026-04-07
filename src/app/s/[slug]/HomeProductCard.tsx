@@ -229,13 +229,6 @@ export default function HomeProductCard({
                         )}
                     </div>
                     
-                    {/* Rating Overlay */}
-                    <div className="absolute bottom-4 left-4 z-10 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-700 delay-75">
-                        <div className={`flex items-center gap-1.5 py-2 px-3.5 backdrop-blur-2xl border rounded-2xl shadow-2xl ${isAura ? 'bg-black/60 border-white/10' : 'bg-white/90 dark:bg-black/60 border-white/20 dark:border-white/10'}`}>
-                            <span className={`text-[11px] font-black ${isAura ? 'text-white' : 'text-zinc-900 dark:text-white'}`}>{avgRating > 0 ? avgRating.toFixed(1) : "5.0"}</span>
-                            <Star className="w-3 h-3 fill-amber-400 text-amber-400 mb-0.5" />
-                        </div>
-                    </div>
 
                     {/* Quick Action - Circular Side Actions */}
                     <div className="absolute right-4 top-4 flex flex-col gap-2.5 z-10 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-700">
