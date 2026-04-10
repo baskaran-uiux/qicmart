@@ -39,7 +39,7 @@ export default function PremiumButton({
     disabled = false
 }: PremiumButtonProps) {
     const sizeClasses = {
-        sm: "px-3 py-1.5 text-[10px]",
+        sm: "px-4 py-1.5 text-[11.5px]",
         md: "px-4 py-2 text-[12px]",
         lg: "px-5 py-3 text-[14px]"
     }

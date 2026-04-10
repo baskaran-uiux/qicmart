@@ -188,26 +188,26 @@ export default function HeroBannerPage() {
                         {saving ? (
                             <div className="flex items-center gap-2 text-indigo-500 bg-indigo-500/5 px-4 py-2 rounded-xl border border-indigo-500/10">
                                 <Loader2 size={14} className="animate-spin" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest">Saving</span>
+                                <span className="text-[12px] font-bold uppercase tracking-wider">Saving</span>
                             </div>
                         ) : saved ? (
                             <div className="flex items-center gap-2 text-emerald-500 bg-emerald-500/5 px-4 py-2 rounded-xl border border-emerald-500/10">
                                 <Check size={14} />
-                                <span className="text-[10px] font-bold uppercase tracking-widest">Saved</span>
+                                <span className="text-[12px] font-bold uppercase tracking-wider">Saved</span>
                             </div>
                         ) : isDirty ? (
                             <div className="flex items-center gap-2 text-amber-500 bg-amber-500/5 px-4 py-2 rounded-xl border border-amber-500/10">
                                 <RefreshCw size={14} />
-                                <span className="text-[10px] font-bold uppercase tracking-widest">Unsaved Changes</span>
+                                <span className="text-[12px] font-bold uppercase tracking-wider">Unsaved Changes</span>
                             </div>
                         ) : (
                             <div className="flex items-center gap-2 text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-4 py-2 rounded-xl">
-                                <span className="text-[10px] font-bold uppercase tracking-widest">All Persistent</span>
+                                <span className="text-[12px] font-bold uppercase tracking-wider">All Persistent</span>
                             </div>
                         )}
                     </div>
                     <PremiumButton onClick={addBanner} icon={Plus}>
-                        Add Banner
+                        <span className="font-bold uppercase tracking-wider text-[11px]">Add Banner</span>
                     </PremiumButton>
                 </div>
             </div>
@@ -226,7 +226,9 @@ export default function HeroBannerPage() {
                     </div>
                     <h3 className="text-xl font-bold text-slate-900 dark:text-white">No Banners Added</h3>
                     <p className="text-zinc-500 text-sm mb-8 max-w-sm mx-auto">Create your first hero banner with photos or videos to showcase your premium store collection.</p>
-                    <PremiumButton onClick={addBanner} icon={Plus} size="sm">Create First Slide</PremiumButton>
+                    <PremiumButton onClick={addBanner} icon={Plus} size="sm">
+                        <span className="font-bold uppercase tracking-wider text-[10px]">Create First Slide</span>
+                    </PremiumButton>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 gap-8">
@@ -287,7 +289,7 @@ export default function HeroBannerPage() {
                                 <div className="absolute top-8 right-8 z-30">
                                     <button 
                                         onClick={() => openMediaLibrary("banner", editingBanner?.id)}
-                                        className="px-6 py-3.5 bg-white text-zinc-900 rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 font-black text-[10px] uppercase tracking-widest border border-zinc-100"
+                                        className="h-[46px] px-6 bg-white text-zinc-900 rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 font-bold text-[12px] uppercase tracking-wider border border-zinc-100"
                                     >
                                         <Upload size={14} className="stroke-[3]" />
                                         Replace Media
@@ -363,7 +365,7 @@ export default function HeroBannerPage() {
                                     <div className="flex flex-wrap items-center gap-10">
                                         <div className="space-y-3">
                                             <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Content Alignment</label>
-                                            <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 p-1.5 rounded-2xl border border-zinc-200 dark:border-zinc-700">
+                                            <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-2xl border border-zinc-200 dark:border-zinc-700">
                                                 {[
                                                     { key: "left", icon: AlignLeft },
                                                     { key: "center", icon: AlignCenter },
@@ -371,10 +373,11 @@ export default function HeroBannerPage() {
                                                 ].map(a => (
                                                     <button
                                                         key={a.key}
+                                                        type="button"
                                                         onClick={() => updateBanner(editingBanner!.id, "textAlign", a.key)}
-                                                        className={`p-3 rounded-xl transition-all ${editingBanner?.textAlign === a.key ? 'bg-white dark:bg-zinc-700 shadow-md text-indigo-500' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'}`}
+                                                        className={`p-2.5 rounded-xl transition-all ${editingBanner?.textAlign === a.key ? 'bg-white dark:bg-zinc-700 shadow-md text-indigo-500' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'}`}
                                                     >
-                                                        <a.icon size={18} />
+                                                        <a.icon size={16} />
                                                     </button>
                                                 ))}
                                             </div>
@@ -384,17 +387,17 @@ export default function HeroBannerPage() {
                                             <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Dark Overlay</label>
                                             <button 
                                                 onClick={() => updateBanner(editingBanner!.id, "showOverlay", !editingBanner?.showOverlay)}
-                                                className={`flex items-center gap-3 px-5 py-3 rounded-2xl transition-all border font-bold text-xs ${editingBanner?.showOverlay ? 'bg-indigo-500 text-white border-indigo-600 shadow-lg shadow-indigo-500/20' : 'bg-white dark:bg-zinc-800 text-zinc-500 border-zinc-200 dark:border-zinc-800'}`}
+                                                className={`flex items-center gap-3 px-6 h-[46px] rounded-2xl transition-all border font-bold text-[12px] uppercase tracking-wider ${editingBanner?.showOverlay ? 'bg-indigo-500 text-white border-indigo-600 shadow-lg shadow-indigo-500/20' : 'bg-white dark:bg-zinc-800 text-zinc-500 border-zinc-200 dark:border-zinc-800'}`}
                                             >
-                                                {editingBanner?.showOverlay ? <Eye size={16} /> : <EyeOff size={16} />}
+                                                {editingBanner?.showOverlay ? <Eye size={14} className="stroke-[3]" /> : <EyeOff size={14} className="stroke-[3]" />}
                                                 {editingBanner?.showOverlay ? 'Enabled' : 'Disabled'}
                                             </button>
                                         </div>
 
                                         <div className="space-y-3">
                                             <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Media Mode</label>
-                                            <div className={`px-5 py-3 rounded-2xl transition-all border flex items-center gap-3 font-bold text-xs ${editingBanner?.type === 'video' ? 'bg-purple-600 text-white border-purple-700 shadow-lg shadow-purple-500/20' : 'bg-blue-600 text-white border-blue-700 shadow-lg shadow-blue-500/20'}`}>
-                                                {editingBanner?.type === 'video' ? <Video size={16} /> : <ImageIcon size={16} />}
+                                            <div className={`px-6 h-[46px] rounded-2xl transition-all border flex items-center gap-3 font-bold text-[12px] uppercase tracking-wider ${editingBanner?.type === 'video' ? 'bg-purple-600 text-white border-purple-700 shadow-lg shadow-purple-500/20' : 'bg-blue-600 text-white border-blue-700 shadow-lg shadow-blue-500/20'}`}>
+                                                {editingBanner?.type === 'video' ? <Video size={14} className="stroke-[3]" /> : <ImageIcon size={14} className="stroke-[3]" />}
                                                 {editingBanner?.type?.toUpperCase()}
                                             </div>
                                         </div>
@@ -403,17 +406,17 @@ export default function HeroBannerPage() {
                                     <div className="flex gap-4 w-full sm:w-auto">
                                         <button 
                                             onClick={() => removeBanner(editingBanner!.id)}
-                                            className="px-8 py-4 bg-rose-50 dark:bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white rounded-[22px] transition-all font-black text-[11px] uppercase tracking-widest flex-1 sm:flex-initial"
+                                            className="h-[52px] px-8 bg-rose-50 dark:bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white rounded-2xl transition-all font-bold text-[12px] uppercase tracking-wider flex-1 sm:flex-initial"
                                         >
                                             Delete Slide
                                         </button>
                                         <PremiumButton 
                                             onClick={() => setEditingBannerId(null)} 
-                                            className="flex-1 sm:flex-initial px-12 py-4"
+                                            className="flex-1 sm:flex-initial h-[52px] px-12"
                                             size="sm"
                                             icon={Check}
                                         >
-                                            Finish Layout
+                                            <span className="font-bold uppercase tracking-wider text-[12px]">Finish Layout</span>
                                         </PremiumButton>
                                     </div>
                                 </div>
@@ -452,7 +455,7 @@ export default function HeroBannerPage() {
                                     <div className="flex items-center gap-4">
                                         <button 
                                             onClick={() => setEditingBannerId(banner.id)}
-                                            className="px-8 py-4 bg-zinc-50 dark:bg-white text-zinc-900 font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-sm hover:scale-105 active:scale-95 transition-all"
+                                            className="h-[52px] px-8 bg-zinc-50 dark:bg-white text-zinc-900 font-bold text-[12px] uppercase tracking-wider rounded-2xl shadow-sm hover:scale-105 active:scale-95 transition-all"
                                         >
                                             Configure Design
                                         </button>

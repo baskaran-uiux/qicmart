@@ -50,10 +50,10 @@ export default function ExportButton({ data }: { data: ExportButtonProps }) {
     return (
         <button 
             onClick={handleExport}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-zinc-900 text-black dark:text-white border border-zinc-200 dark:border-zinc-800 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all shadow-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 active:scale-95"
+            title="Export CSV"
+            className="flex items-center justify-center w-10 h-10 bg-white dark:bg-zinc-900 text-black dark:text-white border-2 border-zinc-200 dark:border-zinc-800 rounded-full transition-all active:scale-95"
         >
-            <Download size={14} className="text-cyan-500" />
-            Export CSV
+            <Download size={18} className="text-zinc-600 dark:text-zinc-400" />
         </button>
     )
 }

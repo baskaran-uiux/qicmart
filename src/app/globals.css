@@ -90,6 +90,21 @@ html {
     @apply bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl border border-zinc-200/50 dark:border-white/5 rounded-[32px] shadow-sm hover:shadow-2xl transition-all duration-500;
   }
 
+  /* Professional Typography System Tokens */
+  .t-h1 { @apply text-[28px] sm:text-[32px] font-bold tracking-tight leading-tight; }
+  .t-h2 { @apply text-[22px] sm:text-[24px] font-bold tracking-tight leading-snug; }
+  .t-h3 { @apply text-[18px] sm:text-[20px] font-bold tracking-tight; }
+  .t-body { @apply text-[14px] sm:text-[16px] font-medium leading-relaxed; }
+  .t-body-sm { @apply text-[12px] sm:text-[13px] font-medium leading-normal; }
+  .t-label { @apply text-[11px] font-bold text-zinc-500; }
+  .t-label-sm { @apply text-[10px] font-bold text-zinc-400; }
+
+  /* Dashboard Neutral Font Locking */
+  .dashboard-font, 
+  .dashboard-font * {
+    font-family: var(--font-outfit), sans-serif !important;
+  }
+
   .beveled {
     clip-path: polygon(
       0% 20px, 20px 0%, 
@@ -127,8 +142,9 @@ html {
   }
 
   .mono-label {
-  @apply font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-bold;
-}
+    @apply font-mono text-[9px] uppercase tracking-wider text-zinc-400 font-bold;
+  }
+
 
 /* Sparkle Button Custom Styles */
 .sparkle-button {

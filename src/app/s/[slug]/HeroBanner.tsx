@@ -290,15 +290,15 @@ export default function HeroBanner({ slug, banners = [], layoutStyle = "default"
                     <>
                         <button
                             onClick={prev}
-                            className="hidden sm:flex absolute left-8 top-1/2 -translate-y-1/2 z-30 w-16 h-16 rounded-full bg-white/5 backdrop-blur-3xl text-white border border-white/20 hover:bg-white hover:text-black transition-all items-center justify-center group shadow-2xl"
+                            className="hidden sm:flex absolute left-8 top-1/2 -translate-y-1/2 z-30 w-16 h-16 rounded-full bg-white/20 backdrop-blur-xl text-white border border-white/30 hover:bg-white hover:text-black transition-all items-center justify-center group shadow-2xl"
                         >
-                            <ChevronLeft size={28} className="group-hover:-translate-x-0.5 transition-transform" />
+                            <ChevronLeft size={32} strokeWidth={2.5} className="group-hover:-translate-x-0.5 transition-transform" />
                         </button>
                         <button
                             onClick={next}
-                            className="hidden sm:flex absolute right-8 top-1/2 -translate-y-1/2 z-30 w-16 h-16 rounded-full bg-white/5 backdrop-blur-3xl text-white border border-white/20 hover:bg-white hover:text-black transition-all items-center justify-center group shadow-2xl"
+                            className="hidden sm:flex absolute right-8 top-1/2 -translate-y-1/2 z-30 w-16 h-16 rounded-full bg-white/20 backdrop-blur-xl text-white border border-white/30 hover:bg-white hover:text-black transition-all items-center justify-center group shadow-2xl"
                         >
-                            <ChevronRight size={28} className="group-hover:translate-x-0.5 transition-transform" />
+                            <ChevronRight size={32} strokeWidth={2.5} className="group-hover:translate-x-0.5 transition-transform" />
                         </button>
                         
                         {/* Pagination Progress */}

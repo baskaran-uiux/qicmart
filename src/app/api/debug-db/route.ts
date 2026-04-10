@@ -3,21 +3,34 @@ import { prisma } from "@/lib/prisma"
 
 // Temporary: Fix the test user's role and assign stores to them
 export async function GET() {
-    // 1. Update venlo@gmail.com to STORE_OWNER
-    const user = await prisma.user.update({
-        where: { email: "venlo@gmail.com" },
-        data: { role: "STORE_OWNER" }
+    const store = await prisma.store.findUnique({
+        where: { slug: "demo" },
+        select: {
+            id: true,
+            name: true,
+            products: {
+                select: {
+                    id: true,
+                    name: true,
+                    images: true,
+                    updatedAt: true
+                },
+                orderBy: { updatedAt: 'desc' }
+            }
+        }
     })
 
-    // 2. Get all stores that don't have an owner matching venlo
-    const stores = await prisma.store.findMany()
-    
-    // 3. If there are stores with no link to this user, assign the first one
-    const myStore = stores.find(s => s.ownerId === user.id)
-    
+    if (!store) return NextResponse.json({ error: "Demo store not found" })
+
     return NextResponse.json({ 
-        user: { id: user.id, email: user.email, role: user.role },
-        myStore: myStore || null,
-        allStores: stores.map(s => ({ id: s.id, name: s.name, slug: s.slug, ownerId: s.ownerId }))
+        storeName: store.name,
+        productsCount: store.products.length,
+        products: store.products.map(p => ({
+            id: p.id,
+            name: p.name,
+            imagesRaw: p.images,
+            imagesParsed: (typeof p.images === 'string' ? JSON.parse(p.images) : p.images),
+            updatedAt: p.updatedAt
+        }))
     })
 }

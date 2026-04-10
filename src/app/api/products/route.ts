@@ -18,9 +18,10 @@ export async function GET(request: Request) {
                 isActive: true,
                 ...(q ? {
                     OR: [
-                        { name: { contains: q } },
-                        { description: { contains: q } },
-                        { slug: { contains: q } }
+                        { name: { contains: q, mode: 'insensitive' } },
+                        { description: { contains: q, mode: 'insensitive' } },
+                        { slug: { contains: q, mode: 'insensitive' } },
+                        { sku: { contains: q, mode: 'insensitive' } }
                     ]
                 } : {})
             },

@@ -23,8 +23,8 @@ export default function OverviewClient({ storeUrl, planName }: OverviewClientPro
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Store QR Code card */}
-            <div className="bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 p-8 shadow-sm flex flex-col sm:flex-row items-center gap-8 group">
-                <div className="p-6 bg-zinc-50 dark:bg-zinc-950 rounded-[32px] border border-zinc-100 dark:border-zinc-800 shadow-inner group-hover:scale-105 transition-transform duration-500">
+            <div className="bg-white dark:bg-zinc-900 rounded-[32px] border-2 border-zinc-200 dark:border-zinc-800 p-8 flex flex-col sm:flex-row items-center gap-8 group">
+                <div className="p-6 bg-zinc-50 dark:bg-zinc-950 rounded-[32px] border-2 border-zinc-100 dark:border-zinc-800 transition-transform duration-500">
                     <QRCodeCanvas 
                         value={storeUrl}
                         size={160}
@@ -35,8 +35,8 @@ export default function OverviewClient({ storeUrl, planName }: OverviewClientPro
                 </div>
                 <div className="flex-1 flex flex-col items-center sm:items-start text-center sm:text-left">
                     <div className="mb-6">
-                        <h3 className="text-xl font-black text-black dark:text-white uppercase tracking-tight italic mb-2">{t("storeQrCode")}</h3>
-                        <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">{t("scanToVisit")}</p>
+                        <h3 className="text-xl font-bold text-black dark:text-white uppercase tracking-tight mb-2">{t("storeQrCode")}</h3>
+                        <p className="text-zinc-500 dark:text-zinc-400 text-[14px] font-bold">{t("scanToVisit")}</p>
                     </div>
                     
                     <div className="w-full space-y-3">
@@ -63,13 +63,13 @@ export default function OverviewClient({ storeUrl, planName }: OverviewClientPro
             </div>
 
             {/* Quick Stats / Subscription Info card */}
-            <div className="bg-indigo-600 rounded-[32px] p-8 shadow-2xl relative overflow-hidden group border border-indigo-400/20">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 blur-[100px] -mr-32 -mt-32" />
+            <div className="bg-indigo-600 rounded-[32px] p-8 relative overflow-hidden group border-2 border-indigo-400/40">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[100px] -mr-32 -mt-32" />
                 <div className="relative z-10 h-full flex flex-col">
                     <div className="flex justify-between items-start mb-8">
                         <div>
-                            <h3 className="text-3xl font-black tracking-tighter italic uppercase text-white mb-2 leading-none">{t("empireStatus")}</h3>
-                            <p className="text-indigo-100/70 text-sm font-medium tracking-tight">{t("storeIsActive")}</p>
+                            <h3 className="text-3xl font-bold tracking-tighter uppercase text-white mb-2 leading-none">{t("empireStatus")}</h3>
+                            <p className="text-indigo-100/70 text-[14px] font-bold tracking-tight">{t("storeIsActive")}</p>
                         </div>
                         <div className="px-4 py-2 bg-white/20 backdrop-blur-md rounded-2xl border border-white/20 text-[10px] font-black uppercase text-white tracking-widest">
                             {planName} {t("member")}
@@ -77,23 +77,23 @@ export default function OverviewClient({ storeUrl, planName }: OverviewClientPro
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 mt-auto">
-                        <div className="p-6 bg-white/10 backdrop-blur-md rounded-[24px] border border-white/10">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-100/50 mb-1">{t("salesGoal")}</p>
+                        <div className="p-6 bg-white/10 backdrop-blur-md rounded-[24px] border border-white/20">
+                            <p className="text-[12px] font-bold uppercase tracking-wider text-indigo-100/70 mb-1">{t("salesGoal")}</p>
                             <div className="flex items-center justify-between">
-                                <p className="text-xl font-black text-white">84%</p>
-                                <TrendingUpUI size={16} className="text-emerald-400" />
+                                <p className="text-2xl font-bold text-white">84%</p>
+                                <TrendingUpUI size={18} className="text-emerald-400" />
                             </div>
                             <div className="w-full bg-white/10 h-1.5 rounded-full mt-3 overflow-hidden">
                                 <div className="bg-emerald-400 h-full w-[84%] rounded-full shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
                             </div>
                         </div>
-                        <div className="p-6 bg-white/10 backdrop-blur-md rounded-[24px] border border-white/10">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-100/50 mb-1">{t("storeHealth")}</p>
+                        <div className="p-6 bg-white/10 backdrop-blur-md rounded-[24px] border border-white/20">
+                            <p className="text-[12px] font-bold uppercase tracking-wider text-indigo-100/70 mb-1">{t("storeHealth")}</p>
                             <div className="flex items-center justify-between">
-                                <p className="text-xl font-black text-white">{t("excellent")}</p>
-                                <CheckCircle size={16} className="text-white" />
+                                <p className="text-2xl font-bold text-white">{t("excellent")}</p>
+                                <CheckCircle size={18} className="text-white" />
                             </div>
-                            <p className="text-[8px] font-bold text-white/40 mt-3 uppercase tracking-widest">{t("everythingIsPerfect")}</p>
+                            <p className="text-[11px] font-bold text-white/50 mt-3 uppercase tracking-widest">{t("everythingIsPerfect")}</p>
                         </div>
                     </div>
                 </div>

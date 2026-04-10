@@ -461,9 +461,10 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
         if (JSON.stringify(form) === JSON.stringify(initialForm)) return
 
         setSaving(true)
-        const allImages = [...form.gallery]
-        if (form.imageUrl && !allImages.includes(form.imageUrl)) {
-            allImages.unshift(form.imageUrl)
+        // CRITICAL SYNC: Ensure imageUrl is ALWAYS at images[0]
+        let allImages = [...form.gallery]
+        if (form.imageUrl) {
+            allImages = [form.imageUrl, ...allImages.filter(img => img !== form.imageUrl)]
         }
         const images = JSON.stringify(allImages)
         
@@ -551,9 +552,10 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
         }
 
         setSaving(true)
-        const allImages = [...form.gallery]
-        if (form.imageUrl && !allImages.includes(form.imageUrl)) {
-            allImages.unshift(form.imageUrl)
+        // CRITICAL SYNC: Ensure imageUrl is ALWAYS at images[0]
+        let allImages = [...form.gallery]
+        if (form.imageUrl) {
+            allImages = [form.imageUrl, ...allImages.filter(img => img !== form.imageUrl)]
         }
         const images = JSON.stringify(allImages)
         
@@ -910,7 +912,20 @@ export default function ProductEditor({ productId }: ProductEditorProps) {
                                                                 <div key={i} className="relative aspect-square rounded-[28px] overflow-hidden border border-zinc-100 dark:border-zinc-800 group/item shadow-md hover:shadow-xl transition-all hover:scale-[1.02]">
                                                                     <img src={img} className="w-full h-full object-cover" />
                                                                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/item:opacity-100 transition-opacity flex items-center justify-center">
-                                                                        <button onClick={() => setForm(f => ({ ...f, gallery: f.gallery.filter((_, idx) => idx !== i) }))} className="p-3 bg-white text-rose-500 rounded-full shadow-2xl hover:scale-110 active:scale-90 transition-all"><X size={20} /></button>
+                                                                        <button 
+                                                                            onClick={() => {
+                                                                                const deletedUrl = form.gallery[i]
+                                                                                setForm(f => ({ 
+                                                                                    ...f, 
+                                                                                    gallery: f.gallery.filter((_, idx) => idx !== i),
+                                                                                    // If the deleted image was the cover, clear the cover too
+                                                                                    imageUrl: f.imageUrl === deletedUrl ? "" : f.imageUrl
+                                                                                }))
+                                                                            }}
+                                                                            className="p-3 bg-white text-rose-500 rounded-full shadow-2xl hover:scale-110 active:scale-90 transition-all"
+                                                                        >
+                                                                            <X size={20} />
+                                                                        </button>
                                                                     </div>
                                                                 </div>
                                                             ))}

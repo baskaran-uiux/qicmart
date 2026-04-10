@@ -137,30 +137,30 @@ export default function AnalyticsPage() {
             {/* Sales Overview Header */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                 <div>
-                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize">{t("salesOverview")}</h2>
-                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">{t("salesSummary")}</p>
+                    <h2 className="t-h2 text-zinc-950 dark:text-white">{t("salesOverview")}</h2>
+                    <p className="t-body-sm text-zinc-500 dark:text-zinc-400 mt-1">{t("salesSummary")}</p>
                 </div>
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2">
                     <div className="relative">
                         <button 
                             onClick={() => setShowTimeRange(!showTimeRange)}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[12px] font-bold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95 shadow-sm"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-full text-[13px] font-bold text-zinc-600 dark:text-zinc-300 transition-all active:scale-95"
                         >
-                            {t(timeRange.toLowerCase().replace(" ", "") as any)} <ChevronDown size={14} />
+                            {t(timeRange.toLowerCase().replace(" ", "") as any)} <ChevronDown size={14} className={`transition-transform duration-300 ${showTimeRange ? 'rotate-180' : ''}`} />
                         </button>
                         <AnimatePresence>
                             {showTimeRange && (
                                 <motion.div 
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: 10 }}
-                                    className="absolute top-full left-0 mt-2 w-40 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl shadow-2xl z-50 p-2"
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 5, scale: 1 }}
+                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-zinc-900 border-2 border-zinc-100 dark:border-zinc-800 rounded-2xl shadow-none z-50 p-2"
                                 >
                                     {["Today", "This Week", "This Month", "This Year"].map((range) => (
                                         <button 
                                             key={range}
                                             onClick={() => { setTimeRange(range); setShowTimeRange(false) }}
-                                            className="w-full text-left px-4 py-2 rounded-xl text-xs font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 transition-colors"
+                                            className={`w-full text-left px-4 py-2.5 rounded-xl text-[13px] font-bold transition-colors ${timeRange === range ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800'}`}
                                         >
                                             {t(range.toLowerCase().replace(" ", "") as any)}
                                         </button>
@@ -171,12 +171,10 @@ export default function AnalyticsPage() {
                     </div>
                     <button 
                         onClick={handleExport}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[12px] font-bold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95 shadow-sm"
+                        title={t("export")}
+                        className="flex items-center justify-center w-10 h-10 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-full transition-all active:scale-95"
                     >
-                        <Download size={14} className="text-zinc-400" /> {t("export")}
-                    </button>
-                    <button className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-2xl text-[12px] font-bold hover:bg-indigo-700 transition-all active:scale-95 shadow-lg shadow-indigo-600/20">
-                        <Filter size={14} /> {t("filter")}
+                        <Download size={18} className="text-zinc-600 dark:text-zinc-400" />
                     </button>
                 </div>
             </div>
@@ -186,22 +184,22 @@ export default function AnalyticsPage() {
                     [...Array(4)].map((_, i) => <KpiCardSkeleton key={i} />)
                 ) : (
                     <>
-                        <div className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-indigo-600 p-8 rounded-[32px] shadow-xl shadow-blue-500/20 group">
+                        <div className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-indigo-600 p-8 rounded-[32px] border-2 border-blue-400/40 group">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl -mr-16 -mt-16 rounded-full group-hover:scale-150 transition-transform duration-1000" />
                             <div className="relative z-10">
                                 <div className="flex items-center justify-between mb-8">
-                                    <span className="text-[12px] sm:text-[14px] font-semibold text-blue-50/70 capitalize tracking-wide">{t("totalSales")}</span>
-                                    <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-lg shadow-black/5">
+                                    <span className="t-label text-blue-50/70">{t("totalSales")}</span>
+                                    <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-blue-600">
                                         <ShoppingCart size={20} />
                                     </div>
                                 </div>
                                 <div className="flex items-end gap-3 mb-2">
-                                    <p className="text-[28px] sm:text-[32px] font-bold text-white tracking-tighter">{metrics.current.orders.toLocaleString()}</p>
+                                    <p className="t-h1 text-white">{metrics.current.orders.toLocaleString()}</p>
                                     <span className="mb-1.5 px-2 py-0.5 bg-white/20 backdrop-blur-md rounded-lg text-[10px] font-bold text-white flex items-center gap-0.5">
                                         {salesTrend >= 0 ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />} {Math.abs(salesTrend).toFixed(1)}%
                                     </span>
                                 </div>
-                                <p className="text-xs font-medium text-blue-100/50 italic">{t("lastMonth")}: {metrics.last.orders}</p>
+                                <p className="text-[13px] font-bold text-blue-100/50 opacity-80">{t("lastMonth")}: {metrics.last.orders}</p>
                             </div>
                         </div>
 
@@ -210,22 +208,22 @@ export default function AnalyticsPage() {
                             { label: "returnProducts", value: metrics.returnProducts.toLocaleString(), last: 0, trend: 0, icon: Box, color: "bg-blue-500 text-white", iconColor: "text-blue-200" },
                             { label: "totalRevenue", value: formatCurrency(metrics.current.revenue), last: formatCurrency(metrics.last.revenue), trend: revenueTrend, icon: IndianRupee, color: "bg-indigo-500 text-white", iconColor: "text-indigo-200" },
                         ].map((kpi) => (
-                            <div key={kpi.label} className="p-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[32px] shadow-sm hover:shadow-xl transition-all duration-500 group">
+                            <div key={kpi.label} className="p-8 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-[32px] transition-all duration-300 group">
                                 <div className="flex items-center justify-between mb-8">
-                                    <span className="text-[12px] sm:text-[14px] font-semibold text-zinc-400 dark:text-zinc-500 capitalize tracking-wide">{t(kpi.label as any)}</span>
-                                    <div className={`w-10 h-10 ${kpi.color} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
+                                    <span className="t-label pl-1">{t(kpi.label as any)}</span>
+                                    <div className={`w-10 h-10 ${kpi.color} rounded-2xl flex items-center justify-center`}>
                                         <kpi.icon size={20} />
                                     </div>
                                 </div>
                                 <div className="flex items-end gap-3 mb-2">
-                                    <p className="text-[28px] sm:text-[32px] font-bold text-zinc-900 dark:text-white tracking-tighter">{kpi.value}</p>
+                                    <p className="t-h1 text-zinc-900 dark:text-white">{kpi.value} </p>
                                     {kpi.label !== "returnProducts" && (
                                         <span className={`mb-1.5 px-2 py-0.5 rounded-lg text-[10px] font-bold flex items-center gap-0.5 ${kpi.trend >= 0 ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400' : 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400'}`}>
                                             {kpi.trend >= 0 ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />} {Math.abs(kpi.trend).toFixed(1)}%
                                         </span>
                                     )}
                                 </div>
-                                <p className="text-xs font-medium text-zinc-400 italic">{t("lastMonth")}: {kpi.last}</p>
+                                <p className="text-[13px] font-bold text-zinc-400 opacity-80 pl-1">{t("lastMonth")}: {kpi.last}</p>
                             </div>
                         ))}
                     </>
@@ -244,7 +242,7 @@ export default function AnalyticsPage() {
                     </>
                 ) : (
                     <>
-                        <div className="lg:col-span-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[32px] p-8 shadow-sm">
+                        <div className="lg:col-span-2 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-[32px] p-8">
                             <div className="flex items-center justify-between mb-10">
                                 <div>
                                     <h3 className="text-xl font-bold text-zinc-900 dark:text-white tracking-tight">{t("performanceOverview")}</h3>
@@ -252,9 +250,9 @@ export default function AnalyticsPage() {
                                 <div className="relative">
                                     <button 
                                         onClick={() => setShowYearFilter(!showYearFilter)}
-                                        className="flex items-center gap-2 px-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold text-zinc-500 hover:text-zinc-700 transition-colors shadow-sm"
+                                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-full text-xs font-bold text-zinc-500 hover:text-zinc-700 transition-colors"
                                     >
-                                        {t(performanceYear.toLowerCase().replace(" ", "") as any)} <ChevronDown size={14} />
+                                        {t(performanceYear.toLowerCase().replace(" ", "") as any)} <ChevronDown size={14} className={`transition-transform duration-300 ${showYearFilter ? 'rotate-180' : ''}`} />
                                     </button>
                                     <AnimatePresence>
                                         {showYearFilter && (
@@ -300,22 +298,22 @@ export default function AnalyticsPage() {
                                             content={({ active, payload }) => {
                                                 if (active && payload && payload.length) {
                                                     return (
-                                                        <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl shadow-2xl border border-zinc-100 dark:border-zinc-800 animate-in zoom-in-95">
-                                                            <p className="text-[10px] font-semibold text-zinc-400 capitalize tracking-wide mb-3">{payload[0].payload.name} {new Date().getFullYear()}</p>
+                                                        <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl border-2 border-zinc-100 dark:border-zinc-800 animate-in zoom-in-95">
+                                                            <p className="text-[10px] font-bold text-zinc-400 capitalize tracking-wide mb-3">{payload[0].payload.name} {new Date().getFullYear()}</p>
                                                             <div className="space-y-2">
                                                                 <div className="flex items-center justify-between gap-8">
                                                                     <div className="flex items-center gap-2">
                                                                         <div className="w-2 h-2 rounded-full bg-zinc-200" />
-                                                                        <span className="text-[11px] font-semibold text-zinc-500">{t("orders")}</span>
+                                                                        <span className="text-[11px] font-bold text-zinc-500">{t("orders")}</span>
                                                                     </div>
-                                                                    <span className="text-[11px] font-semibold text-zinc-900 dark:text-white">{payload[0].payload.orders}</span>
+                                                                    <span className="text-[11px] font-bold text-zinc-900 dark:text-white">{payload[0].payload.orders}</span>
                                                                 </div>
                                                                 <div className="flex items-center justify-between gap-8">
                                                                     <div className="flex items-center gap-2">
                                                                         <div className="w-2 h-2 rounded-full bg-indigo-600" />
-                                                                        <span className="text-[11px] font-semibold text-zinc-500">{t("revenue")}</span>
+                                                                        <span className="text-[11px] font-bold text-zinc-500">{t("revenue")}</span>
                                                                     </div>
-                                                                    <span className="text-[11px] font-bold text-indigo-600">{formatCurrency(payload[0].payload.sales)}</span>
+                                                                    <span className="text-[11px] font-black text-indigo-600">{formatCurrency(payload[0].payload.sales)}</span>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -338,9 +336,9 @@ export default function AnalyticsPage() {
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[32px] p-8 shadow-sm flex flex-col items-center justify-center relative group overflow-hidden">
-                            <div className="absolute top-0 left-0 w-full p-8 border-b border-zinc-50 dark:border-zinc-800 flex items-center justify-between">
-                                <h3 className="font-bold text-zinc-900 dark:text-white">{t("salesOverview")}</h3>
+                        <div className="bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-[32px] p-8 flex flex-col items-center justify-center relative group overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full p-8 border-b-2 border-zinc-50 dark:border-zinc-800 flex items-center justify-between">
+                                <h3 className="font-bold text-zinc-900 dark:text-white tracking-tight">{t("salesOverview")}</h3>
                                 <div className="relative">
                                     <button 
                                         onClick={() => setShowOptions(!showOptions)}
@@ -402,31 +400,31 @@ export default function AnalyticsPage() {
                             </div>
 
                             <div className="grid grid-cols-2 gap-4 w-full mt-4">
-                                <div className="p-5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-3xl">
-                                    <p className="text-[12px] font-semibold text-zinc-400 capitalize tracking-wide mb-2">{t("totalSales")}</p>
+                                <div className="p-5 bg-white dark:bg-zinc-950 border-2 border-zinc-100 dark:border-zinc-800 rounded-3xl">
+                                    <p className="text-[12px] font-bold text-zinc-400 capitalize tracking-wide mb-2">{t("totalSales")}</p>
                                     <div className="flex items-center gap-2">
                                         <span className="text-xl font-bold text-zinc-900 dark:text-white tracking-tight">{metrics.current.orders}</span>
-                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold capitalize ${salesTrend >= 0 ? 'bg-indigo-500/10 text-indigo-500' : 'bg-rose-500/10 text-rose-500'}`}>{salesTrend.toFixed(1)}%</span>
+                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold capitalize ${salesTrend >= 0 ? 'bg-indigo-500/10 text-indigo-500' : 'bg-rose-500/10 text-rose-500'}`}>{salesTrend.toFixed(1)}%</span>
                                     </div>
                                 </div>
-                                <div className="p-5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-3xl">
-                                    <p className="text-[12px] font-semibold text-zinc-400 capitalize tracking-wide mb-2">{t("totalRevenue")}</p>
+                                <div className="p-5 bg-white dark:bg-zinc-950 border-2 border-zinc-100 dark:border-zinc-800 rounded-3xl">
+                                    <p className="text-[12px] font-bold text-zinc-400 capitalize tracking-wide mb-2">{t("totalRevenue")}</p>
                                     <div className="flex items-center gap-2">
                                         <span className="text-xl font-bold text-zinc-900 dark:text-white tracking-tight">{formatCurrency(metrics.current.revenue)}</span>
-                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold capitalize ${revenueTrend >= 0 ? 'bg-indigo-500/10 text-indigo-600' : 'bg-rose-500/10 text-rose-600'}`}>{revenueTrend.toFixed(1)}%</span>
+                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold capitalize ${revenueTrend >= 0 ? 'bg-indigo-500/10 text-indigo-600' : 'bg-rose-500/10 text-rose-600'}`}>{revenueTrend.toFixed(1)}%</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Top Regions Chart */}
-                        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[32px] p-8 shadow-sm flex flex-col group overflow-hidden">
+                        <div className="bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-[32px] p-8 flex flex-col group overflow-hidden">
                             <div className="flex items-center justify-between mb-8">
                                 <div>
                                     <h3 className="text-xl font-bold text-zinc-900 dark:text-white tracking-tight">Sales by Region</h3>
-                                    <p className="text-[10px] text-zinc-400 font-semibold tracking-wide uppercase mt-1">Geographic Performance</p>
+                                    <p className="text-[10px] text-zinc-400 font-bold tracking-wide uppercase mt-1">Geographic Performance</p>
                                 </div>
-                                <div className="w-10 h-10 bg-indigo-50 dark:bg-zinc-800 rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm">
+                                <div className="w-10 h-10 bg-indigo-50 dark:bg-zinc-800 rounded-2xl flex items-center justify-center text-indigo-600">
                                     <MapPin size={20} />
                                 </div>
                             </div>
@@ -509,7 +507,7 @@ export default function AnalyticsPage() {
                                             <BarChart2 size={24} className="text-zinc-300" />
                                         </div>
                                         <p className="text-sm font-bold text-zinc-900 dark:text-white">{t("noDataAvailable") || "No Regional Data"}</p>
-                                        <p className="text-[11px] text-zinc-500 mt-1 max-w-[180px] mx-auto italic">Receive orders with state info to see regional performance.</p>
+                                        <p className="text-[11px] text-zinc-500 mt-1 max-w-[180px] mx-auto font-medium">Receive orders with state info to see regional performance.</p>
                                     </div>
                                 )}
                             </div>
@@ -518,16 +516,46 @@ export default function AnalyticsPage() {
                 )}
             </div>
 
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[32px] overflow-hidden shadow-sm">
+            {/* Top Customers Insight */}
+            <div className="bg-indigo-600 rounded-[32px] p-8 border-2 border-indigo-400/40 relative overflow-hidden group mb-4">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-3xl rounded-full -mr-20 -mt-20 group-hover:scale-150 transition-transform duration-1000" />
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div className="space-y-2 text-center md:text-left">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest">
+                            <Star size={12} fill="currentColor" />
+                            Premium Insight
+                        </div>
+                        <h3 className="text-2xl font-bold text-white tracking-tight">Your Most Valuable Customers</h3>
+                        <p className="text-indigo-100 text-sm font-medium opacity-80">Identify your frequent shoppers and build loyalty with targeted offers.</p>
+                    </div>
+                    <div className="flex -space-x-4">
+                        {[
+                            { name: 'SR', color: 'bg-white text-indigo-600' },
+                            { name: 'AK', color: 'bg-indigo-400 text-white' },
+                            { name: 'JD', color: 'bg-indigo-800 text-white' },
+                            { name: 'MK', color: 'bg-indigo-200 text-indigo-900' },
+                        ].map((user, i) => (
+                            <div key={i} className={`w-14 h-14 ${user.color} rounded-full border-4 border-indigo-600 flex items-center justify-center font-bold text-sm shadow-xl transition-transform hover:-translate-y-2 cursor-pointer`}>
+                                {user.name}
+                            </div>
+                        ))}
+                        <div className="w-14 h-14 bg-indigo-500/30 backdrop-blur-md border-4 border-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                            +12
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-[32px] overflow-hidden">
                 {loading ? (
                     <div className="p-8">
                         <TableSkeleton />
                     </div>
                 ) : (
                     <>
-                        <div className="p-8 border-b border-zinc-100 dark:border-zinc-800 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div className="p-8 border-b-2 border-zinc-100 dark:border-zinc-800 flex flex-col md:flex-row md:items-center justify-between gap-6">
                             <h3 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">{t("recentOrdersTitle")}</h3>
-                            <div className="flex flex-wrap items-center gap-3">
+                            <div className="flex flex-wrap items-center gap-2">
                                 <div className="relative group">
                                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
                                     <input 
@@ -535,15 +563,15 @@ export default function AnalyticsPage() {
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         placeholder={t("searchAnalytics")}
-                                        className="pl-11 pr-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none w-full md:w-64 transition-all"
+                                        className="pl-11 pr-4 py-2.5 bg-white dark:bg-zinc-950 border-2 border-zinc-200 dark:border-zinc-800 rounded-full text-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none w-full md:w-64 transition-all font-bold"
                                     />
                                 </div>
                                 <div className="relative">
                                     <button 
                                         onClick={() => setShowSort(!showSort)}
-                                        className="flex items-center gap-2 px-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-sm font-bold text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95"
+                                        className="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-zinc-950 border-2 border-zinc-200 dark:border-zinc-800 rounded-full text-sm font-bold text-zinc-500 transition-all active:scale-95"
                                     >
-                                        <BarChart2 size={16} className="rotate-90" /> {t("sortBy")} <ChevronDown size={14} />
+                                        <BarChart2 size={16} className="rotate-90" /> {t("sortBy")} <ChevronDown size={14} className={`transition-transform duration-300 ${showSort ? 'rotate-180' : ''}`} />
                                     </button>
                                     <AnimatePresence>
                                         {showSort && (
@@ -603,7 +631,7 @@ export default function AnalyticsPage() {
                                             <td className="px-6 py-6 text-xs text-zinc-500 font-medium">{new Date(order.createdAt).toLocaleDateString()}</td>
                                             <td className="px-6 py-6 font-bold text-zinc-900 dark:text-white text-sm whitespace-nowrap">{order.customerName}</td>
                                             <td className="px-6 py-6 whitespace-nowrap">
-                                                <span className="px-3 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-[10px] font-semibold text-zinc-600 dark:text-zinc-400 capitalize tracking-normal italic">{order.firstItem?.category || "N/A"}</span>
+                                                <span className="px-3 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-[10px] font-bold text-zinc-600 dark:text-zinc-400 capitalize tracking-normal">{order.firstItem?.category || "N/A"}</span>
                                             </td>
                                             <td className="px-6 py-6">
                                                 <span className={`px-3 py-1 rounded-full text-[10px] font-semibold capitalize tracking-wide ${
@@ -619,7 +647,15 @@ export default function AnalyticsPage() {
                                         </tr>
                                     )) : (
                                         <tr>
-                                            <td colSpan={9} className="px-8 py-12 text-center text-zinc-400 italic font-medium">{t("noOrdersMatching")}</td>
+                                            <td colSpan={9} className="px-8 py-20 text-center">
+                                                <div className="inline-flex flex-col items-center">
+                                                    <div className="w-16 h-16 bg-zinc-50 dark:bg-zinc-800/50 rounded-3xl flex items-center justify-center mb-4 border-2 border-zinc-100 dark:border-zinc-800/50">
+                                                        <Package size={24} className="text-zinc-200 dark:text-zinc-700" />
+                                                    </div>
+                                                    <p className="text-[11px] font-black text-zinc-400 dark:text-zinc-600 uppercase tracking-widest">{t("noOrdersMatching")}</p>
+                                                    <p className="text-xs text-zinc-400 mt-2 font-medium">Try adjusting your filters or search query.</p>
+                                                </div>
+                                            </td>
                                         </tr>
                                     )}
                                 </tbody>

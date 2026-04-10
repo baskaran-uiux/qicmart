@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { 
     Package, ShoppingCart, IndianRupee, Users, ExternalLink, Clock, 
     CheckCircle, Truck, Package as PackageIcon, XCircle, ChevronRight,
-    Star, ArrowRight, Share2, Copy, Globe, TrendingUp, Download, Filter,
+    Star, ArrowRight, Share2, Copy, BarChart3, Download, Filter,
     ChevronDown, ArrowUpRight, ArrowDownRight, Search
 } from "lucide-react"
 import { getServerSession } from "next-auth/next"
@@ -12,6 +12,7 @@ import { getStoreForDashboard } from "@/lib/dashboard"
 import Link from "next/link"
 import OverviewClient from "@/components/dashboard/OverviewClient"
 import ExportButton from "@/components/dashboard/ExportButton"
+import DashboardFilter from "@/components/dashboard/DashboardFilter"
 import SetupGuide from "@/components/dashboard/SetupGuide"
 import { headers } from "next/headers"
 import * as Motion from "framer-motion/client"
@@ -60,16 +61,48 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
         )
     }
 
-    // Actual aggregates
+    // Calculate date range filter
+    const range = params.range || "all"
     const today = new Date()
     today.setHours(0, 0, 0, 0)
+    
+    let dateLimit: Date | undefined = undefined
+    if (range === "today") {
+        dateLimit = today
+    } else if (range === "7d") {
+        dateLimit = new Date(new Date().setDate(new Date().getDate() - 7))
+    } else if (range === "30d") {
+        dateLimit = new Date(new Date().setDate(new Date().getDate() - 30))
+    }
 
+    // Actual aggregates
     const { totalProducts, totalOrders, ordersToday, newCustomers, totalSales } = await getCachedDashboardStats(store.id)
+    
+    // For filtered view, we might need to bypass the simple global cache or use it as a base
+    let displaySales = totalSales._sum.total || 0
+    let displayOrders = totalOrders
+    
+    if (dateLimit) {
+        const filteredStats = await prisma.order.aggregate({
+            where: { 
+                storeId: store.id, 
+                status: { not: "CANCELLED" },
+                createdAt: { gte: dateLimit }
+            },
+            _sum: { total: true },
+            _count: { id: true }
+        })
+        displaySales = filteredStats._sum.total || 0
+        displayOrders = filteredStats._count.id
+    }
 
     // Optimized fetch for ExportButton only (minimal fields)
     const [exportOrders, exportProductsData] = await Promise.all([
         prisma.order.findMany({
-            where: { storeId: store.id },
+            where: { 
+                storeId: store.id,
+                ...(dateLimit ? { createdAt: { gte: dateLimit } } : {})
+            },
             take: 5,
             orderBy: { createdAt: "desc" },
             select: {
@@ -81,7 +114,12 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
         }),
         prisma.orderItem.groupBy({
             by: ['productId'],
-            where: { order: { storeId: store.id } },
+            where: { 
+                order: { 
+                    storeId: store.id,
+                    ...(dateLimit ? { createdAt: { gte: dateLimit } } : {})
+                } 
+            },
             _sum: { quantity: true },
             orderBy: { _sum: { quantity: 'desc' } },
             take: 5
@@ -156,28 +194,30 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
             {/* Premium Header section */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                 <div>
-                    <h2 className="text-[22px] sm:text-[28px] font-bold tracking-tight text-black dark:text-white capitalize">{t("dashboard")}</h2>
-                    <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-[12px] sm:text-[14px] font-medium tracking-normal">Your store performance and activity at a glance.</p>
+                    <h2 className="t-h2 text-zinc-950 dark:text-white font-bold">{t("dashboard")}</h2>
+                    <p className="t-body-sm text-zinc-500 dark:text-zinc-400 mt-1">Your store performance and activity at a glance.</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                     <Link 
                         href={`/dashboard/analytics${impersonateId ? `?ownerId=${impersonateId}` : ''}`}
-                        className="flex items-center gap-2 px-4 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-[12px] font-bold capitalize tracking-wide text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95 shadow-sm"
+                        title={t("analytics")}
+                        className="flex items-center justify-center w-10 h-10 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-full transition-all active:scale-95"
                     >
-                        <TrendingUp size={14} className="text-indigo-500" /> {t("analytics")}
+                        <BarChart3 size={18} className="text-zinc-600 dark:text-zinc-400" />
                     </Link>
                     <Link 
                         href={storeUrl}
                         target="_blank"
-                        className="flex items-center gap-2 px-4 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-[12px] font-bold capitalize tracking-wide text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all active:scale-95 shadow-sm"
+                        title={t("openStore")}
+                        className="flex items-center justify-center w-10 h-10 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-full transition-all active:scale-95"
                     >
-                        <Globe size={14} className="text-emerald-500" /> {t("openStore")}
+                        <ExternalLink size={18} className="text-zinc-600 dark:text-zinc-400" />
                     </Link>
                     <div className="flex items-center gap-2">
                          <ExportButton data={{
                              currencySymbol,
-                             totalSales: totalSales._sum.total || 0,
-                             totalOrders,
+                             totalSales: displaySales,
+                             totalOrders: displayOrders,
                              totalProducts,
                              newCustomers,
                              topProducts: exportTopProducts,
@@ -191,9 +231,7 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
                          }} />
 
 
-                        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-[12px] font-bold capitalize tracking-wide hover:bg-indigo-700 transition-all active:scale-95 shadow-lg shadow-indigo-600/20">
-                            <Filter size={14} /> Filter
-                        </button>
+                        <DashboardFilter />
                     </div>
                 </div>
             </div>
@@ -202,28 +240,27 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Total Revenue Gradient Card */}
                 <Motion.div 
-                    whileHover={{ y: -5, scale: 1.01 }}
-                    className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-500 to-purple-600 p-7 rounded-[32px] shadow-2xl shadow-indigo-500/20 group cursor-default"
+                    className="relative overflow-hidden bg-gradient-to-br from-indigo-700 via-indigo-600 to-purple-700 p-7 rounded-[32px] group cursor-default border-2 border-indigo-400/40"
                 >
-                    <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 blur-3xl -mr-24 -mt-24 rounded-full group-hover:scale-150 transition-transform duration-1000" />
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 blur-3xl -mr-24 -mt-24 rounded-full transition-transform duration-1000" />
                     <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-400/20 blur-2xl -ml-16 -mb-16 rounded-full" />
                     <div className="relative z-10">
                         <div className="flex items-center justify-between mb-8">
-                            <span className="text-[12px] sm:text-[14px] font-semibold text-blue-50/70 capitalize tracking-wide">{t("totalRevenue")}</span>
+                            <span className="text-[13px] font-bold uppercase tracking-wider !text-white">{t("totalRevenue")}</span>
                             <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-lg shadow-black/5">
                                 <IndianRupee size={20} />
                             </div>
                         </div>
                         <div className="flex items-end gap-3 mb-2">
-                            <p className="text-[28px] sm:text-[32px] font-bold text-white tracking-tighter">{currencySymbol}{(totalSales._sum.total || 0).toLocaleString()}</p>
+                            <p className="t-h1 text-white">{currencySymbol}{displaySales.toLocaleString()}</p>
                         </div>
-                        <p className="text-xs font-medium text-blue-100/50 italic opacity-80">Verified aggregate revenue</p>
+                        <p className="text-[13px] font-medium !text-white/60">Verified aggregate revenue</p>
                     </div>
                 </Motion.div>
 
                 {/* Other KPI Cards */}
                 {[
-                    { label: t("totalOrders"), value: totalOrders.toLocaleString(), sub: `${ordersToday} today`, icon: ShoppingCart, color: "bg-zinc-950 text-white", iconColor: "text-zinc-400" },
+                    { label: t("totalOrders"), value: displayOrders.toLocaleString(), sub: range === 'today' ? "Orders received today" : `Orders in ${range}`, icon: ShoppingCart, color: "bg-zinc-950 text-white", iconColor: "text-zinc-400" },
                     { label: t("totalProducts"), value: totalProducts.toLocaleString(), sub: "Active items", icon: Package, color: "bg-blue-500 text-white", iconColor: "text-blue-200" },
                     { label: t("totalCustomers"), value: newCustomers.toLocaleString(), sub: "Verified accounts", icon: Users, color: "bg-indigo-500 text-white", iconColor: "text-indigo-200" },
                 ].map((kpi, i) => (
@@ -232,19 +269,18 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: (i + 1) * 0.1 }}
-                        whileHover={{ y: -5, scale: 1.01 }}
-                        className="p-7 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl border border-zinc-200/50 dark:border-white/5 rounded-[32px] shadow-sm hover:shadow-2xl hover:shadow-indigo-500/5 transition-all duration-500 group cursor-default"
+                        className="p-7 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-white/10 rounded-[32px] transition-all duration-500 group cursor-default"
                     >
                         <div className="flex items-center justify-between mb-8">
-                            <span className="text-[12px] sm:text-[14px] font-semibold text-zinc-400 dark:text-zinc-500 capitalize tracking-wide">{kpi.label}</span>
+                            <span className="text-[13px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{kpi.label}</span>
                             <div className={`w-10 h-10 ${kpi.color} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
                                 <kpi.icon size={20} />
                             </div>
                         </div>
                         <div className="flex items-end gap-3 mb-2">
-                            <p className="text-[28px] sm:text-[32px] font-bold text-zinc-900 dark:text-white tracking-tighter">{kpi.value}</p>
+                            <p className="t-h1 text-zinc-900 dark:text-white">{kpi.value}</p>
                         </div>
-                        <p className="text-xs font-medium text-zinc-400 italic">{kpi.sub}</p>
+                        <p className="text-[13px] font-semibold text-zinc-400">{kpi.sub}</p>
                     </Motion.div>
                 ))}
             </div>
@@ -252,11 +288,23 @@ export default async function StoreDashboard({ searchParams }: { searchParams: P
             {/* Dashboard 3-Column Section Upgraded */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-min">
                 <Suspense fallback={<TableSkeleton />}>
-                    <RecentOrdersSection storeId={store.id} impersonateId={impersonateId} currencySymbol={currencySymbol} t={t} />
+                    <RecentOrdersSection 
+                        storeId={store.id} 
+                        impersonateId={impersonateId} 
+                        currencySymbol={currencySymbol} 
+                        t={t}
+                        dateLimit={dateLimit}
+                    />
                 </Suspense>
 
                 <Suspense fallback={<TableSkeleton />}>
-                    <TopProductsSection storeId={store.id} impersonateId={impersonateId} currencySymbol={currencySymbol} t={t} />
+                    <TopProductsSection 
+                        storeId={store.id} 
+                        impersonateId={impersonateId} 
+                        currencySymbol={currencySymbol} 
+                        t={t}
+                        dateLimit={dateLimit}
+                    />
                 </Suspense>
 
                 <Suspense fallback={<div className="bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-sm flex flex-col min-h-[400px]">

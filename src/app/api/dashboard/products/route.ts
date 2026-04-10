@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { getStoreForDashboard } from "@/lib/dashboard"
+import { revalidatePath } from "next/cache"
 
 export async function GET(req: Request) {
     const session = await getServerSession(authOptions)
@@ -72,12 +73,15 @@ export async function POST(req: Request) {
         }, { status: 403 })
     }
 
+    const { imageUrl, gallery, ...productData } = body
+    console.log(`[Product POST] Creating product for store ${store.id}`, { name: productData.name })
+
     const product = await prisma.product.create({
         data: {
-            ...body,
-            isBestSeller: body.isBestSeller || false,
+            ...productData,
+            isBestSeller: productData.isBestSeller || false,
             storeId: store.id,
-            slug: body.name.toLowerCase()
+            slug: productData.name.toLowerCase()
                 .replace(/[^a-z0-9\s-]/g, "") // Remove special characters
                 .replace(/\s+/g, "-")        // Replace spaces with -
                 .replace(/-+/g, "-")         // Replace multiple - with single -
@@ -118,7 +122,8 @@ export async function PUT(req: Request) {
         return NextResponse.json(results)
     }
 
-    const { id, ...data } = body
+    const { id, imageUrl, gallery, ...data } = body
+    console.log(`[Product PUT] Updating product ${id} for store ${store.id}`)
     
     if (data.name !== undefined && !data.name.trim()) {
         return NextResponse.json({ error: "Product name cannot be empty" }, { status: 400 })
@@ -134,6 +139,10 @@ export async function PUT(req: Request) {
             compareAtPrice: data.compareAtPrice !== undefined ? parseFloat(String(data.compareAtPrice)) : undefined,
         }
     })
+
+    // Instant refresh for store home page
+    revalidatePath(`/s/${store.slug}`)
+    revalidatePath(`/s/${store.slug}/products`)
 
     return NextResponse.json(product)
 }

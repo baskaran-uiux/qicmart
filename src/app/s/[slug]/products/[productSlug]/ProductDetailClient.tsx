@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ShoppingCart, Heart, GitCompare, Star, Minus, Plus, Check, ChevronLeft, ChevronRight, Zap } from "lucide-react"
@@ -134,9 +134,19 @@ export default function ProductDetailClient({
     const [activeTab, setActiveTab] = useState("description")
     const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" })
     const [isSubmittingReview, setIsSubmittingReview] = useState(false)
+    const tabsRef = useRef<HTMLDivElement>(null)
     const [localReviews, setLocalReviews] = useState(product.reviews || [])
     const [reviewImages, setReviewImages] = useState<string[]>([])
     const [isUploading, setIsUploading] = useState(false)
+    const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 })
+    const [isZooming, setIsZooming] = useState(false)
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        const { left, top, width, height } = e.currentTarget.getBoundingClientRect()
+        const x = ((e.pageX - left - window.scrollX) / width) * 100
+        const y = ((e.pageY - top - window.scrollY) / height) * 100
+        setZoomPos({ x, y })
+    }
 
     // Find current variation based on selected options
     const currentVariation = product.type === "VARIABLE" 
@@ -314,25 +324,32 @@ export default function ProductDetailClient({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 mb-20">
                     {/* Image Gallery */}
                     <div className="space-y-4">
-                        <div className="relative aspect-square w-full rounded-3xl bg-zinc-50 overflow-hidden border border-zinc-100 shadow-2xl shadow-zinc-200/50 group/gallery">
+                        <div 
+                            className="relative aspect-square w-full rounded-3xl bg-zinc-50 overflow-hidden border border-zinc-100 shadow-2xl shadow-zinc-200/50 group/gallery cursor-zoom-in"
+                            onMouseMove={handleMouseMove}
+                            onMouseEnter={() => setIsZooming(true)}
+                            onMouseLeave={() => setIsZooming(false)}
+                        >
                             <AnimatePresence mode="wait">
                                 {activeImg ? (
-                                    <motion.img
+                                    <motion.div 
                                         key={activeImg}
-                                        src={activeImg}
-                                        alt={product.name}
-                                        initial={{ opacity: 0, x: 20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: -20 }}
-                                        transition={{ duration: 0.3 }}
-                                        drag="x"
-                                        dragConstraints={{ left: 0, right: 0 }}
-                                        onDragEnd={(e, info) => {
-                                            if (info.offset.x > 100) handlePrevImage()
-                                            else if (info.offset.x < -100) handleNextImage()
-                                        }}
-                                        className="w-full h-full object-cover cursor-grab active:cursor-grabbing"
-                                    />
+                                        className="w-full h-full relative"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                    >
+                                        <motion.img
+                                            src={activeImg}
+                                            alt={product.name}
+                                            transition={{ duration: 0.3 }}
+                                            className={`w-full h-full object-cover transition-transform duration-200 ease-out`}
+                                            style={{
+                                                transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
+                                                transform: isZooming ? 'scale(2.5)' : 'scale(1)'
+                                            }}
+                                        />
+                                    </motion.div>
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-zinc-200 text-6xl">📦</div>
                                 )}
@@ -387,15 +404,15 @@ export default function ProductDetailClient({
                     <div>
                         <div className="flex items-center gap-2 mb-4">
                             {product.category && (
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] px-2.5 py-1 bg-[var(--primary-color)]/10 text-[var(--primary-color)] rounded-full border border-[var(--primary-color)]/20">{product.category.name}</span>
+                                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 bg-[var(--primary-color)]/10 text-[var(--primary-color)] rounded-full border border-[var(--primary-color)]/20">{product.category.name}</span>
                             )}
                             {stock > 0 ? (
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100">In Stock</span>
+                                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100">In Stock</span>
                             ) : (
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] px-2.5 py-1 bg-rose-50 text-rose-600 rounded-full border border-rose-100">Out of Stock</span>
+                                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 bg-rose-50 text-rose-600 rounded-full border border-rose-100">Out of Stock</span>
                             )}
                         </div>
-                        <h1 className="text-2xl font-medium tracking-tight text-zinc-900 mb-4">{product.name}</h1>
+                        <h1 className="text-3xl font-bold tracking-tight text-zinc-900 mb-4">{product.name}</h1>
                         
                         {/* Rating Pill */}
                         <div className="flex items-center gap-3 mb-6">
@@ -430,7 +447,15 @@ export default function ProductDetailClient({
                         {product.description && (
                             <div className="mb-8">
                                 <p className="text-zinc-600 leading-relaxed font-medium line-clamp-3">{product.description}</p>
-                                <button onClick={() => setActiveTab("description")} className="text-[var(--primary-color)] text-sm font-bold mt-2 uppercase tracking-widest hover:underline">Read full description</button>
+                                <button 
+                                    onClick={() => {
+                                        setActiveTab("description");
+                                        tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                    }} 
+                                    className="text-[var(--primary-color)] text-sm font-bold mt-2 hover:underline"
+                                >
+                                    Read full description
+                                </button>
                             </div>
                         )}
 
@@ -446,8 +471,8 @@ export default function ProductDetailClient({
                                     return (
                                         <div key={attr.name}>
                                             <div className="flex items-center justify-between mb-3">
-                                                <span className="text-xs font-black text-zinc-900 uppercase tracking-widest italic">{attr.name}</span>
-                                                {selectedOptions[attr.name] && <span className="text-[10px] font-black text-[var(--primary-color)] uppercase tracking-widest">{selectedOptions[attr.name]}</span>}
+                                                <span className="text-xs font-bold text-zinc-900 uppercase tracking-wider">{attr.name}</span>
+                                                {selectedOptions[attr.name] && <span className="text-[10px] font-bold text-[var(--primary-color)] uppercase tracking-wider">{selectedOptions[attr.name]}</span>}
                                             </div>
                                             <div className="flex gap-3 flex-wrap items-center">
                                                 {(Array.isArray(attr.values) ? attr.values.flatMap((v: any) => typeof v === 'string' ? v.split('|') : [v]) : []).map((v: string) => {
@@ -480,7 +505,7 @@ export default function ProductDetailClient({
                                                         <button
                                                             key={v}
                                                             onClick={() => setSelectedOptions(prev => ({ ...prev, [attr.name]: v }))}
-                                                            className={`px-6 py-2.5 text-xs font-black uppercase tracking-widest border rounded-2xl transition-all ${isSelected ? "bg-[var(--primary-color)] text-white border-[var(--primary-color)] shadow-xl shadow-[var(--primary-color)]/20" : "bg-white border-zinc-200 text-zinc-700 hover:border-[var(--primary-color)]/50 shadow-sm"}`}
+                                                            className={`px-6 py-2.5 text-xs font-bold uppercase tracking-wider border rounded-2xl transition-all ${isSelected ? "bg-[var(--primary-color)] text-white border-[var(--primary-color)] shadow-xl shadow-[var(--primary-color)]/20" : "bg-white border-zinc-200 text-zinc-700 hover:border-[var(--primary-color)]/50 shadow-sm"}`}
                                                         >
                                                             {v}
                                                         </button>
@@ -496,10 +521,10 @@ export default function ProductDetailClient({
                         {/* Actions */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-4 mb-4">
-                                <span className="text-[10px] font-black text-zinc-900 uppercase tracking-widest italic">Quantity</span>
+                                <span className="text-[10px] font-bold text-zinc-900 uppercase tracking-wider">Quantity</span>
                                 <div className="flex items-center bg-zinc-50 border border-zinc-200 rounded-2xl p-1 shadow-inner">
                                     <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="w-10 h-10 flex items-center justify-center text-zinc-600 hover:bg-white hover:text-[var(--primary-color)] rounded-xl transition-all"><Minus className="w-4 h-4" /></button>
-                                    <span className="w-12 text-center text-sm font-black text-zinc-900">{quantity}</span>
+                                    <span className="w-12 text-center text-sm font-bold text-zinc-900">{quantity}</span>
                                     <button onClick={() => setQuantity(q => Math.min(stock || 99, q + 1))} className="w-10 h-10 flex items-center justify-center text-zinc-600 hover:bg-white hover:text-[var(--primary-color)] rounded-xl transition-all"><Plus className="w-4 h-4" /></button>
                                 </div>
                             </div>
@@ -508,7 +533,7 @@ export default function ProductDetailClient({
                                 <button
                                     disabled={stock === 0 || (product.type === "VARIABLE" && Object.keys(selectedOptions).length < attributes.length)}
                                     onClick={handleAddToCart}
-                                    className={`w-full py-4 font-black uppercase tracking-[0.2em] rounded-2xl text-[10px] transition-all border ${addedToCart ? "bg-emerald-500 text-white border-emerald-400" : "bg-white hover:bg-zinc-50 text-zinc-900 border-zinc-200 disabled:opacity-40"}`}
+                                    className={`w-full py-4 font-bold uppercase tracking-wider rounded-2xl text-[10px] transition-all border ${addedToCart ? "bg-emerald-500 text-white border-emerald-400" : "bg-white hover:bg-zinc-50 text-zinc-900 border-zinc-200 disabled:opacity-40"}`}
                                 >
                                     {addedToCart ? "Added to Cart!" : stock === 0 ? "Out of Stock" : "Add to Cart"}
                                 </button>
@@ -516,7 +541,7 @@ export default function ProductDetailClient({
                                 <button
                                     disabled={stock === 0 || (product.type === "VARIABLE" && Object.keys(selectedOptions).length < attributes.length)}
                                     onClick={handleBuyNow}
-                                    className="w-full py-4 bg-[var(--primary-color)] text-white font-black uppercase tracking-[0.2em] rounded-2xl text-[10px] transition-all shadow-xl shadow-[var(--primary-color)]/20 flex items-center justify-center gap-2 disabled:opacity-40 hover:opacity-90"
+                                    className="w-full py-4 bg-[var(--primary-color)] text-white font-bold uppercase tracking-wider rounded-2xl text-[10px] transition-all shadow-xl shadow-[var(--primary-color)]/20 flex items-center justify-center gap-2 disabled:opacity-40 hover:opacity-90"
                                 >
                                     <Zap size={14} className="fill-current" />
                                     Buy Now
@@ -524,20 +549,20 @@ export default function ProductDetailClient({
                             </div>
 
                              <div className="flex gap-4">
-                                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic">Fast Delivery & Secure Checkout</span>
+                                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Fast Delivery & Secure Checkout</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Tabbed section */}
-                <div className="border-t border-zinc-100 pt-16 mb-20">
+                <div ref={tabsRef} className="border-t border-zinc-100 pt-16 mb-20">
                     <div className="flex flex-wrap gap-8 border-b border-zinc-100 mb-10">
                         {tabs.map(tab => (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`pb-4 text-sm font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === tab.id ? "text-[var(--primary-color)]" : "text-zinc-400 hover:text-zinc-900"}`}
+                                className={`pb-4 text-sm font-bold tracking-tight transition-all relative ${activeTab === tab.id ? "text-[var(--primary-color)]" : "text-zinc-400 hover:text-zinc-900"}`}
                             >
                                 {tab.label}
                                 {activeTab === tab.id && <div className="absolute bottom-0 left-0 w-full h-1 bg-[var(--primary-color)] rounded-full" />}
@@ -573,7 +598,7 @@ export default function ProductDetailClient({
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
                                 {/* Reviews List */}
                                 <div className="space-y-8">
-                                    <h3 className="text-xl font-black text-zinc-900 uppercase tracking-widest italic">Customer Reviews</h3>
+                                    <h3 className="text-xl font-bold text-zinc-900 tracking-tight">Customer Reviews</h3>
                                     {localReviews.length === 0 ? (
                                         <div className="p-8 bg-zinc-50 rounded-3xl text-center border border-zinc-100">
                                             <p className="text-zinc-400 font-bold">No reviews yet. Be the first to review!</p>
@@ -588,8 +613,8 @@ export default function ProductDetailClient({
                                                                 {review.user?.image ? <img src={review.user.image} className="w-full h-full rounded-full object-cover" /> : review.user?.name?.charAt(0) || "U"}
                                                             </div>
                                                             <div>
-                                                                <p className="text-xs font-black text-zinc-900 uppercase tracking-widest">{review.user?.name || "Anonymous"}</p>
-                                                                <p className="text-[10px] text-zinc-400 font-bold italic">{new Date(review.createdAt).toLocaleDateString()}</p>
+                                                                <p className="text-xs font-bold text-zinc-900 uppercase tracking-wider">{review.user?.name || "Anonymous"}</p>
+                                                                <p className="text-[10px] text-zinc-400 font-bold">{new Date(review.createdAt).toLocaleDateString()}</p>
                                                             </div>
                                                         </div>
                                                         <div className="flex text-yellow-500">
@@ -612,12 +637,12 @@ export default function ProductDetailClient({
 
                                 {/* Review Form */}
                                 <div className="p-10 bg-zinc-50 border border-zinc-200 rounded-[40px] shadow-sm h-fit">
-                                    <h3 className="text-xl font-black uppercase tracking-widest italic mb-2 text-zinc-900">Share your experience</h3>
-                                    <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest mb-8 text-zinc-400">Tell us what you think about this product</p>
+                                    <h3 className="text-xl font-bold tracking-tight mb-2 text-zinc-900">Share your experience</h3>
+                                    <p className="text-zinc-500 text-sm font-semibold mb-8">Tell us what you think about this product</p>
                                     
                                     <form onSubmit={handleReviewSubmit} className="space-y-6">
                                         <div>
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 block italic">Your Rating</label>
+                                            <label className="text-xs font-bold text-zinc-900 mb-3 block">Your Rating</label>
                                             <div className="flex gap-2">
                                                 {[1, 2, 3, 4, 5].map(r => (
                                                     <button key={r} type="button" onClick={() => setReviewForm(f => ({ ...f, rating: r }))} className={`p-2 transition-all ${reviewForm.rating >= r ? "text-yellow-500" : "text-zinc-300 hover:text-yellow-500"}`}>
@@ -627,7 +652,7 @@ export default function ProductDetailClient({
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 block italic">Detailed Comment</label>
+                                            <label className="text-xs font-bold text-zinc-900 mb-3 block">Detailed Comment</label>
                                             <textarea
                                                 required
                                                 value={reviewForm.comment}
@@ -639,7 +664,7 @@ export default function ProductDetailClient({
 
                                         {/* Image Upload */}
                                         <div>
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 block italic">Attach Photos (Optional)</label>
+                                            <label className="text-xs font-bold text-zinc-900 mb-3 block">Attach Photos (Optional)</label>
                                             <div className="flex flex-wrap gap-3">
                                                 {reviewImages.map((img, i) => (
                                                     <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border border-zinc-200 group">
@@ -656,7 +681,7 @@ export default function ProductDetailClient({
                                                 {reviewImages.length < 5 && (
                                                     <label className="w-20 h-20 rounded-xl border-2 border-dashed border-zinc-200 flex flex-col items-center justify-center cursor-pointer hover:border-[var(--primary-color)]/50 hover:bg-[var(--primary-color)]/5 transition-all text-zinc-400 hover:text-[var(--primary-color)]">
                                                         <Camera size={20} />
-                                                        <span className="text-[8px] font-black uppercase tracking-widest mt-1">Add</span>
+                                                        <span className="text-[8px] font-bold uppercase tracking-wider mt-1">Add</span>
                                                         <input 
                                                             type="file" 
                                                             multiple 
@@ -672,7 +697,7 @@ export default function ProductDetailClient({
                                         <button
                                             disabled={isSubmittingReview || isUploading}
                                             type="submit"
-                                            className="w-full py-4 bg-zinc-900 text-white rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+                                            className="w-full py-4 bg-zinc-900 text-white rounded-2xl font-bold uppercase text-xs tracking-wider shadow-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
                                         >
                                             {isSubmittingReview ? "Submitting..." : "Submit Review"}
                                         </button>
@@ -688,10 +713,10 @@ export default function ProductDetailClient({
                     <div className="pt-20 border-t border-zinc-100">
                         <div className="flex items-center justify-between mb-12">
                             <div>
-                                <h2 className="text-3xl font-black text-zinc-900 tracking-tight mb-2 uppercase italic">Related Products</h2>
-                                <p className="text-zinc-400 text-xs font-black uppercase tracking-widest italic">Products you might be interested in</p>
+                                <h2 className="text-3xl font-bold text-zinc-900 tracking-tight mb-2 uppercase">Related Products</h2>
+                                <p className="text-zinc-400 text-xs font-bold uppercase tracking-wider">Products you might be interested in</p>
                             </div>
-                            <Link href={`/s/${slug}/products`} className="text-[var(--primary-color)] text-xs font-black uppercase tracking-widest hover:underline">View All</Link>
+                            <Link href={`/s/${slug}/products`} className="text-[var(--primary-color)] text-xs font-bold uppercase tracking-wider hover:underline">View All</Link>
                         </div>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-10">
                             {relatedProducts.map(p => (

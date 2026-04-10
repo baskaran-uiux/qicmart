@@ -241,17 +241,8 @@ function DashboardContent({ children }: { children: ReactNode }) {
     let inactiveClass = `${subtext} ${navHover} border border-transparent`
     let headerBg = dark ? "bg-zinc-950/60 border-white/5" : "bg-white/60 border-zinc-200"
 
-    const getFontFamily = (font: string) => {
-        switch (font) {
-            case "Poppins": return "var(--font-poppins)";
-            case "Outfit": return "var(--font-outfit)";
-            case "Montserrat": return "var(--font-montserrat)";
-            default: return "var(--font-inter)";
-        }
-    }
-
     return (
-        <div className={`flex h-screen ${bg} ${text} overflow-hidden ${dark ? "dark" : ""}`}>
+        <div className={`flex h-screen ${bg} ${text} overflow-hidden ${dark ? "dark" : ""} dashboard-font`}>
             {/* Mobile Backdrop */}
             {mobileMenuOpen && (
                 <div
@@ -264,13 +255,13 @@ function DashboardContent({ children }: { children: ReactNode }) {
             <motion.aside
                 initial={false}
                 animate={{ width: sidebarOpen ? 240 : 64 }}
-                style={{ fontFamily: getFontFamily(fontFamily) }}
                 className={`
                     fixed inset-y-0 left-0 z-50 lg:static lg:z-20
                     ${mobileMenuOpen ? "translate-x-0 w-[240px]" : "-translate-x-full lg:translate-x-0"}
                     flex-shrink-0 ${sidebar} border-r flex flex-col transition-transform duration-300 ease-in-out
                 `}
             >
+
                 {/* Logo */}
                 <div className={`h-16 flex items-center ${sidebarOpen ? "px-5 justify-between" : "justify-center"} border-b ${dark ? "border-zinc-800" : "border-slate-200"}`}>
                     {sidebarOpen && (
@@ -309,7 +300,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                                 placeholder={t("quickSearch")}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className={`w-full pl-9 pr-4 py-2 text-[12px] rounded-xl border transition-all outline-none ${dark
+                                className={`w-full pl-9 pr-4 py-2.5 text-[13px] rounded-xl border transition-all outline-none ${dark
                                     ? "bg-zinc-950 border-zinc-800 text-zinc-300 focus:border-white/30 focus:ring-4 focus:ring-white/5"
                                     : "bg-zinc-50 border-zinc-200 text-black focus:border-zinc-400 focus:ring-4 focus:ring-zinc-900/5"
                                     }`}
@@ -449,7 +440,7 @@ function DashboardContent({ children }: { children: ReactNode }) {
                 <div className={`mt-auto ${sidebarOpen ? "px-4 py-6" : "px-2 pb-6"} border-t ${dark ? "border-white/5" : "border-zinc-200"}`}>
                     {sidebarOpen ? (
                         <>
-                            <div className={`p-4 rounded-xl ${dark ? "bg-purple-500/10 border border-purple-500/20" : "bg-purple-50 border border-purple-200 shadow-sm"} relative overflow-hidden group`}>
+                            <div className="relative p-5 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-blue-500/10 rounded-2xl border-2 border-white/20 overflow-hidden group">
                                 <div className="absolute -right-4 -top-4 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-400/20 transition-all duration-500" />
 
                                 <div className="relative z-10 flex flex-col gap-3">
@@ -457,10 +448,10 @@ function DashboardContent({ children }: { children: ReactNode }) {
                                         <div className="p-1.5 rounded-lg bg-purple-500 text-white shadow-lg shadow-purple-500/20">
                                             <Zap size={14} fill="currentColor" />
                                         </div>
-                                        <span className="text-[11px] font-bold uppercase tracking-wider text-purple-500">{subscription?.plan || "Free"} Plan</span>
+                                        <span className="text-[13px] font-bold uppercase tracking-wider text-purple-500">{subscription?.plan || "Free"} Plan</span>
                                     </div>
 
-                                    <p className={`text-[10px] leading-relaxed ${dark ? "text-zinc-400" : "text-zinc-500"} font-medium`}>
+                                    <p className={`text-[12px] leading-relaxed ${dark ? "text-zinc-400" : "text-zinc-500"} font-medium`}>
                                         Manage your store and grow your business. Pro features coming soon!
                                     </p>
 

@@ -44,6 +44,7 @@ export default async function StorefrontPage({
                     price: true,
                     compareAtPrice: true,
                     images: true,
+                    updatedAt: true,
                     isBestSeller: true,
                     stock: true,
                     description: true,

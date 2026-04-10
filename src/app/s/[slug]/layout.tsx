@@ -666,7 +666,7 @@ function Footer({ storeInfo, slug, categories, pages, storeTheme, version }: { s
     const isSports = storeTheme === "sports"
 
     return (
-        <footer className={`${isSports ? 'bg-black text-white border-t border-white/5' : isAura ? 'bg-black border-t border-white/5 text-white' : isGlass ? 'bg-white/20 backdrop-blur-3xl border-t border-white/20 text-white' : 'bg-zinc-950 text-white'} py-12 mt-auto`}>
+        <footer className={`${isSports ? 'bg-black text-white border-t border-white/5' : isAura ? 'bg-black border-t border-white/5 text-white' : isGlass ? 'bg-white/20 backdrop-blur-3xl border-t border-white/20 text-white' : 'bg-zinc-950 text-white'} py-12 pb-32 lg:pb-12 mt-auto`}>
             <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-12">
                 <div className="col-span-2 md:col-span-1 flex flex-col items-center md:items-start text-center md:text-left">
                     <div className="mb-6">
@@ -939,7 +939,29 @@ export default function StoreLayout({
         tech: { heading: 'var(--font-ubuntu)', body: 'var(--font-lato)' },
     }
 
-    const { heading, body } = FONT_MAP[fontStyle] || FONT_MAP.modern
+    const getFontVar = (font: string) => {
+        switch (font) {
+            case "Poppins": return "var(--font-poppins)";
+            case "Outfit": return "var(--font-outfit)";
+            case "Montserrat": return "var(--font-montserrat)";
+            case "Inter": return "var(--font-inter)";
+            case "Ubuntu": return "var(--font-ubuntu)";
+            case "Lato": return "var(--font-lato)";
+            default: return "var(--font-inter)";
+        }
+    }
+
+    let heading = FONT_MAP.modern.heading
+    let body = FONT_MAP.modern.body
+
+    if (config.fontFamily) {
+        heading = getFontVar(config.fontFamily)
+        body = getFontVar(config.fontFamily)
+    } else {
+        const mapped = FONT_MAP[fontStyle] || FONT_MAP.modern
+        heading = mapped.heading
+        body = mapped.body
+    }
 
     const COLOR_MAP: Record<string, string> = {
         purple: '#6366f1',
@@ -974,7 +996,7 @@ export default function StoreLayout({
 
         return (
             <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[70] w-[92%] max-w-sm">
-                <div className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-3xl border border-white/20 dark:border-white/10 rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex items-center justify-between p-2 gap-1">
+                <div className="bg-white/40 backdrop-blur-xl border border-white/40 ring-1 ring-black/5 rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] flex items-center justify-between p-2 gap-1">
                     {navItems.map((item) => {
                         const isActive = pathname === item.href
                         const Icon = item.icon
@@ -1111,7 +1133,7 @@ export default function StoreLayout({
                 <div className="flex items-center gap-12 whitespace-nowrap animate-marquee">
                     {[...Array(10)].map((_, i) => (
                         <div key={i} className="flex items-center gap-4">
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">{themeConfig.announcementText || "Welcome to our store!"}</span>
+                            <span className="text-[11px] font-bold tracking-normal">{themeConfig.announcementText || "Welcome to our store!"}</span>
                             <Star size={10} fill="currentColor" className="opacity-40" />
                         </div>
                     ))}
@@ -1136,7 +1158,7 @@ export default function StoreLayout({
             <LanguageProvider>
                 <CartProvider>
                     <WishlistProvider>
-                        <div className={`min-h-screen flex flex-col storefront-fonts ${isAura ? "bg-zinc-950 text-white" : "bg-white"} ${isVisiblePage ? "pb-24 lg:pb-0" : ""}`} style={{ '--font-heading': heading, '--font-body': body, '--primary-color': primaryColorHex, '--primary-rgb': primaryColorRgb } as any}>
+                        <div className={`min-h-screen flex flex-col storefront-fonts ${isAura ? "bg-zinc-950 text-white" : "bg-white"}`} style={{ '--font-heading': heading, '--font-body': body, '--primary-color': primaryColorHex, '--primary-rgb': primaryColorRgb } as any}>
                             <ScrollingAnnouncementBar themeConfig={config} />
                             {slug && <Header storeInfo={storeInfo} slug={slug} categories={categories} version={version} scrolled={scrolled} announcementHeight={config.showAnnouncement && !scrolled ? 36 : 0} />}
                             

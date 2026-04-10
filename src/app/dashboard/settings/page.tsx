@@ -6,7 +6,7 @@ import { useSession, signOut } from "next-auth/react"
 import { motion, Reorder, AnimatePresence } from "framer-motion"
 import { QRCodeCanvas } from "qrcode.react"
 import { useDashboardStore } from "@/components/DashboardStoreProvider"
-import { Bell, Mail, Layout, Store, Plus, Info, Globe, Image as ImageIcon, CreditCard, Landmark, Instagram, Facebook, Twitter, Linkedin, Youtube, LogOut, RefreshCw, AlertCircle, Check, Trash2, Upload, Loader2, MessageCircle, Settings as SettingsIcon, Zap } from "lucide-react"
+import { Bell, Mail, Layout, Store, Plus, Info, Globe, Image as ImageIcon, CreditCard, Landmark, Instagram, Facebook, Twitter, Linkedin, Youtube, LogOut, RefreshCw, AlertCircle, Check, Trash2, Upload, Loader2, MessageCircle, Settings as SettingsIcon, Zap, Palette } from "lucide-react"
 import PremiumButton from "@/components/dashboard/PremiumButton"
 import DeleteConfirmationModal from "@/components/dashboard/DeleteConfirmationModal"
 import { FormSkeleton } from "@/components/dashboard/DashboardSkeletons"
@@ -246,16 +246,36 @@ function AppearanceTab({ settings, update, openMediaLibrary, editingBannerId, se
             exit={{ opacity: 0, x: -20 }}
             className="space-y-12"
         >
-
-
-             <section className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm">
+             <section className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[32px] overflow-hidden shadow-sm transition-all duration-300">
                 <div className="p-8 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-4">
-                    <ImageIcon size={20} className="text-zinc-400" />
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-400">{t("designSettings")}</h3>
+                    <Palette size={20} className="text-zinc-400" />
+                    <h3 className="t-h3">{t("designSettings")}</h3>
                 </div>
+                
                 <div className="p-10 space-y-12">
+                    {/* Storefront Font Selection */}
+                    <div className="p-8 rounded-[24px] bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-indigo-500/5 dark:to-purple-500/5 border border-indigo-100/50 dark:border-indigo-500/10">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div className="space-y-1">
+                                <h4 className="t-body font-bold text-zinc-900 dark:text-white">Storefront Font</h4>
+                                <p className="t-body-sm text-zinc-500">Pick a font that matches your brand personality.</p>
+                            </div>
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:min-w-[400px]">
+                                {["Outfit", "Inter", "Poppins", "Montserrat"].map((font) => (
+                                    <button 
+                                        key={font} 
+                                        onClick={() => update("fontFamily", font)} 
+                                        className={`px-4 py-3 rounded-xl border-2 transition-all text-center ${settings.fontFamily === font ? "border-indigo-600 bg-white dark:bg-zinc-800 shadow-md scale-105" : "border-white/50 dark:border-zinc-800 bg-white/30 dark:bg-zinc-900/50 hover:border-zinc-200"}`}
+                                    >
+                                        <div style={{ fontFamily: `var(--font-${font.toLowerCase()})` }} className="text-sm font-bold truncate">{font}</div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="space-y-4">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t("selectVibe")}</label>
+                        <label className="t-label">{t("selectVibe")}</label>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                             {[
                                 { id: 'modern', name: 'Modern', h: 'Poppins', b: 'Inter' },
@@ -265,7 +285,7 @@ function AppearanceTab({ settings, update, openMediaLibrary, editingBannerId, se
                             ].map((style) => (
                                 <button key={style.id} onClick={() => update("fontStyle", style.id)} className={`p-6 rounded-2xl border-2 text-left transition-all ${settings.fontStyle === style.id ? "border-indigo-600 bg-indigo-50/20 shadow-lg" : "border-zinc-100 dark:border-zinc-800 hover:border-zinc-200"}`}>
                                     <div className="text-xl font-bold mb-1">Aa</div>
-                                    <div className="text-[10px] font-bold uppercase tracking-widest leading-none mb-1">{style.name}</div>
+                                    <div className="t-label mb-1">{style.name}</div>
                                     <div className="text-[9px] text-zinc-400 font-medium truncate">{style.h} / {style.b}</div>
                                 </button>
                             ))}
@@ -274,7 +294,7 @@ function AppearanceTab({ settings, update, openMediaLibrary, editingBannerId, se
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                         <div className="space-y-4">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t("primaryColor")}</label>
+                            <label className="t-label">{t("primaryColor")}</label>
                             <div className="grid grid-cols-4 gap-3">
                                 {[
                                     { id: 'purple', bg: 'bg-[#6366f1]' },
@@ -290,10 +310,10 @@ function AppearanceTab({ settings, update, openMediaLibrary, editingBannerId, se
                         </div>
 
                         <div className="space-y-4">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t("menuAlignment")}</label>
+                            <label className="t-label">{t("menuAlignment")}</label>
                             <div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl">
                                 {["left", "center", "right"].map((align) => (
-                                    <button key={align} onClick={() => update("menuAlignment", align)} className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all ${settings.menuAlignment === align ? "bg-white dark:bg-zinc-700 text-indigo-600 shadow-sm" : "text-zinc-400 hover:text-zinc-600"}`}>
+                                    <button key={align} onClick={() => update("menuAlignment", align)} className={`flex-1 py-2 t-label rounded-lg transition-all ${settings.menuAlignment === align ? "bg-white dark:bg-zinc-700 text-indigo-600 shadow-sm" : "text-zinc-400 hover:text-zinc-600"}`}>
                                         {align}
                                     </button>
                                 ))}
@@ -301,12 +321,12 @@ function AppearanceTab({ settings, update, openMediaLibrary, editingBannerId, se
                         </div>
                     </div>
 
-                    {/* New Layout & Navigation Section */}
+                    {/* Layout & Navigation Section */}
                     <div className="pt-10 border-t border-zinc-100 dark:border-zinc-800 space-y-10">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Header Style</h4>
+                                    <h4 className="t-label">Header Style</h4>
                                     <span className="px-2 py-0.5 bg-indigo-500 text-white text-[8px] font-black uppercase rounded-md tracking-tighter">New</span>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
@@ -319,7 +339,7 @@ function AppearanceTab({ settings, update, openMediaLibrary, editingBannerId, se
                                             onClick={() => update("layoutStyle", style.id)} 
                                             className={`p-4 rounded-xl border-2 text-left transition-all ${settings.layoutStyle === style.id ? "border-indigo-600 bg-indigo-50/20 shadow-md" : "border-zinc-100 dark:border-zinc-800 hover:border-zinc-200"}`}
                                         >
-                                            <div className="text-xs font-bold mb-1">{style.name}</div>
+                                            <div className="t-body-sm font-bold mb-1">{style.name}</div>
                                             <div className="text-[9px] text-zinc-400 font-medium leading-tight">{style.desc}</div>
                                         </button>
                                     ))}
@@ -328,7 +348,7 @@ function AppearanceTab({ settings, update, openMediaLibrary, editingBannerId, se
 
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Menu Navigation</h4>
+                                    <h4 className="t-label">Menu Navigation</h4>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     {[
@@ -340,7 +360,7 @@ function AppearanceTab({ settings, update, openMediaLibrary, editingBannerId, se
                                             onClick={() => update("menuType", type.id)} 
                                             className={`p-4 rounded-xl border-2 text-left transition-all ${settings.menuType === type.id ? "border-indigo-600 bg-indigo-50/20 shadow-md" : "border-zinc-100 dark:border-zinc-800 hover:border-zinc-200"}`}
                                         >
-                                            <div className="text-xs font-bold mb-1">{type.name}</div>
+                                            <div className="t-body-sm font-bold mb-1">{type.name}</div>
                                             <div className="text-[9px] text-zinc-400 font-medium leading-tight">{type.desc}</div>
                                         </button>
                                     ))}
@@ -348,12 +368,12 @@ function AppearanceTab({ settings, update, openMediaLibrary, editingBannerId, se
                             </div>
                         </div>
                     </div>
-
                 </div>
             </section>
         </motion.div>
     )
 }
+
 
 function FeaturesTab({ settings, update }: any) {
     const { t } = useDashboardStore()

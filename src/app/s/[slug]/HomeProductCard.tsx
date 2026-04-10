@@ -19,6 +19,7 @@ interface Product {
     price: number
     compareAtPrice: number | null
     images: string
+    updatedAt: Date | string
     stock: number
     isBestSeller?: boolean
     description: string | null
@@ -68,7 +69,15 @@ export default function HomeProductCard({
     const images: string[] = Array.isArray(product.images) ? product.images : (function() {
         try { return JSON.parse(product.images as any || "[]") } catch(e) { return [] }
     })()
-    const image = images[0] || null
+    
+    // Add cache-busting version based on updatedAt
+    const version = product.updatedAt ? new Date(product.updatedAt).getTime() : Date.now()
+    const rawImage = images[0] || null
+    const image = rawImage ? (rawImage.includes('?') ? `${rawImage}&v=${version}` : `${rawImage}?v=${version}`) : null
+    
+    // Hover image (2nd image in gallery)
+    const rawHoverImage = images[1] || null
+    const hoverImage = rawHoverImage ? (rawHoverImage.includes('?') ? `${rawHoverImage}&v=${version}` : `${rawHoverImage}?v=${version}`) : null
     const inCart = isInCart(product.id)
     const wishlisted = isWishlisted(product.id)
 
@@ -198,9 +207,18 @@ export default function HomeProductCard({
                                     src={image}
                                     alt={product.name}
                                     fill
-                                    className="object-cover transition-transform duration-[1.2s] ease-[0.16,1,0.3,1] group-hover:scale-110"
+                                    className={`object-cover transition-all duration-[1.2s] ease-[0.16,1,0.3,1] ${hoverImage ? 'group-hover:opacity-0' : 'group-hover:scale-110'}`}
                                     sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                                 />
+                                {hoverImage && (
+                                    <OptimizedImage
+                                        src={hoverImage}
+                                        alt={`${product.name} hover`}
+                                        fill
+                                        className="object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-[1.2s] ease-[0.16,1,0.3,1] group-hover:scale-110"
+                                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                                    />
+                                )}
                             </div>
                         ) : (
                             <div className={`w-full h-full flex items-center justify-center text-5xl font-black italic rounded-3xl overflow-hidden relative group/placeholder

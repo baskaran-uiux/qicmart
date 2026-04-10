@@ -17,13 +17,15 @@ export default function OptimizedImage({
     ...props 
 }: OptimizedImageProps) {
     // Ensure src is a valid type for next/image (string or object) and never an array
-    const validSrc = Array.isArray(src) ? src[0] : src;
-    const [imgSrc, setImgSrc] = useState(validSrc || fallback)
+    const rawSrc = Array.isArray(src) ? src[0] : src;
+    const isRemoteWithParams = typeof rawSrc === 'string' && rawSrc.includes('?');
+    const [imgSrc, setImgSrc] = useState(rawSrc || fallback)
     const [error, setError] = useState(false)
 
     // Sync state when src prop changes
     useEffect(() => {
-        setImgSrc(Array.isArray(src) ? src[0] : (src || fallback))
+        const currentSrc = Array.isArray(src) ? src[0] : (src || fallback);
+        setImgSrc(currentSrc)
         setError(false)
     }, [src, fallback])
 
@@ -32,7 +34,7 @@ export default function OptimizedImage({
             src={error ? fallback : (imgSrc || fallback)}
             alt={alt || "Image"}
             className={className}
-            unoptimized={unoptimized}
+            unoptimized={unoptimized || isRemoteWithParams}
             onError={() => {
                 if (!error) setError(true)
             }}

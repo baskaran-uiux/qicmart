@@ -39,6 +39,7 @@ interface Product {
     price: number
     compareAtPrice: number | null
     images: string
+    updatedAt: Date | string
     stock: number
     description: string | null
     categoryId: string | null

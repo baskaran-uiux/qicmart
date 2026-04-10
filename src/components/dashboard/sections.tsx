@@ -2,9 +2,12 @@ import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { ArrowRight, ShoppingCart, Package, Star } from "lucide-react"
 
-export async function RecentOrdersSection({ storeId, impersonateId, currencySymbol, t }: { storeId: string, impersonateId: string | null, currencySymbol: string, t: any }) {
+export async function RecentOrdersSection({ storeId, impersonateId, currencySymbol, t, dateLimit }: { storeId: string, impersonateId: string | null, currencySymbol: string, t: any, dateLimit?: Date }) {
     const recentOrders = await prisma.order.findMany({
-        where: { storeId },
+        where: { 
+            storeId,
+            ...(dateLimit ? { createdAt: { gte: dateLimit } } : {})
+        },
         take: 5,
         orderBy: { createdAt: "desc" },
         select: {
@@ -21,9 +24,9 @@ export async function RecentOrdersSection({ storeId, impersonateId, currencySymb
     })
 
     return (
-        <div className="bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-sm flex flex-col hover:shadow-xl transition-all duration-500 group">
+        <div className="bg-white dark:bg-zinc-900 rounded-[32px] border-2 border-zinc-200 dark:border-zinc-800 overflow-hidden flex flex-col transition-all duration-500 group">
             <div className="p-7 border-b border-zinc-50 dark:border-zinc-800 flex items-center justify-between">
-                <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight capitalize italic text-black dark:text-white">{t("recentOrders")}</h3>
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight capitalize text-black dark:text-white">{t("recentOrders")}</h3>
                 <Link 
                     href={`/dashboard/orders${impersonateId ? `?ownerId=${impersonateId}` : ''}`}
                     className="p-1.5 bg-zinc-50 dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
@@ -35,7 +38,7 @@ export async function RecentOrdersSection({ storeId, impersonateId, currencySymb
                 {recentOrders.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center p-8 text-center">
                         <ShoppingCart className="w-10 h-10 text-zinc-100 dark:text-zinc-800 mb-3" />
-                        <p className="text-zinc-400 font-semibold italic text-xs capitalize tracking-wide">{t("noOrdersYet")}</p>
+                        <p className="text-zinc-400 font-bold text-[13px] capitalize tracking-wide">{t("noOrdersYet")}</p>
                     </div>
                 ) : (
                     <table className="w-full text-left min-w-[380px]">
@@ -50,15 +53,15 @@ export async function RecentOrdersSection({ storeId, impersonateId, currencySymb
                                 <tr key={order.id} className="group/row hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-all">
                                     <td className="px-5 py-4">
                                         <div className="flex flex-col">
-                                            <span className="font-semibold text-zinc-900 dark:text-white text-xs group-hover/row:text-indigo-600 transition-colors">
+                                            <span className="font-semibold text-zinc-900 dark:text-white text-[13px] group-hover/row:text-indigo-600 transition-colors">
                                                 {order.customer?.firstName} {order.customer?.lastName?.[0]}.
                                             </span>
-                                            <span className="text-[11px] text-zinc-400 font-semibold capitalize tracking-normal">#{order.id.slice(-6)}</span>
+                                            <span className="text-[12px] text-zinc-400 font-bold capitalize tracking-normal">#{order.id.slice(-6)}</span>
                                         </div>
                                     </td>
                                     <td className="px-5 py-4 text-right">
-                                        <p className="font-semibold text-zinc-900 dark:text-white text-xs mb-0.5">{currencySymbol}{order.total.toLocaleString()}</p>
-                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold capitalize tracking-wide ${
+                                        <p className="font-bold text-zinc-900 dark:text-white text-[13px] mb-0.5">{currencySymbol}{order.total.toLocaleString()}</p>
+                                        <span className={`px-2 py-0.5 rounded text-[11px] font-bold capitalize tracking-wide ${
                                             order.status === 'PAID' ? 'bg-emerald-500/10 text-emerald-500' : 
                                             order.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500' :
                                             'bg-zinc-500/10 text-zinc-500'
@@ -76,10 +79,15 @@ export async function RecentOrdersSection({ storeId, impersonateId, currencySymb
     )
 }
 
-export async function TopProductsSection({ storeId, impersonateId, currencySymbol, t }: { storeId: string, impersonateId: string | null, currencySymbol: string, t: any }) {
+export async function TopProductsSection({ storeId, impersonateId, currencySymbol, t, dateLimit }: { storeId: string, impersonateId: string | null, currencySymbol: string, t: any, dateLimit?: Date }) {
     const topProductsData = await prisma.orderItem.groupBy({
         by: ['productId'],
-        where: { order: { storeId } },
+        where: { 
+            order: { 
+                storeId,
+                ...(dateLimit ? { createdAt: { gte: dateLimit } } : {})
+            } 
+        },
         _sum: { quantity: true },
         orderBy: { _sum: { quantity: 'desc' } },
         take: 5
@@ -101,9 +109,9 @@ export async function TopProductsSection({ storeId, impersonateId, currencySymbo
     })
 
     return (
-        <div className="bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-sm flex flex-col hover:shadow-xl transition-all duration-500 group">
+        <div className="bg-white dark:bg-zinc-900 rounded-[32px] border-2 border-zinc-200 dark:border-zinc-800 overflow-hidden flex flex-col transition-all duration-500 group">
             <div className="p-7 border-b border-zinc-50 dark:border-zinc-800 flex items-center justify-between">
-                <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight capitalize italic text-black dark:text-white">{t("topProducts")}</h3>
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight capitalize text-black dark:text-white">{t("topProducts")}</h3>
                 <Link 
                     href={`/dashboard/analytics${impersonateId ? `?ownerId=${impersonateId}` : ''}`}
                     className="p-1.5 bg-zinc-50 dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
@@ -115,7 +123,7 @@ export async function TopProductsSection({ storeId, impersonateId, currencySymbo
                 {topProducts.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center p-8 text-center">
                         <Package className="w-10 h-10 text-zinc-100 dark:text-zinc-800 mb-3" />
-                        <p className="text-zinc-400 font-semibold italic text-xs capitalize tracking-wide">{t("noDataAvailable")}</p>
+                        <p className="text-zinc-400 font-bold text-[13px] capitalize tracking-wide">{t("noDataAvailable")}</p>
                     </div>
                 ) : (
                     <table className="w-full text-left min-w-[380px]">
@@ -130,13 +138,13 @@ export async function TopProductsSection({ storeId, impersonateId, currencySymbo
                                 <tr key={i} className="group/row hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-all">
                                     <td className="px-5 py-4">
                                         <div className="flex flex-col">
-                                            <span className="font-semibold text-zinc-900 dark:text-white text-xs truncate max-w-[150px] group-hover/row:text-indigo-600 transition-colors">{p.name}</span>
-                                            <span className="text-[11px] text-zinc-400 font-semibold capitalize tracking-normal italic whitespace-nowrap">{p.units} {t("sold")}</span>
+                                            <span className="font-bold text-zinc-900 dark:text-white text-[13px] truncate max-w-[150px] group-hover/row:text-indigo-600 transition-colors">{p.name}</span>
+                                            <span className="text-[12px] text-zinc-400 font-bold capitalize tracking-normal whitespace-nowrap">{p.units} {t("sold")}</span>
                                         </div>
                                     </td>
                                     <td className="px-5 py-4 text-right">
-                                        <p className="font-semibold text-zinc-900 dark:text-white text-xs mb-0.5">{currencySymbol}{p.rev.toLocaleString()}</p>
-                                        <span className="text-[8px] font-semibold capitalize tracking-wide text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded-full italic">{t("bestSeller")}</span>
+                                        <p className="font-bold text-zinc-900 dark:text-white text-[13px] mb-0.5">{currencySymbol}{p.rev.toLocaleString()}</p>
+                                        <span className="text-[10px] font-bold capitalize tracking-wide text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded-full">{t("bestSeller")}</span>
                                     </td>
                                 </tr>
                             ))}
@@ -164,9 +172,9 @@ export async function ReviewsSection({ storeId, impersonateId, t }: { storeId: s
     })
 
     return (
-        <div className="bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-sm flex flex-col hover:shadow-xl transition-all duration-500 group">
+        <div className="bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-sm flex flex-col transition-all duration-500 group">
             <div className="p-7 border-b border-zinc-50 dark:border-zinc-800 flex items-center justify-between">
-                <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight capitalize italic text-black dark:text-white">{t("reviews")}</h3>
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight capitalize text-black dark:text-white">{t("reviews")}</h3>
                 <Link 
                     href={`/dashboard/reviews${impersonateId ? `?ownerId=${impersonateId}` : ''}`}
                     className="p-1.5 bg-zinc-50 dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
@@ -178,7 +186,7 @@ export async function ReviewsSection({ storeId, impersonateId, t }: { storeId: s
                 {recentReviews.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center p-8 text-center">
                         <Star className="w-10 h-10 text-zinc-100 dark:text-zinc-800 mb-3" />
-                        <p className="text-zinc-400 font-semibold italic text-xs capitalize tracking-wide">No reviews yet</p>
+                        <p className="text-zinc-400 font-bold text-[13px] capitalize tracking-wide">No reviews yet</p>
                     </div>
                 ) : (
                     <div className="divide-y divide-zinc-50 dark:divide-zinc-800/50">
@@ -192,17 +200,17 @@ export async function ReviewsSection({ storeId, impersonateId, t }: { storeId: s
                                             className={i < review.rating ? "fill-amber-400 text-amber-400" : "text-zinc-200 dark:text-zinc-800"} 
                                         />
                                     ))}
-                                    <span className="text-[11px] font-semibold text-zinc-400 capitalize tracking-wide ml-auto italic">
+                                    <span className="text-[12px] font-bold text-zinc-400 capitalize tracking-wide ml-auto">
                                         {new Date(review.createdAt).toLocaleDateString()}
                                     </span>
                                 </div>
-                                <p className="text-xs font-medium text-zinc-900 dark:text-white line-clamp-2 leading-relaxed mb-2 italic">"{review.comment}"</p>
+                                <p className="text-[14px] font-bold text-zinc-900 dark:text-white line-clamp-2 leading-relaxed mb-2 uppercase tracking-tight">"{review.comment}"</p>
                                 <div className="flex items-center gap-2">
-                                    <div className="w-6 h-6 bg-indigo-100 dark:bg-zinc-800 rounded-full flex items-center justify-center text-[10px] font-semibold text-indigo-600 dark:text-indigo-400">
+                                    <div className="w-8 h-8 bg-indigo-100 dark:bg-zinc-800 rounded-full flex items-center justify-center text-[12px] font-bold text-indigo-600 dark:text-indigo-400">
                                         {(review.user?.name?.[0]) || 'G'}
                                     </div>
-                                    <p className="text-[12px] font-medium text-zinc-500">
-                                        <span className="font-semibold text-zinc-900 dark:text-zinc-300 truncate max-w-[80px]">{(review.user?.name) || 'Guest'}</span> <span className="text-[10px] italic opacity-50">on {review.product?.name}</span>
+                                    <p className="text-[13px] font-bold text-zinc-500">
+                                        <span className="font-bold text-zinc-900 dark:text-zinc-300 truncate max-w-[80px]">{(review.user?.name) || 'Guest'}</span> <span className="text-[12px] opacity-50 font-medium">on {review.product?.name}</span>
                                     </p>
                                 </div>
                             </div>
